@@ -3,13 +3,24 @@ import playSample from '../../../data/samples/levels/L01.play.json';
 import revealSample from '../../../data/samples/levels/L01.reveal.json';
 import indexSample from '../../../data/samples/levels/index.json';
 import type { GameEvent } from '../shared/protocol';
-import { createEventLog, createLevelLoader } from './runtime';
+import { createEventLog, createLevelLoader, hasDecisionForActiveLevel } from './runtime';
 
 function mockJson(value: unknown) {
   return vi.fn<typeof fetch>().mockImplementation(async () => new Response(JSON.stringify(value), { status: 200 }));
 }
 
 describe('事件日志', () => {
+  it('历史决定不能解锁同一关卡重新开始后的揭晓', () => {
+    const log = createEventLog('s');
+    log.emit('level_start', { budget: 3, is_supplementary: false }, 'L01');
+    expect(hasDecisionForActiveLevel(log.events, 'L01')).toBe(false);
+    log.emit('decision', {}, 'L01');
+    expect(hasDecisionForActiveLevel(log.events, 'L01')).toBe(true);
+    log.emit('level_start', { budget: 3, is_supplementary: false }, 'L01');
+    expect(hasDecisionForActiveLevel(log.events, 'L01')).toBe(false);
+    log.emit('decision', {}, 'L01');
+    expect(hasDecisionForActiveLevel(log.events, 'L01')).toBe(true);
+  });
   it('按会话和每关各自的起点计时，同时保存完整协议字段', () => {
     let time = Date.parse('2026-10-30T12:00:00.000Z');
     const save = vi.fn();
@@ -103,6 +114,7 @@ describe('隔离关卡加载器', () => {
   });
 
   it('拒绝 schema 错误及文件 id 不匹配', async () => {
+    await expect(createLevelLoader('./', mockJson({ ...indexSample, main: ['L01', 'L01'] })).loadIndex()).rejects.toThrow('重复');
     await expect(createLevelLoader('./', mockJson({ ...playSample, schema: 'wrong' })).loadPlay('L01')).rejects.toThrow('schema');
     await expect(createLevelLoader('./', mockJson({ ...playSample, id: 'L02' })).loadPlay('L01')).rejects.toThrow('不一致');
     await expect(createLevelLoader('./', mockJson({ ...indexSample, schema: 'wrong' })).loadIndex()).rejects.toThrow('schema');

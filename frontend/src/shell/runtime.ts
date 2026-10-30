@@ -68,6 +68,12 @@ export interface LevelLoader {
   loadReveal: (id: string, canReveal: () => boolean) => Promise<LevelReveal>;
 }
 
+/** 同一标的以前的决定不能解锁新一轮对局的后续数据。 */
+export function hasDecisionForActiveLevel(events: GameEvent[], id: string): boolean {
+  const start = [...events].reverse().find(event => event.level_id === id && event.type === 'level_start');
+  return !!start && events.some(event => event.level_id === id && event.type === 'decision' && event.seq > start.seq);
+}
+
 type JsonObject = Record<string, unknown>;
 
 function object(value: unknown, description: string): JsonObject {
@@ -124,6 +130,7 @@ function validateIndex(value: unknown): LevelIndex {
   const index = object(value, '关卡索引');
   check(index.schema === 'level-index/v1', '关卡索引 schema 必须是 level-index/v1');
   check(Array.isArray(index.main) && index.main.length > 0 && index.main.every(validId), '关卡索引 main 必须包含合法关卡 id');
+  check(new Set(index.main).size === index.main.length, '关卡索引 main 不能重复同一关卡');
   check(Array.isArray(index.pool), '关卡索引 pool 必须是数组');
   for (const value of index.pool) {
     const item = object(value, '补充关卡');
