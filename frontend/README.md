@@ -1,5 +1,30 @@
 # 前端
 
+## React + TypeScript 骨架（C / ARKimo-mo）
+
+环境：Node.js 20.19+ 或 22.12+（Vite 要求），npm。React 18 保持协议中 `JSX.Element` 的类型兼容。
+
+```sh
+cd frontend
+npm ci
+npm run dev
+```
+
+打开终端给出的地址；同一局域网手机可访问 Network 地址。生产检查和预览：
+
+```sh
+npm run build
+npm run preview
+```
+
+产物在 `dist/`，不提交依赖、构建产物或 `.env`。不需要 Panda Data 凭证，前端不调用 Panda Data。
+
+模块入口：B 替换 `src/play/index.ts` 的 `PlayLevel`；D 替换 `src/profile/index.ts` 的 `analyze` / `pickNextLevel`，并维护 `src/shared/protocol.ts`。C 在骨架 PR 后不再改这三个目录。类型和 props 遵守 `docs/protocol.md`，此阶段不增加协议字段。
+
+`public/levels/` 原样复制自 `data/samples/levels/`，目前只有 L01；`analyze` 返回固定 `sample_profile.json`。页面明确标记“示例数据”和占位流程，不能把示例判断视为用户本次测试结论。占位玩法先发 `decision`，再调用 `loadReveal()`；完整流程、日志、揭晓页和画像页由后续 shell PR 实现。
+
+来源：React、React DOM、Vite、官方 React 插件、TypeScript；关卡和画像来自本仓库示例；骨架代码由 Codex 协助生成。原有 `PandaAI_Skill_Card_Demo.html` 保留，仅供视觉参考。
+
 H5 页面代码（需支持手机访问）。确定技术栈后，在这里补充依赖、配置和启动方式。
 
 ## K 线 Skill 卡牌 Demo
