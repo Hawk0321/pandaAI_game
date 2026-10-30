@@ -1,0 +1,146 @@
+{
+ "schema": "profile/v1",
+ "session_id": "sample-0001",
+ "is_sample": true,
+ "generated_at": "2026-10-31T10:01:00Z",
+ "method": "rules",
+ "round": 1,
+ "dimensions": [
+  {
+   "id": "evidence_use",
+   "group": "ability",
+   "name": "证据使用",
+   "judgement": "倾向先下结论，只看支持自己想法的线索",
+   "score": 0.25,
+   "evidence": [
+    {
+     "level_id": "L01",
+     "event_seqs": [
+      3,
+      4
+     ],
+     "text": "第 1 关只翻了看涨的均线卡就满仓做多，没看本关关键线索成交量和回测",
+     "direction": "+"
+    }
+   ],
+   "confidence": "low",
+   "uncertain": "只有 1 关证据，还不清楚是不会看成交量，还是不想花研究点",
+   "conflict": false
+  },
+  {
+   "id": "calibration",
+   "group": "ability",
+   "name": "判断校准",
+   "judgement": "信心偏高",
+   "score": 0.2,
+   "evidence": [
+    {
+     "level_id": "L01",
+     "event_seqs": [
+      4
+     ],
+     "text": "信心选了 5/5，结果方向判断错误",
+     "direction": "+"
+    }
+   ],
+   "confidence": "low",
+   "uncertain": "样本太少，一次错判可能是运气",
+   "conflict": false
+  },
+  {
+   "id": "risk_control",
+   "group": "ability",
+   "name": "风险控制",
+   "judgement": "浮亏时倾向加仓，没有设止损",
+   "score": 0.2,
+   "evidence": [
+    {
+     "level_id": "L01",
+     "event_seqs": [
+      4,
+      5
+     ],
+     "text": "未设止损；浮亏 2.1% 时选择加仓",
+     "direction": "+"
+    }
+   ],
+   "confidence": "medium",
+   "uncertain": "第 3 步主动平仓，说明有止损意识，只是执行偏晚",
+   "conflict": true
+  },
+  {
+   "id": "style",
+   "group": "preference",
+   "name": "趋势 vs 反转",
+   "judgement": "偏趋势跟随",
+   "score": 0.8,
+   "evidence": [
+    {
+     "level_id": "L01",
+     "event_seqs": [
+      4
+     ],
+     "text": "价格创新高时做多",
+     "direction": "+"
+    }
+   ],
+   "confidence": "low",
+   "uncertain": "还没见过在下跌行情里的选择",
+   "conflict": false
+  },
+  {
+   "id": "research_depth",
+   "group": "preference",
+   "name": "研究深度",
+   "judgement": "偏直觉、决定快",
+   "score": 0.2,
+   "evidence": [
+    {
+     "level_id": "L01",
+     "event_seqs": [
+      3,
+      4
+     ],
+     "text": "3 个研究点只用了 1 个，9 秒内做出决定",
+     "direction": "+"
+    }
+   ],
+   "confidence": "low",
+   "uncertain": "",
+   "conflict": false
+  },
+  {
+   "id": "risk_appetite",
+   "group": "preference",
+   "name": "风险偏好",
+   "judgement": "偏激进",
+   "score": 0.9,
+   "evidence": [
+    {
+     "level_id": "L01",
+     "event_seqs": [
+      4
+     ],
+     "text": "满仓做多",
+     "direction": "+"
+    }
+   ],
+   "confidence": "low",
+   "uncertain": "",
+   "conflict": false
+  }
+ ],
+ "persona": {
+  "name": "冲锋熊猫",
+  "emoji": "🐼",
+  "tagline": "看到机会就冲，但还没学会先看清再出手",
+  "is_fun_label": true
+ },
+ "summary": "示例：这位玩家决策快、仓位重，倾向只找支持自己判断的证据。由于只玩了 1 关，多数判断置信度较低。",
+ "needs_more": [
+  {
+   "dimension_id": "evidence_use",
+   "reason": "只有 1 关证据，需要一关成交量是决定性线索的题来区分不会看还是不想看"
+  }
+ ]
+}
