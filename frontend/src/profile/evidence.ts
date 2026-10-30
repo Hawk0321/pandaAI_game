@@ -253,6 +253,10 @@ function riskControl(f: LevelFacts): RawEvidence[] {
     }
   }
 
+  if (side === 'flat' && !f.holdSteps.some((h) => h.data.action === 'add')) {
+    out.push({ ...base, event_seqs: [d.seq], value: null, text: `${f.label}观望没有持仓，看不出风险控制` });
+  }
+
   // 3) 浮亏时加仓还是减仓（按每步之前的持仓）
   let position = sideSign(side) * size;
   for (const h of f.holdSteps) {
@@ -277,7 +281,10 @@ function style(f: LevelFacts): RawEvidence[] {
   if (!d) return [];
   const side = str(d.data.side) as Side;
   const tr = priorTrend(f.play);
-  if (tr === null || Math.abs(tr) < T.trendMin || side === 'flat') return [];
+  const base = { dim: 'style' as const, level_id: f.levelId, event_seqs: [d.seq], value: null };
+  if (tr === null) return [];
+  if (Math.abs(tr) < T.trendMin) return [{ ...base, text: `${f.label}决定前 ${T.trendLookback} 天涨跌不到 ${pct(T.trendMin)}，没有明显趋势，不计入顺势/逆势` }];
+  if (side === 'flat') return [{ ...base, text: `${f.label}观望，看不出顺势还是逆势` }];
   const up = tr > 0;
   const follow = (up && side === 'long') || (!up && side === 'short');
   return [{

@@ -160,7 +160,40 @@
      "name": "风险控制",
      "judgement": "证据不足，暂不下结论",
      "score": null,
-     "evidence": [],
+     "evidence": [
+      {
+       "level_id": "S01",
+       "event_seqs": [
+        6
+       ],
+       "text": "第 1 关观望没有持仓，看不出风险控制",
+       "direction": "?"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        16
+       ],
+       "text": "第 2 关观望没有持仓，看不出风险控制",
+       "direction": "?"
+      },
+      {
+       "level_id": "S03",
+       "event_seqs": [
+        26
+       ],
+       "text": "第 3 关观望没有持仓，看不出风险控制",
+       "direction": "?"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        36
+       ],
+       "text": "第 4 关观望没有持仓，看不出风险控制",
+       "direction": "?"
+      }
+     ],
      "confidence": "low",
      "uncertain": "还没有真正入场持仓，看不出遇到浮亏会怎么做",
      "conflict": false
@@ -171,7 +204,40 @@
      "name": "趋势 vs 反转",
      "judgement": "证据不足，暂不下结论",
      "score": null,
-     "evidence": [],
+     "evidence": [
+      {
+       "level_id": "S01",
+       "event_seqs": [
+        6
+       ],
+       "text": "第 1 关观望，看不出顺势还是逆势",
+       "direction": "?"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        16
+       ],
+       "text": "第 2 关观望，看不出顺势还是逆势",
+       "direction": "?"
+      },
+      {
+       "level_id": "S03",
+       "event_seqs": [
+        26
+       ],
+       "text": "第 3 关决定前 20 天涨跌不到 3.0%，没有明显趋势，不计入顺势/逆势",
+       "direction": "?"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        36
+       ],
+       "text": "第 4 关观望，看不出顺势还是逆势",
+       "direction": "?"
+      }
+     ],
      "confidence": "low",
      "uncertain": "还没有在明显上涨或下跌的行情里下过方向，看不出偏好",
      "conflict": false
@@ -491,6 +557,38 @@
      "score": 0.85,
      "evidence": [
       {
+       "level_id": "S01",
+       "event_seqs": [
+        6
+       ],
+       "text": "第 1 关观望没有持仓，看不出风险控制",
+       "direction": "?"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        16
+       ],
+       "text": "第 2 关观望没有持仓，看不出风险控制",
+       "direction": "?"
+      },
+      {
+       "level_id": "S03",
+       "event_seqs": [
+        26
+       ],
+       "text": "第 3 关观望没有持仓，看不出风险控制",
+       "direction": "?"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        36
+       ],
+       "text": "第 4 关观望没有持仓，看不出风险控制",
+       "direction": "?"
+      },
+      {
        "level_id": "S05",
        "event_seqs": [
         45
@@ -510,6 +608,38 @@
      "judgement": "偏逆势反转：涨多了空、跌多了买",
      "score": 0,
      "evidence": [
+      {
+       "level_id": "S01",
+       "event_seqs": [
+        6
+       ],
+       "text": "第 1 关观望，看不出顺势还是逆势",
+       "direction": "?"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        16
+       ],
+       "text": "第 2 关观望，看不出顺势还是逆势",
+       "direction": "?"
+      },
+      {
+       "level_id": "S03",
+       "event_seqs": [
+        26
+       ],
+       "text": "第 3 关决定前 20 天涨跌不到 3.0%，没有明显趋势，不计入顺势/逆势",
+       "direction": "?"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        36
+       ],
+       "text": "第 4 关观望，看不出顺势还是逆势",
+       "direction": "?"
+      },
       {
        "level_id": "S05",
        "event_seqs": [

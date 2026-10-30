@@ -86,7 +86,7 @@ describe('证据层', () => {
     // L01 决定前 20 天上涨（假突破），做多 = 顺势
     expect(of(run({ side: 'long', size: 0.5 }), 'style')[0].value).toBe(1);
     expect(of(run({ side: 'short', size: 0.5 }), 'style')[0].value).toBe(0);
-    expect(of(run({}), 'style')).toHaveLength(0);
+    expect(of(run({}), 'style')[0].value).toBeNull();
 
     const quick = of(run({ think_ms: 3000 }), 'research_depth')[0].value!;
     const deep = of(run({ think_ms: 40000, clues: [clue('vol'), clue('bt')] }), 'research_depth')[0].value!;

@@ -276,6 +276,14 @@
        "direction": "+"
       },
       {
+       "level_id": "S03",
+       "event_seqs": [
+        19
+       ],
+       "text": "第 3 关决定前 20 天涨跌不到 3.0%，没有明显趋势，不计入顺势/逆势",
+       "direction": "?"
+      },
+      {
        "level_id": "S04",
        "event_seqs": [
         27
