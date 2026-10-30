@@ -1,5 +1,6 @@
 """Behavioral tests for information boundaries and real source data."""
 from copy import deepcopy
+from collections import Counter
 import json
 from pathlib import Path
 import tempfile
@@ -15,12 +16,15 @@ class LevelTests(unittest.TestCase):
     def setUpClass(cls):
         cls.benchmark = {build.date_key(r["date"]): r for r in build.market_rows(build.read_snapshot(build.SOURCE, "benchmark"))}
         cls.calendar = sorted(build.date_key(r["nature_date"]) for r in build.read_snapshot(build.SOURCE, "calendar")["rows"])
+        with tempfile.TemporaryDirectory() as directory:
+            cls.reports = build.build(output=Path(directory))
+            cls.index = json.loads(Path(directory, "index.json").read_text(encoding="utf-8"))
+            cls.levels = {play["id"]: (play, reveal) for play, reveal in check.check(Path(directory), complete=True)}
         cls.plans = []
-        for level_id, dataset, market, name, prefs in [("L01", "bank", "A股", "平安银行", ["fake_breakout"]), ("L02", "gold", "期货", "沪金2504", ["uptrend"])]:
-            snapshot = build.read_snapshot(build.SOURCE, dataset)
+        for plan, report in zip(build.LEVEL_PLANS, cls.reports):
+            snapshot = build.read_snapshot(build.SOURCE, plan["dataset"])
             rows = build.market_rows(snapshot)
-            i, scenario, _ = build.select(rows, cls.benchmark, cls.calendar, prefs)
-            cls.plans.append((level_id, snapshot, rows, i, scenario, market, name))
+            cls.plans.append((plan["id"], snapshot, rows, report["decision_index"], report["scenario"], plan["market"], plan["name"]))
 
     def generate(self, plan, rows=None, benchmark=None):
         level_id, snapshot, original, i, scenario, market, name = plan
@@ -71,6 +75,11 @@ class LevelTests(unittest.TestCase):
         bad = deepcopy(reveal); bad["bots"][0]["ret"] = .5
         with self.assertRaises(ValueError): check.validate_level(play, bad)
 
+    def test_checker_rejects_scenario_labels_that_do_not_match_prices(self):
+        play, reveal = self.generate(self.plans[0])
+        bad = deepcopy(reveal); bad["scenario"] = "range"
+        with self.assertRaisesRegex(ValueError, "Scenario label"): check.validate_level(play, bad)
+
     def test_missing_trading_day_cannot_be_silently_compressed(self):
         plan = self.plans[0]
         window = plan[2][plan[3]-59:plan[3]+16]
@@ -105,8 +114,50 @@ class LevelTests(unittest.TestCase):
             first = {p.name: p.read_bytes() for p in output.glob("*.json")}
             build.build(output=output)
             self.assertEqual(first, {p.name: p.read_bytes() for p in output.glob("*.json")})
-            self.assertEqual(len(check.check(output)), 2)
-            with self.assertRaises(ValueError): check.check(output, complete=True)
+            self.assertEqual(len(check.check(output, complete=True)), 10)
+
+    def test_ten_level_release_covers_assets_scenarios_and_probes(self):
+        self.assertEqual(len(self.levels), 10)
+        self.assertEqual(len(self.index["main"]), 4)
+        self.assertEqual(len(self.index["pool"]), 6)
+        self.assertEqual(len({self.levels[key][1]["scenario"] for key in self.index["main"]}), 4)
+        self.assertEqual({reveal["scenario"] for _, reveal in self.levels.values()}, check.SCENARIOS)
+        self.assertEqual(len({reveal["symbol"] for _, reveal in self.levels.values()}), 8)
+        self.assertEqual(Counter(probe for entry in self.index["pool"] for probe in entry["probes"]), Counter(evidence_use=2, calibration=2, risk_control=2))
+        for left in self.reports:
+            for right in self.reports:
+                if left["id"] >= right["id"]: continue
+                if left["dataset"] == right["dataset"]:
+                    self.assertGreaterEqual(abs(left["decision_index"]-right["decision_index"]), 60)
+                if set(left["probes"]) & set(right["probes"]):
+                    self.assertGreaterEqual(abs(self.calendar.index(left["decision_date"].replace('-', ''))-self.calendar.index(right["decision_date"].replace('-', ''))), 30)
+
+    def test_release_rejects_wrong_supplementary_probe_evidence(self):
+        for level_id, expected in [("L07", "conflicting"), ("L06", "uncertain")]:
+            bad = deepcopy(self.levels)
+            for clue in bad[level_id][0]["clues"]: clue["signal"] = "bullish"
+            with self.subTest(level=level_id), self.assertRaisesRegex(ValueError, expected): check.validate_release(self.index, bad)
+        bad = deepcopy(self.levels)
+        price = bad["L05"][0]["bars"][-1]["c"]
+        for bar in bad["L05"][1]["after_bars"][:5]:
+            for key in ["o", "h", "l", "c"]: bar[key] = price
+        with self.assertRaisesRegex(ValueError, "first-step drawdown"): check.validate_release(self.index, bad)
+
+    def test_two_level_delivery_is_not_a_complete_release(self):
+        index = {"schema": "level-index/v1", "is_sample": False, "main": ["L01", "L02"], "pool": []}
+        with self.assertRaisesRegex(ValueError, "10 total"): check.validate_release(index, {key: self.levels[key] for key in index["main"]})
+
+    def test_all_candidate_sources_are_real_and_match_the_export_manifest(self):
+        total = 0
+        for dataset, (method, params) in fetch.QUERIES.items():
+            snapshot = build.read_snapshot(build.SOURCE, dataset)
+            self.assertEqual(snapshot["method"], method)
+            self.assertEqual(snapshot["params"], params)
+            self.assertFalse(snapshot["is_sample"])
+            self.assertGreater(snapshot["received_rows"], 75)
+            if dataset != "calendar": build.market_rows(snapshot)
+            total += snapshot["received_rows"]
+        self.assertEqual(total, 3234)
 
 
 if __name__ == "__main__":

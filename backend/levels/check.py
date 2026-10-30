@@ -77,6 +77,21 @@ def validate_level(play: dict, reveal: dict) -> None:
     ret = reveal["after_bars"][-1]["c"]/play["bars"][-1]["c"]-1
     expected = "flat" if abs(ret) < .02 else "up" if ret > 0 else "down"
     require(set(reveal["outcome"]) == {"ret", "direction"} and finite(reveal["outcome"]["ret"]) and abs(ret-reveal["outcome"]["ret"]) < 1e-7 and expected == reveal["outcome"]["direction"], "Inconsistent outcome")
+    known, after = play["bars"], reveal["after_bars"]
+    price = known[-1]["c"]
+    previous_high = max(bar["h"] for bar in known[-21:-1])
+    trough = min(bar["c"] for bar in after[:8])
+    ma5 = sum(bar["c"] for bar in known[-5:]) / 5
+    ma20 = sum(bar["c"] for bar in known[-20:]) / 20
+    scenario_valid = {
+        "uptrend": ret >= .04 - 1e-8 and ma5 > ma20*1.01 - 1e-8 and price > ma5,
+        "crash": ret <= -.10 + 1e-8,
+        "range": abs(ret) < .02 + 1e-8 and (max(bar["h"] for bar in after)-min(bar["l"] for bar in after))/price < .08 + 1e-8,
+        "fake_breakout": known[-1]["h"] > previous_high and ret < -.025 + 1e-8 and after[-1]["c"] < previous_high*.98 + 1e-8,
+        "v_reversal": trough/price <= .96 + 1e-8 and after[-1]["c"]/trough >= 1.07 - 1e-8,
+        "gap": abs(after[0]["o"]/price-1) >= .025 - 1e-8,
+    }
+    require(scenario_valid[reveal["scenario"]], "Scenario label does not match the actual price path")
     require(len(reveal["bots"]) == 3 and {bot["id"] for bot in reveal["bots"]} == {"ma_cross", "turtle", "mean_revert"}, "Missing/duplicate bots")
     for bot in reveal["bots"]:
         require(set(bot) == {"id", "name", "side", "ret"} and bot["side"] in {"long", "short", "flat"} and finite(bot["ret"]), "Invalid bot")
@@ -101,6 +116,31 @@ def validate_index(index: dict, available: set[str]) -> None:
     require(referenced == available, "Index has missing files or unreferenced public levels")
 
 
+def validate_release(index: dict, levels: dict[str, tuple[dict, dict]]) -> None:
+    require(len(index["main"]) == 4 and len(index["pool"]) == 6 and len(levels) == 10, "Full release requires 4 main levels and 6 supplementary levels (10 total)")
+    require(len({levels[level_id][1]["scenario"] for level_id in index["main"]}) == 4, "Main levels must cover 4 distinct scenarios")
+    require({reveal["scenario"] for _, reveal in levels.values()} == SCENARIOS, "Full release requires all 6 scenarios")
+    identities = {(reveal["symbol"], reveal["decision_date"]) for _, reveal in levels.values()}
+    require(len(identities) == 10, "Repeated instrument/decision-date case")
+    probes = [probe for entry in index["pool"] for probe in entry["probes"]]
+    for ability in ["evidence_use", "calibration", "risk_control"]:
+        require(probes.count(ability) >= 2, f"Need two supplementary levels probing {ability}")
+        dates = sorted(datetime.strptime(levels[entry["id"]][1]["decision_date"], "%Y-%m-%d") for entry in index["pool"] if ability in entry["probes"])
+        require(all((right-left).days >= 30 for left, right in zip(dates, dates[1:])), "Same-ability probes must not reuse a single short market episode")
+    for entry in index["pool"]:
+        play, reveal = levels[entry["id"]]
+        price, after = play["bars"][-1]["c"], reveal["after_bars"]
+        signals = [clue["signal"] for clue in play["clues"]]
+        for probe in entry["probes"]:
+            if probe == "evidence_use":
+                require({"bullish", "bearish"} <= set(signals), "Evidence-use level needs conflicting visible signals")
+            elif probe == "calibration":
+                require(signals.count("neutral") >= 3, "Calibration level needs visibly uncertain evidence")
+            elif probe == "risk_control":
+                require(min(bar["l"] for bar in after[:5])/price <= .96 + 1e-8, "Risk-control level needs a first-step drawdown of at least 4%")
+                require(after[-1]["c"]/min(bar["c"] for bar in after[:8]) >= 1.07 - 1e-8, "Risk-control level needs a rebound of at least 7% from the early trough")
+
+
 def check(directory: Path = DEFAULT, complete: bool = False) -> list[tuple[dict, dict]]:
     index = json.loads((directory / "index.json").read_text(encoding="utf-8"))
     plays = {p.name.removesuffix(".play.json"): p for p in directory.glob("*.play.json")}
@@ -113,9 +153,7 @@ def check(directory: Path = DEFAULT, complete: bool = False) -> list[tuple[dict,
         require(play["id"] == level_id and index["is_sample"] == play["is_sample"], "File/index flags or IDs disagree")
         validate_level(play, reveal); levels.append((play, reveal))
     if complete:
-        require(len(index["main"]) == 4 and 8 <= len(levels) <= 10, "Full release requires 4 main levels and 8-10 total")
-        require({r["scenario"] for _, r in levels} == SCENARIOS, "Full release requires all 6 scenarios")
-        require({"evidence_use", "calibration", "risk_control"} <= {p for entry in index["pool"] for p in entry["probes"]}, "Missing ability probes")
+        validate_release(index, {play["id"]: (play, reveal) for play, reveal in levels})
     return levels
 
 

@@ -3,7 +3,46 @@
   "is_sample": false,
   "main": [
     "L01",
-    "L02"
+    "L02",
+    "L03",
+    "L04"
   ],
-  "pool": []
+  "pool": [
+    {
+      "id": "L05",
+      "probes": [
+        "risk_control"
+      ]
+    },
+    {
+      "id": "L06",
+      "probes": [
+        "calibration"
+      ]
+    },
+    {
+      "id": "L07",
+      "probes": [
+        "evidence_use"
+      ]
+    },
+    {
+      "id": "L08",
+      "probes": [
+        "calibration"
+      ]
+    },
+    {
+      "id": "L09",
+      "probes": [
+        "risk_control"
+      ]
+    },
+    {
+      "id": "L10",
+      "probes": [
+        "evidence_use"
+      ]
+    }
+  ]
 }

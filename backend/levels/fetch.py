@@ -1,4 +1,4 @@
-"""Fetch the first two levels' source data. OAuth remains in Codex's credential store."""
+"""Fetch the ten-level candidate universe. OAuth remains in Codex's credential store."""
 from __future__ import annotations
 
 import argparse
@@ -15,6 +15,11 @@ QUERIES = {
     "benchmark": ("get_index_daily", {"symbol": ["000300.SH"], "start_date": "20240101", "end_date": "20250630", "fields": []}),
     "calendar": ("get_trade_cal", {"exchange": "SH", "start_date": "20240101", "end_date": "20250630", "is_trading_day": 1, "fields": []}),
 }
+QUERIES.update({
+    dataset: ("get_stock_daily_pre", {**QUERIES["bank"][1], "symbol": [symbol]})
+    for dataset, symbol in {"maotai": "600519.SH", "catl": "300750.SZ", "eastmoney": "300059.SZ", "zijin": "601899.SH", "shenhua": "601088.SH"}.items()
+})
+QUERIES["silver"] = ("get_future_daily", {**QUERIES["gold"][1], "symbol": ["AG2502.SHF"], "end_date": "20250124"})
 
 
 def unwrap(payload: dict) -> list[dict]:
@@ -78,8 +83,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--only", choices=QUERIES)
     parser.add_argument("--output", type=Path, default=ROOT / "source_data")
+    parser.add_argument("--missing-only", action="store_true", help="Preserve frozen source snapshots and fetch only new candidates")
     args = parser.parse_args()
     for name in ([args.only] if args.only else QUERIES):
+        if args.missing_only and (args.output / f"{name}.json").exists():
+            print(f"{name}: keeping frozen snapshot", flush=True)
+            continue
         export(name, args.output)
 
 

@@ -1,6 +1,8 @@
 [
   {
     "id": "L01",
+    "role": "main",
+    "probes": [],
     "dataset": "bank",
     "decision_index": 88,
     "symbol": "000001.SZ",
@@ -16,13 +18,27 @@
       "range": 91,
       "uptrend": 14,
       "fake_breakout": 10,
-      "crash": 17,
       "v_reversal": 5,
-      "gap": 3
+      "gap": 3,
+      "crash": 1
+    },
+    "probe_evidence": {
+      "signals": {
+        "vol": "bullish",
+        "ma": "bullish",
+        "index": "neutral",
+        "backtest": "neutral",
+        "risk": "neutral",
+        "breakout": "bearish"
+      },
+      "first_step_min_return": -0.00702987697715296,
+      "rebound_from_first8_close_trough": -0.02248201438848918
     }
   },
   {
     "id": "L02",
+    "role": "main",
+    "probes": [],
     "dataset": "gold",
     "decision_index": 161,
     "symbol": "AU2504.SHF",
@@ -39,6 +55,307 @@
       "uptrend": 18,
       "fake_breakout": 4,
       "gap": 1
+    },
+    "probe_evidence": {
+      "signals": {
+        "vol": "bullish",
+        "ma": "bullish",
+        "index": "neutral",
+        "backtest": "neutral",
+        "risk": "neutral",
+        "breakout": "bearish"
+      },
+      "first_step_min_return": 0.026129659943787464,
+      "rebound_from_first8_close_trough": 0.025611106124524996
+    }
+  },
+  {
+    "id": "L03",
+    "role": "main",
+    "probes": [],
+    "dataset": "catl",
+    "decision_index": 231,
+    "symbol": "300750.SZ",
+    "start_date": "2024-09-18",
+    "decision_date": "2024-12-17",
+    "end_date": "2025-01-08",
+    "scenario": "crash",
+    "outcome": {
+      "ret": -0.103944485,
+      "direction": "down"
+    },
+    "candidate_counts": {
+      "fake_breakout": 16,
+      "range": 19,
+      "gap": 20,
+      "uptrend": 24,
+      "crash": 15,
+      "v_reversal": 19
+    },
+    "probe_evidence": {
+      "signals": {
+        "vol": "neutral",
+        "ma": "bullish",
+        "index": "bearish",
+        "backtest": "neutral",
+        "risk": "neutral",
+        "breakout": "neutral"
+      },
+      "first_step_min_return": -0.04923301680058434,
+      "rebound_from_first8_close_trough": -0.06089952153110045
+    }
+  },
+  {
+    "id": "L04",
+    "role": "main",
+    "probes": [],
+    "dataset": "shenhua",
+    "decision_index": 300,
+    "symbol": "601088.SH",
+    "start_date": "2024-12-31",
+    "decision_date": "2025-04-02",
+    "end_date": "2025-04-24",
+    "scenario": "range",
+    "outcome": {
+      "ret": 0.0075032342,
+      "direction": "flat"
+    },
+    "candidate_counts": {
+      "fake_breakout": 11,
+      "range": 69,
+      "uptrend": 6,
+      "crash": 4,
+      "v_reversal": 5,
+      "gap": 2
+    },
+    "probe_evidence": {
+      "signals": {
+        "vol": "bearish",
+        "ma": "bullish",
+        "index": "neutral",
+        "backtest": "neutral",
+        "risk": "neutral",
+        "breakout": "neutral"
+      },
+      "first_step_min_return": -0.04786545924967667,
+      "rebound_from_first8_close_trough": 0.042849491162292086
+    }
+  },
+  {
+    "id": "L05",
+    "role": "pool",
+    "probes": [
+      "risk_control"
+    ],
+    "dataset": "maotai",
+    "decision_index": 170,
+    "symbol": "600519.SH",
+    "start_date": "2024-06-21",
+    "decision_date": "2024-09-12",
+    "end_date": "2024-10-14",
+    "scenario": "v_reversal",
+    "outcome": {
+      "ret": 0.1999385795,
+      "direction": "up"
+    },
+    "candidate_counts": {
+      "v_reversal": 6
+    },
+    "probe_evidence": {
+      "signals": {
+        "vol": "bearish",
+        "ma": "bearish",
+        "index": "bearish",
+        "backtest": "neutral",
+        "risk": "neutral",
+        "breakout": "bearish"
+      },
+      "first_step_min_return": -0.06683594744805477,
+      "rebound_from_first8_close_trough": 0.2704123711340205
+    }
+  },
+  {
+    "id": "L06",
+    "role": "pool",
+    "probes": [
+      "calibration"
+    ],
+    "dataset": "eastmoney",
+    "decision_index": 320,
+    "symbol": "300059.SZ",
+    "start_date": "2025-02-06",
+    "decision_date": "2025-05-06",
+    "end_date": "2025-05-27",
+    "scenario": "gap",
+    "outcome": {
+      "ret": -0.0142925202,
+      "direction": "flat"
+    },
+    "candidate_counts": {
+      "v_reversal": 20,
+      "range": 15,
+      "crash": 36,
+      "uptrend": 9,
+      "gap": 8,
+      "fake_breakout": 2
+    },
+    "probe_evidence": {
+      "signals": {
+        "vol": "bearish",
+        "ma": "neutral",
+        "index": "neutral",
+        "backtest": "neutral",
+        "risk": "neutral",
+        "breakout": "neutral"
+      },
+      "first_step_min_return": -0.010481181515007099,
+      "rebound_from_first8_close_trough": -0.00672107537205946
+    }
+  },
+  {
+    "id": "L07",
+    "role": "pool",
+    "probes": [
+      "evidence_use"
+    ],
+    "dataset": "zijin",
+    "decision_index": 64,
+    "symbol": "601899.SH",
+    "start_date": "2024-01-09",
+    "decision_date": "2024-04-11",
+    "end_date": "2024-05-07",
+    "scenario": "fake_breakout",
+    "outcome": {
+      "ret": -0.0300166759,
+      "direction": "down"
+    },
+    "candidate_counts": {
+      "gap": 7,
+      "fake_breakout": 9,
+      "v_reversal": 7,
+      "crash": 8,
+      "range": 2,
+      "uptrend": 1
+    },
+    "probe_evidence": {
+      "signals": {
+        "vol": "bullish",
+        "ma": "bullish",
+        "index": "bearish",
+        "backtest": "bullish",
+        "risk": "neutral",
+        "breakout": "bearish"
+      },
+      "first_step_min_return": -0.022790439132851614,
+      "rebound_from_first8_close_trough": 0.02406103286384975
+    }
+  },
+  {
+    "id": "L08",
+    "role": "pool",
+    "probes": [
+      "calibration"
+    ],
+    "dataset": "silver",
+    "decision_index": 141,
+    "symbol": "AG2502.SHF",
+    "start_date": "2024-09-30",
+    "decision_date": "2024-12-27",
+    "end_date": "2025-01-20",
+    "scenario": "range",
+    "outcome": {
+      "ret": 0.0196026839,
+      "direction": "flat"
+    },
+    "candidate_counts": {
+      "fake_breakout": 6,
+      "v_reversal": 5,
+      "uptrend": 5,
+      "range": 19
+    },
+    "probe_evidence": {
+      "signals": {
+        "vol": "bearish",
+        "ma": "bearish",
+        "index": "neutral",
+        "backtest": "neutral",
+        "risk": "neutral",
+        "breakout": "neutral"
+      },
+      "first_step_min_return": -0.01960268385738717,
+      "rebound_from_first8_close_trough": 0.03748326639892907
+    }
+  },
+  {
+    "id": "L09",
+    "role": "pool",
+    "probes": [
+      "risk_control"
+    ],
+    "dataset": "zijin",
+    "decision_index": 137,
+    "symbol": "601899.SH",
+    "start_date": "2024-05-06",
+    "decision_date": "2024-07-29",
+    "end_date": "2024-08-19",
+    "scenario": "v_reversal",
+    "outcome": {
+      "ret": 0.0134892024,
+      "direction": "flat"
+    },
+    "candidate_counts": {
+      "v_reversal": 19,
+      "uptrend": 1,
+      "gap": 2
+    },
+    "probe_evidence": {
+      "signals": {
+        "vol": "bearish",
+        "ma": "bearish",
+        "index": "bearish",
+        "backtest": "neutral",
+        "risk": "neutral",
+        "breakout": "neutral"
+      },
+      "first_step_min_return": -0.04034761018001243,
+      "rebound_from_first8_close_trough": 0.073458977642896
+    }
+  },
+  {
+    "id": "L10",
+    "role": "pool",
+    "probes": [
+      "evidence_use"
+    ],
+    "dataset": "catl",
+    "decision_index": 330,
+    "symbol": "300750.SZ",
+    "start_date": "2025-02-20",
+    "decision_date": "2025-05-20",
+    "end_date": "2025-06-11",
+    "scenario": "fake_breakout",
+    "outcome": {
+      "ret": -0.0475285171,
+      "direction": "down"
+    },
+    "candidate_counts": {
+      "fake_breakout": 2,
+      "crash": 2,
+      "range": 1,
+      "uptrend": 8,
+      "gap": 1
+    },
+    "probe_evidence": {
+      "signals": {
+        "vol": "neutral",
+        "ma": "bullish",
+        "index": "neutral",
+        "backtest": "neutral",
+        "risk": "neutral",
+        "breakout": "bearish"
+      },
+      "first_step_min_return": -0.0403422053231941,
+      "rebound_from_first8_close_trough": 0.0020000000000000018
     }
   }
 ]

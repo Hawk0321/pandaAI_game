@@ -13,7 +13,10 @@ const loader = createLevelLoader('/', async url => {
 });
 const index = await loader.loadIndex();
 assert.equal(index.is_sample, false);
-for (const id of index.main) {
+assert.equal(index.main.length, 4);
+assert.equal(index.pool.length, 6);
+const ids = [...index.main, ...index.pool.map(entry => entry.id)];
+for (const id of ids) {
   const play = await loader.loadPlay(id);
   assert.equal(play.bars.length, 60);
   const before = requests.length;
@@ -23,4 +26,4 @@ for (const id of index.main) {
   assert.equal(reveal.after_bars.length, 15);
   assert.equal(reveal.id, play.id);
 }
-console.log(`PASS: C loader accepted ${index.main.length} real levels and blocked reveal fetch before decision`);
+console.log(`PASS: C loader accepted ${ids.length} real levels (4 main + 6 supplementary) and blocked reveal fetch before decision`);

@@ -1,4 +1,4 @@
-"""Build the first two real-data levels from reproducible, credential-free snapshots."""
+"""Build ten real-data levels from reproducible, credential-free snapshots."""
 from __future__ import annotations
 
 import argparse
@@ -15,6 +15,18 @@ REPO = ROOT.parents[1]
 OUTPUT = REPO / "frontend" / "public" / "levels"
 SOURCE = ROOT / "source_data"
 SCENARIOS = {"uptrend", "crash", "range", "fake_breakout", "v_reversal", "gap"}
+LEVEL_PLANS = [
+    {"id": "L01", "dataset": "bank", "market": "A股", "name": "平安银行", "scenario": "fake_breakout", "probe": None},
+    {"id": "L02", "dataset": "gold", "market": "期货", "name": "沪金2504", "scenario": "uptrend", "probe": None},
+    {"id": "L03", "dataset": "catl", "market": "A股", "name": "宁德时代", "scenario": "crash", "probe": None},
+    {"id": "L04", "dataset": "shenhua", "market": "A股", "name": "中国神华", "scenario": "range", "probe": None},
+    {"id": "L05", "dataset": "maotai", "market": "A股", "name": "贵州茅台", "scenario": "v_reversal", "probe": "risk_control"},
+    {"id": "L06", "dataset": "eastmoney", "market": "A股", "name": "东方财富", "scenario": "gap", "probe": "calibration"},
+    {"id": "L07", "dataset": "zijin", "market": "A股", "name": "紫金矿业", "scenario": "fake_breakout", "probe": "evidence_use"},
+    {"id": "L08", "dataset": "silver", "market": "期货", "name": "沪银2502", "scenario": "range", "probe": "calibration"},
+    {"id": "L09", "dataset": "zijin", "market": "A股", "name": "紫金矿业", "scenario": "v_reversal", "probe": "risk_control"},
+    {"id": "L10", "dataset": "catl", "market": "A股", "name": "宁德时代", "scenario": "fake_breakout", "probe": "evidence_use"},
+]
 
 
 def read_snapshot(directory: Path, name: str) -> dict:
@@ -131,7 +143,7 @@ def classify(known: list[dict], after: list[dict]) -> set[str]:
     ret = after[-1]["close"] / price - 1
     labels = set()
     if ret >= .04 and f["ma5"] > f["ma20"]*1.01 and price > f["ma5"]: labels.add("uptrend")
-    if ret <= -.05: labels.add("crash")
+    if ret <= -.10: labels.add("crash")
     if abs(ret) < .02 and (max(r["high"] for r in after)-min(r["low"] for r in after))/price < .08: labels.add("range")
     if known[-1]["high"] > f["high20"] and ret < -.025 and after[-1]["close"] < f["high20"]*.98: labels.add("fake_breakout")
     trough = min(row["close"] for row in after[:8])
@@ -140,18 +152,36 @@ def classify(known: list[dict], after: list[dict]) -> set[str]:
     return labels
 
 
-def select(rows: list[dict], benchmark: dict[str, dict], calendar: list[str], preferences: list[str]) -> tuple[int, str, dict]:
+def probe_eligible(known: list[dict], after: list[dict], clues: list[dict], probe: str | None) -> bool:
+    if probe is None:
+        return True
+    if probe == "evidence_use":
+        return {"bullish", "bearish"} <= {clue["signal"] for clue in clues}
+    if probe == "calibration":
+        return sum(clue["signal"] == "neutral" for clue in clues) >= 3
+    if probe == "risk_control":
+        return min(row["low"] for row in after[:5]) / known[-1]["close"] <= .96 and after[-1]["close"] / min(row["close"] for row in after[:8]) >= 1.07
+    raise ValueError(f"Unsupported ability probe: {probe}")
+
+
+def select(rows: list[dict], benchmark: dict[str, dict], calendar: list[str], preferences: list[str], *, probe: str | None = None, market: str = "A股", used_decisions: tuple[int, ...] = (), used_probe_dates: tuple[str, ...] = ()) -> tuple[int, str, dict]:
     candidates, counts = [], Counter()
     calendar_position = {day: i for i, day in enumerate(calendar)}
     for i in range(59, len(rows)-15):
+        if any(abs(i - previous) < 60 for previous in used_decisions): continue
         window = rows[i-59:i+16]
         dates = [date_key(row["date"]) for row in window]
         if any(row["volume"] <= 0 or row.get("trade_status", 0) != 0 for row in window): continue
         if any(day not in benchmark or day not in calendar_position for day in dates): continue
+        if any(abs(calendar_position[dates[59]] - calendar_position[previous]) < 30 for previous in used_probe_dates): continue
         positions = [calendar_position[day] for day in dates]
         if positions != list(range(positions[0], positions[0]+75)): continue
         known, after = window[:60], window[60:]
         labels = classify(known, after)
+        if probe is not None:
+            aligned = [benchmark[day] for day in dates[:60]]
+            clues, _ = make_clues(known, aligned, market)
+            if not probe_eligible(known, after, clues, probe): continue
         counts.update(labels)
         for scenario in labels:
             if scenario in preferences:
@@ -188,20 +218,28 @@ def build(source: Path = SOURCE, output: Path = OUTPUT) -> list[dict]:
     calendar = sorted(date_key(row["nature_date"]) for row in calendar_rows if row["is_trade"] == 1)
     if len(calendar) != len(set(calendar)): raise ValueError("Duplicate trading-calendar date")
     reports = []
-    plans = [("L01", "bank", "A股", "平安银行", ["fake_breakout", "range", "crash", "gap", "v_reversal", "uptrend"]), ("L02", "gold", "期货", "沪金2504", ["uptrend", "v_reversal", "range", "gap", "crash", "fake_breakout"])]
     generated = []
-    for level_id, dataset, market, name, preference in plans:
+    used: dict[str, list[int]] = {}
+    probe_dates: dict[str, list[str]] = {}
+    for plan in LEVEL_PLANS:
+        level_id, dataset, market, name = [plan[key] for key in ["id", "dataset", "market", "name"]]
         snapshot = read_snapshot(source, dataset)
         rows = market_rows(snapshot)
-        decision, scenario, counts = select(rows, benchmark, calendar, preference)
+        decision, scenario, counts = select(rows, benchmark, calendar, [plan["scenario"]], probe=plan["probe"], market=market, used_decisions=tuple(used.get(dataset, [])), used_probe_dates=tuple(probe_dates.get(plan["probe"], [])))
+        used.setdefault(dataset, []).append(decision)
+        if plan["probe"]:
+            probe_dates.setdefault(plan["probe"], []).append(date_key(rows[decision]["date"]))
         play, reveal = make_level(level_id, snapshot, rows, decision, scenario, benchmark, market, name)
         generated.append((level_id, play, reveal))
-        reports.append({"id": level_id, "dataset": dataset, "decision_index": decision, "symbol": reveal["symbol"], "start_date": reveal["start_date"], "decision_date": reveal["decision_date"], "end_date": reveal["end_date"], "scenario": scenario, "outcome": reveal["outcome"], "candidate_counts": counts})
+        known, after = rows[decision-59:decision+1], rows[decision+1:decision+16]
+        reports.append({"id": level_id, "role": "pool" if plan["probe"] else "main", "probes": [plan["probe"]] if plan["probe"] else [], "dataset": dataset, "decision_index": decision, "symbol": reveal["symbol"], "start_date": reveal["start_date"], "decision_date": reveal["decision_date"], "end_date": reveal["end_date"], "scenario": scenario, "outcome": reveal["outcome"], "candidate_counts": counts,
+                        "probe_evidence": {"signals": {clue["id"]: clue["signal"] for clue in play["clues"]}, "first_step_min_return": min(row["low"] for row in after[:5])/known[-1]["close"]-1, "rebound_from_first8_close_trough": after[-1]["close"]/min(row["close"] for row in after[:8])-1}})
     # Validate everything before replacing any public file.
-    from check import validate_level, validate_index
+    from check import validate_level, validate_index, validate_release
     for _, play, reveal in generated: validate_level(play, reveal)
-    index = {"schema": "level-index/v1", "is_sample": False, "main": [item[0] for item in generated], "pool": []}
+    index = {"schema": "level-index/v1", "is_sample": False, "main": [plan["id"] for plan in LEVEL_PLANS if not plan["probe"]], "pool": [{"id": plan["id"], "probes": [plan["probe"]]} for plan in LEVEL_PLANS if plan["probe"]]}
     validate_index(index, {item[0] for item in generated})
+    validate_release(index, {level_id: (play, reveal) for level_id, play, reveal in generated})
     for level_id, play, reveal in generated:
         write_json(output / f"{level_id}.play.json", play)
         write_json(output / f"{level_id}.reveal.json", reveal)
