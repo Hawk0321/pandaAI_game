@@ -18,7 +18,7 @@
 
 | 任务 | 负责人 | 文档 | 一句话 |
 |---|---|---|---|
-| A 关卡数据 | 【队友】 | [tasks/A-levels.md](tasks/A-levels.md) | Python 拉 Panda Data，生成 8–10 关、线索卡、AI 对手结果 |
+| A 关卡数据 | 张家诚（jczhang1105） | [tasks/A-levels.md](tasks/A-levels.md) | Python 拉 Panda Data，生成 8–10 关、线索卡、AI 对手结果 |
 | B 对局玩法 | 【队友】 | [tasks/B-play.md](tasks/B-play.md) | 一关之内的看盘、翻牌、决定、持有三步，发行为事件 |
 | C 流程与展示 | 【队友】 | [tasks/C-shell.md](tasks/C-shell.md) | 项目骨架、整局串联、揭晓页、画像页、部署 |
 | D 证据与画像 | nate | [tasks/D-profile.md](tasks/D-profile.md) | 事件 → 证据 → 画像，补充关卡选择；维护协议、合并 PR |
