@@ -3,6 +3,7 @@
 放方案、玩法设计、画像与推荐逻辑、Panda Data 使用说明、会议记录等。代码不要放这里。
 
 - [一天开发计划](plan.md)：总纲、分工、时间线和完成标准，开工前必读
+- [AI 开工指令](agent-prompts.md)：四个角色各一段，整段复制给 AI
 - [沟通协议](protocol.md)：四个模块之间的文件格式和函数接口
 - 任务文档：[A 关卡数据](tasks/A-levels.md) · [B 对局玩法](tasks/B-play.md) · [C 流程与展示](tasks/C-shell.md) · [D 证据与画像](tasks/D-profile.md)
 - [队友上传指南](team-guide.md)：怎么把代码和资料传到 GitHub
