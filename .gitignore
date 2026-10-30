@@ -1,0 +1,18 @@
+# 密钥与本地配置
+.env
+.env.*
+!.env.example
+
+# 依赖与构建产物
+node_modules/
+dist/
+build/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# 系统与编辑器
+.DS_Store
+.idea/
+.vscode/
