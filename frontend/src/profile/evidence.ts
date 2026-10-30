@@ -14,6 +14,8 @@ export interface RawEvidence {
   event_seqs: number[];
   text: string;
   value: number | null;
+  /** 汇总证据的权重（默认 1）。跨关汇总的一条证据按它覆盖的关数计权。 */
+  weight?: number;
 }
 
 export interface LevelFacts {
@@ -35,6 +37,9 @@ export const T = {
   volLookback: 20,
   highVol: 0.02,             // 日收益标准差 > 2% 视为高波动
   floatingLoss: -0.01,       // 浮亏超过 1% 才看加仓/减仓
+  lateCut: -0.08,            // 浮亏超过 8% 才减仓/平仓，算止损偏晚
+  overconfident: 0.15,       // 平均信心比实际命中率高 15 个百分点以上算信心偏高
+  underconfident: 0.25,      // 平均信心比实际命中率低 25 个百分点以上算信心偏低
   thinkFullMs: 30000,        // 思考 30 秒算"想得充分"
 };
 
@@ -148,7 +153,8 @@ function evidenceUse(f: LevelFacts): RawEvidence[] {
       text: agree
         ? `${f.label}翻开的线索整体${net > 0 ? '看涨' : '看跌'}，决定${sideText(side)}与线索一致`
         : `${f.label}翻开的线索整体${net > 0 ? '看涨' : '看跌'}，却选择${sideText(side)}，决定与证据相反`,
-      value: agree ? 0.8 : 0.2,
+      // 只翻了 1 张就下单，"一致"说明不了多少，权重放轻
+      value: opened.length >= 2 ? (agree ? 0.8 : 0.2) : (agree ? 0.6 : 0.3),
     });
   } else if (sign === 0 && net === 0 && opened.some((c) => c.signal !== 'neutral')) {
     out.push({ ...base, text: `${f.label}看到多空线索互相抵消后选择观望，和证据一致`, value: 0.7 });
@@ -156,8 +162,9 @@ function evidenceUse(f: LevelFacts): RawEvidence[] {
     out.push({ ...base, text: `${f.label}线索整体${net > 0 ? '看涨' : '看跌'}，但仍选择观望`, value: null });
   }
 
-  // 3) 确认偏误：翻了 ≥2 张且全部和自己方向一致，而反向线索还没翻
-  if (sign !== 0 && opened.length >= 2 && opened.every((c) => clueSign(c) === sign)) {
+  // 3) 确认偏误：翻了 ≥2 张且全部和自己方向一致，反向线索没翻，同时还漏了关键线索
+  const missedKey = key.some((c) => !opened.includes(c));
+  if (sign !== 0 && missedKey && opened.length >= 2 && opened.every((c) => clueSign(c) === sign)) {
     const unopenedOpp = f.play.clues.filter((c) => !opened.includes(c) && clueSign(c) === -sign);
     if (unopenedOpp.length) {
       out.push({ ...base, text: `${f.label}只翻了支持${sideText(side)}的线索，没看反方向的${titles(unopenedOpp)}`, value: 0.25 });
@@ -167,6 +174,36 @@ function evidenceUse(f: LevelFacts): RawEvidence[] {
 }
 
 /* ---------------- 能力：判断校准（不看赚多少） ---------------- */
+/** 信心 1–5 视为"自认为判断正确的概率" 50%–90%。 */
+const confToProb = (conf: number) => 0.4 + conf * 0.1;
+
+/**
+ * 跨关汇总：平均信心（换算成概率）和实际命中率比较。
+ * 单关的对错有运气成分，这条汇总证据按可检验的关数计权，是校准判断的主要依据。
+ */
+function calibrationOverall(facts: LevelFacts[]): RawEvidence[] {
+  const checked = facts.flatMap((f) => {
+    const d = f.decision;
+    const side = str(d?.data.side) as Side;
+    const dir = f.reveal.outcome.direction;
+    if (!d || side === 'flat' || dir === 'flat') return [];
+    const conf = Math.min(5, Math.max(1, Math.round(num(d.data.confidence, 3))));
+    return [{ f, d, conf, right: (dir === 'up') === (side === 'long') }];
+  });
+  if (checked.length < 2) return [];
+  const avgConf = checked.reduce((s, x) => s + x.conf, 0) / checked.length;
+  const avgP = confToProb(avgConf);
+  const hits = checked.filter((x) => x.right).length;
+  const gap = avgP - hits / checked.length;
+  const value = Math.max(0, Math.min(1, 1 - 2 * Math.max(0, gap) - Math.max(0, -gap)));
+  const verdict = gap > T.overconfident ? '信心偏高' : gap < -T.underconfident ? '信心偏低' : '信心和命中率大致匹配';
+  const last = checked[checked.length - 1];
+  return [{
+    dim: 'calibration', level_id: last.f.levelId, event_seqs: [last.d.seq], value, weight: checked.length,
+    text: `截至${last.f.label}，${checked.length} 次可检验的判断平均信心 ${avgConf.toFixed(1)}/5（约 ${Math.round(avgP * 100)}% 把握），实际对了 ${hits} 次（${Math.round((hits / checked.length) * 100)}%）：${verdict}`,
+  }];
+}
+
 function calibration(f: LevelFacts): RawEvidence[] {
   const d = f.decision;
   if (!d) return [];
@@ -177,8 +214,7 @@ function calibration(f: LevelFacts): RawEvidence[] {
   const dir = f.reveal.outcome.direction;
   if (dir === 'flat') return [{ ...base, text: `${f.label}之后走势横盘，${sideText(side)}的对错不明显`, value: null }];
   const right = (dir === 'up') === (side === 'long');
-  // 信心 1–5 视为"自认为判断正确的概率" 50%–90%，按 Brier 分换算到 0–1
-  const p = 0.4 + conf * 0.1;
+  const p = confToProb(conf);
   const value = 1 - (p - (right ? 1 : 0)) ** 2 / 0.81;
   const verdict = right
     ? conf >= 4 ? '信心高且方向判断正确' : '方向对了，但信心给得偏低'
@@ -224,8 +260,10 @@ function riskControl(f: LevelFacts): RawEvidence[] {
     const action = str(h.data.action);
     if (position !== 0 && pnl < T.floatingLoss) {
       const label = `${f.label}第 ${num(h.data.step)} 步浮亏 ${pct(pnl)} 时`;
+      const cut = action === 'close' ? '平仓' : '减仓';
       if (action === 'add') out.push({ ...base, event_seqs: [h.seq], value: 0.1, text: `${label}选择加仓` });
-      else if (action === 'reduce' || action === 'close') out.push({ ...base, event_seqs: [h.seq], value: 0.85, text: `${label}选择${action === 'close' ? '平仓' : '减仓'}` });
+      else if ((action === 'reduce' || action === 'close') && pnl < T.lateCut) out.push({ ...base, event_seqs: [h.seq], value: 0.6, text: `${label}才${cut}，止损偏晚` });
+      else if (action === 'reduce' || action === 'close') out.push({ ...base, event_seqs: [h.seq], value: 0.85, text: `${label}选择${cut}` });
       else out.push({ ...base, event_seqs: [h.seq], value: 0.45, text: `${label}继续持有` });
     }
     position = num(h.data.position_after, position);
@@ -284,8 +322,12 @@ export function extractEvidence(
   events: GameEvent[],
   levels: { play: LevelPlay; reveal: LevelReveal }[],
 ): RawEvidence[] {
-  return collectLevels(events, levels).flatMap((f) => [
-    ...evidenceUse(f), ...calibration(f), ...riskControl(f),
-    ...style(f), ...researchDepth(f), ...riskAppetite(f),
-  ]);
+  const facts = collectLevels(events, levels);
+  return [
+    ...facts.flatMap((f) => [
+      ...evidenceUse(f), ...calibration(f), ...riskControl(f),
+      ...style(f), ...researchDepth(f), ...riskAppetite(f),
+    ]),
+    ...calibrationOverall(facts),
+  ];
 }

@@ -72,7 +72,7 @@ describe('证据层', () => {
       { pnl_before: -0.12, action: 'close', position_after: 0 }] }), 'risk_control');
     expect(bad.some((e) => e.text.includes('没有设止损') && e.value! < 0.3)).toBe(true);
     expect(bad.some((e) => e.text.includes('加仓') && e.value! < 0.2)).toBe(true);
-    expect(bad.some((e) => e.text.includes('平仓') && e.value! > 0.8)).toBe(true);
+    expect(bad.some((e) => e.text.includes('止损偏晚') && e.value! > 0.5 && e.value! < 0.7)).toBe(true);
 
     const good = of(run({ side: 'long', size: 0.5, stop: 0.05, stop_at: { step: 1, pnl: -0.025 }, steps: [
       { pnl_before: -0.025, action: 'close', position_after: 0 },
