@@ -1,0 +1,44 @@
+[
+  {
+    "id": "L01",
+    "dataset": "bank",
+    "decision_index": 88,
+    "symbol": "000001.SZ",
+    "start_date": "2024-02-20",
+    "decision_date": "2024-05-20",
+    "end_date": "2024-06-11",
+    "scenario": "fake_breakout",
+    "outcome": {
+      "ret": -0.0448154657,
+      "direction": "down"
+    },
+    "candidate_counts": {
+      "range": 91,
+      "uptrend": 14,
+      "fake_breakout": 10,
+      "crash": 17,
+      "v_reversal": 5,
+      "gap": 3
+    }
+  },
+  {
+    "id": "L02",
+    "dataset": "gold",
+    "decision_index": 161,
+    "symbol": "AU2504.SHF",
+    "start_date": "2024-11-04",
+    "decision_date": "2025-01-27",
+    "end_date": "2025-02-25",
+    "scenario": "uptrend",
+    "outcome": {
+      "ret": 0.0587454057,
+      "direction": "up"
+    },
+    "candidate_counts": {
+      "range": 48,
+      "uptrend": 18,
+      "fake_breakout": 4,
+      "gap": 1
+    }
+  }
+]

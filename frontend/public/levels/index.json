@@ -1,15 +1,9 @@
 {
- "schema": "level-index/v1",
- "is_sample": true,
- "main": [
-  "L01"
- ],
- "pool": [
-  {
-   "id": "L01",
-   "probes": [
-    "evidence_use"
-   ]
-  }
- ]
+  "schema": "level-index/v1",
+  "is_sample": false,
+  "main": [
+    "L01",
+    "L02"
+  ],
+  "pool": []
 }
