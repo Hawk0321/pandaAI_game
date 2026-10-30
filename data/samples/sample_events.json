@@ -1,0 +1,127 @@
+{
+ "is_sample": true,
+ "note": "模拟玩家：只看均线就重仓做多，浮亏时加仓",
+ "events": [
+  {
+   "seq": 1,
+   "session_id": "sample-0001",
+   "level_id": null,
+   "t_ms": 0,
+   "at": "2026-10-31T10:00:00Z",
+   "type": "session_start",
+   "data": {
+    "device": "mobile"
+   }
+  },
+  {
+   "seq": 2,
+   "session_id": "sample-0001",
+   "level_id": "L01",
+   "t_ms": 0,
+   "at": "2026-10-31T10:00:00Z",
+   "type": "level_start",
+   "data": {
+    "budget": 3,
+    "is_supplementary": false
+   }
+  },
+  {
+   "seq": 3,
+   "session_id": "sample-0001",
+   "level_id": "L01",
+   "t_ms": 4200,
+   "at": "2026-10-31T10:00:04Z",
+   "type": "clue_open",
+   "data": {
+    "clue_id": "ma",
+    "kind": "ma",
+    "signal": "bullish",
+    "cost": 1,
+    "budget_left": 2
+   }
+  },
+  {
+   "seq": 4,
+   "session_id": "sample-0001",
+   "level_id": "L01",
+   "t_ms": 9100,
+   "at": "2026-10-31T10:00:09Z",
+   "type": "decision",
+   "data": {
+    "side": "long",
+    "size": 1,
+    "confidence": 5,
+    "stop": null,
+    "clues_opened": [
+     "ma"
+    ],
+    "think_ms": 9100
+   }
+  },
+  {
+   "seq": 5,
+   "session_id": "sample-0001",
+   "level_id": "L01",
+   "t_ms": 11000,
+   "at": "2026-10-31T10:00:11Z",
+   "type": "hold_step",
+   "data": {
+    "step": 1,
+    "pnl_before": -0.021,
+    "action": "add",
+    "position_after": 1
+   }
+  },
+  {
+   "seq": 6,
+   "session_id": "sample-0001",
+   "level_id": "L01",
+   "t_ms": 13500,
+   "at": "2026-10-31T10:00:13Z",
+   "type": "hold_step",
+   "data": {
+    "step": 2,
+    "pnl_before": -0.068,
+    "action": "hold",
+    "position_after": 1
+   }
+  },
+  {
+   "seq": 7,
+   "session_id": "sample-0001",
+   "level_id": "L01",
+   "t_ms": 15800,
+   "at": "2026-10-31T10:00:15Z",
+   "type": "hold_step",
+   "data": {
+    "step": 3,
+    "pnl_before": -0.11,
+    "action": "close",
+    "position_after": 0
+   }
+  },
+  {
+   "seq": 8,
+   "session_id": "sample-0001",
+   "level_id": "L01",
+   "t_ms": 16000,
+   "at": "2026-10-31T10:00:16Z",
+   "type": "level_end",
+   "data": {
+    "pnl": -0.13,
+    "final_position": 0
+   }
+  },
+  {
+   "seq": 9,
+   "session_id": "sample-0001",
+   "level_id": "L01",
+   "t_ms": 24000,
+   "at": "2026-10-31T10:00:24Z",
+   "type": "reveal_view",
+   "data": {
+    "dwell_ms": 8000
+   }
+  }
+ ]
+}

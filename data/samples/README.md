@@ -4,3 +4,9 @@
 
 - 文件名建议以 `sample_` 开头，或在数据里加 `"is_sample": true`。
 - 真实试玩记录需脱敏，并和示例数据分开存放、分开标注。
+
+## 协议示例（见 `docs/protocol.md`）
+
+- `levels/`：关卡索引和一关完整示例（模拟行情）
+- `sample_events.json`：行为事件示例
+- `sample_profile.json`：画像输出示例
