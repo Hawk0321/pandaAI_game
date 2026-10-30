@@ -1,5 +1,6 @@
 # 任务 A：关卡数据（Panda Data → 关卡 JSON）
 
+> 负责人：张家诚（GitHub：jczhang1105）。
 > 给负责人和 AI 读。开工前先读：`AGENTS.md`、`README.md`、`docs/protocol.md`（第 2 节是你的输出格式）、`docs/pandaai-resources.md`（Panda Data 接口清单）。
 
 ## 你做什么
