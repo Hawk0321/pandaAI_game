@@ -1,4 +1,4 @@
-// 交易滑牌：Reigns 类玩法界面。卡牌内容与引擎见 cards.ts / engine.ts，全部为示例内容（is_sample）。
+// trading人生（交易滑牌）：Reigns 类玩法界面。卡牌内容与引擎见 cards.ts / engine.ts，全部为示例内容（is_sample）。
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CSSProperties, KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent } from 'react';
 import { ALL_CARDS } from './allCards';
@@ -6,7 +6,7 @@ import { EndingScreen } from './EndingScreen';
 import { choose, createGame, previewEffects } from './engine';
 import { RoleSelect } from './RoleSelect';
 import { ROLES } from './roles';
-import { characterArtwork, selfArtwork } from './characterArt';
+import { ROLE_AVATARS, characterArtwork, selfArtwork } from './characterArt';
 import { hintIcon, statIcon } from './uiArt';
 import { formatJitter } from './survival';
 import { OVERTIME_START, STAT_KEYS } from './types';
@@ -190,9 +190,9 @@ export function ReignsGame() {
     return (
       <div className="reigns-scene reigns-scene-select">
         <div className="reigns-ambient" aria-hidden="true"><span /><span /><span /></div>
-        <section className="reigns-root" aria-label="交易滑牌">
+        <section className="reigns-root" aria-label="trading人生">
           <header className="reigns-header">
-            <h1 className="reigns-title"><span className="reigns-brand-mark">P</span>交易滑牌</h1>
+            <h1 className="reigns-title"><img className="reigns-brand-mark" src={ROLE_AVATARS.crypto} alt="" width="28" height="28" />trading人生</h1>
             <p className="reigns-turn"><span className="reigns-sample">示例内容</span></p>
             <MuteButton />
           </header>
@@ -231,9 +231,9 @@ export function ReignsGame() {
     <div className={`reigns-scene reigns-scene-${game.role}${game.ending ? ' reigns-scene-ending' : ''}`}>
       <div className="reigns-ambient" aria-hidden="true"><span /><span /><span /></div>
       <aside className="reigns-scene-rail" aria-hidden="true"><b>{scene.code}</b><span>{scene.location}</span><i /></aside>
-      <section className="reigns-root" aria-label="交易滑牌">
+      <section className="reigns-root" aria-label="trading人生">
         <header className="reigns-header">
-          <h1 className="reigns-title"><span className="reigns-brand-mark">P</span><span>交易滑牌 <span className="reigns-role-chip">{roleDef.name}</span></span></h1>
+          <h1 className="reigns-title"><img className="reigns-brand-mark" src={ROLE_AVATARS.crypto} alt="" width="28" height="28" /><span>trading人生 <span className="reigns-role-chip">{roleDef.name}</span></span></h1>
           <p className="reigns-turn" aria-label={game.ending ? `活了 ${game.turn} 关` : `第 ${game.turn + 1} 关${overtime ? '，加时中' : ''}`}>
             <span className="reigns-turn-number" aria-hidden="true">{String(game.ending ? game.turn : game.turn + 1).padStart(2, '0')}</span>
             {overtime

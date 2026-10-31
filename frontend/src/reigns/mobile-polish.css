@@ -15,7 +15,7 @@
   .reigns-root { gap: 11px; padding: 12px 14px 18px; }
   .reigns-header { min-height: 36px; }
   .reigns-title { font-size: 16px; }
-  .reigns-brand-mark { width: 25px; height: 25px; font-size: 14px; }
+  .reigns-brand-mark { width: 25px; height: 25px; }
   .reigns-role-chip { font-size: 10px; }
   .reigns-mute { min-width: 36px; min-height: 36px; }
   .reigns-sample { display: none; }
