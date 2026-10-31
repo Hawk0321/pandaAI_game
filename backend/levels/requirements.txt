@@ -1,0 +1,2 @@
+# Offline build/check/test and fetch orchestration use Python's standard library.
+# OAuth/MCP export additionally requires Node.js and an authenticated Codex CLI.

@@ -1,15 +1,48 @@
 {
- "schema": "level-index/v1",
- "is_sample": true,
- "main": [
-  "L01"
- ],
- "pool": [
-  {
-   "id": "L01",
-   "probes": [
-    "evidence_use"
-   ]
-  }
- ]
+  "schema": "level-index/v1",
+  "is_sample": false,
+  "main": [
+    "L01",
+    "L02",
+    "L03",
+    "L04"
+  ],
+  "pool": [
+    {
+      "id": "L05",
+      "probes": [
+        "risk_control"
+      ]
+    },
+    {
+      "id": "L06",
+      "probes": [
+        "calibration"
+      ]
+    },
+    {
+      "id": "L07",
+      "probes": [
+        "evidence_use"
+      ]
+    },
+    {
+      "id": "L08",
+      "probes": [
+        "calibration"
+      ]
+    },
+    {
+      "id": "L09",
+      "probes": [
+        "risk_control"
+      ]
+    },
+    {
+      "id": "L10",
+      "probes": [
+        "evidence_use"
+      ]
+    }
+  ]
 }
