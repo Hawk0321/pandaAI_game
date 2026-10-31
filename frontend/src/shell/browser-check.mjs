@@ -167,14 +167,16 @@ async function downloadSubmission(profile) {
   assert.equal(downloaded.schema, 'submission/v1');
   assert.equal(downloaded.session_id, profile.session_id);
   assert.equal(downloaded.dimensions.length, profile.dimensions.length, 'submission keeps every dimension');
-  assert.equal(downloaded.recommendations.length, 4, 'submission carries all four skill cards');
+  assert.equal(downloaded.recommendations.filter(item => item.type === 'skill-card').length, 4, 'submission carries all four skill cards');
+  assert.equal(downloaded.recommendations.filter(item => item.type === 'referral').length, (profile.recommendations ?? []).length, 'submission carries the profile referral cards');
   for (const dimension of downloaded.dimensions) {
     assert.ok(dimension.judgement && dimension.confidence, 'submission dimension carries judgement and confidence');
     assert.ok(dimension.evidence.every(item => typeof item === 'string' && item.includes(' · ')), 'submission evidence is readable text');
   }
   for (const recommendation of downloaded.recommendations) {
     assert.ok(recommendation.reason && recommendation.next_step, 'submission recommendation carries reason and next step');
-    assert.equal(recommendation.is_sample, true, 'in-game exercise is labelled as sample');
+    if (recommendation.type === 'skill-card') assert.equal(recommendation.is_sample, true, 'in-game exercise is labelled as sample');
+    else assert.ok(recommendation.url?.startsWith('https://'), 'referral carries a real link');
   }
   assert.equal(Object.hasOwn(downloaded, 'events'), false, 'submission contains no raw event log');
   return filename;

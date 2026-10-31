@@ -84,12 +84,31 @@ describe('提交版 JSON 导出', () => {
       // 证据排成字符串后仍然保留关卡和方向，评委不必回看界面
       expect(dimension.evidence[0]).toMatch(/^(L\d+|S\d+|补充关|\S+ · )/);
     }
-    expect(submission.recommendations).toHaveLength(4);
-    for (const recommendation of submission.recommendations) {
+    const skills = submission.recommendations.filter(item => item.type === 'skill-card');
+    expect(skills).toHaveLength(4);
+    for (const recommendation of skills) {
       expect(recommendation.reason.length).toBeGreaterThan(0);
-      expect(recommendation.next_step).toContain(CARDS[recommendation.id].name);
+      expect(recommendation.next_step).toContain(CARDS[recommendation.id as keyof typeof CARDS].name);
       expect(recommendation.is_sample).toBe(true);
     }
+  });
+
+  it('带上画像里的引流卡片：理由、依据、链接都在，且与画像页同源', async () => {
+    const events = buildPlayerEvents(PLAYERS[1]);
+    const profile = await analyze({ session_id: 'sample-impulsive', round: 1, events, levels: buildSampleLevels() });
+    expect(profile.recommendations?.length).toBeGreaterThan(0);
+    const referrals = buildSubmission(profile, events).recommendations.filter(item => item.type === 'referral');
+    expect(referrals.map(item => item.id)).toEqual(profile.recommendations!.map(item => item.id));
+    for (const referral of referrals) {
+      expect(referral.reason.length).toBeGreaterThan(0);
+      expect(referral.url?.startsWith("https://")).toBe(true);
+      expect(['PandaAI', 'QuantSkills']).toContain(referral.provider);
+      expect(profile.dimensions.map(d => d.id)).toContain(referral.dimension);
+      expect(referral.next_step).toContain(referral.url!);
+    }
+    // 没有引流卡片的画像（旧存档）导出时只剩游戏内技能卡
+    const legacy = buildSubmission({ ...profile, recommendations: undefined }, events);
+    expect(legacy.recommendations.every(item => item.type === 'skill-card')).toBe(true);
   });
 
   it('导出不引入画像里没有的维度，也不改画像本身的判断', async () => {

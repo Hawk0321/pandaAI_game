@@ -19,8 +19,9 @@ export interface SubmissionDimension {
 }
 
 export interface SubmissionRecommendation {
-  type: 'skill-card';
-  id: SkillId;
+  /** skill-card：游戏内练习（A）；referral：去 PandaAI / QuantSkills 的引流卡片（D） */
+  type: 'skill-card' | 'referral';
+  id: SkillId | string;
   resource: string;
   description: string;
   is_sample: boolean;
@@ -29,6 +30,10 @@ export interface SubmissionRecommendation {
   confidence: Profile['dimensions'][number]['confidence'];
   evidence: string[];
   next_step: string;
+  /** 仅 referral：指向的真实资源和类别，其余字段含义与 skill-card 相同 */
+  provider?: 'PandaAI' | 'QuantSkills';
+  url?: string;
+  category?: 'strategy' | 'tool' | 'product' | 'event' | 'learn';
 }
 
 export interface Submission {
@@ -70,7 +75,7 @@ export function buildSubmission(profile: Profile, events: GameEvent[]): Submissi
       score: dimension.score,
       conflict: dimension.conflict,
     })),
-    recommendations: recommendSkills(profile, own).map((recommendation) => ({
+    recommendations: [...recommendSkills(profile, own).map((recommendation): SubmissionRecommendation => ({
       type: 'skill-card' as const,
       id: recommendation.id,
       resource: CARDS[recommendation.id].name,
@@ -83,6 +88,26 @@ export function buildSubmission(profile: Profile, events: GameEvent[]): Submissi
       evidence: recommendation.evidence.map((item) => `${item.level_id} · ${item.text}`),
       next_step: `在画像页展开「${CARDS[recommendation.id].name}」，用已揭晓的本局行情做一次比较练习`,
     })),
+    // D 的引流卡片：依据哪项维度判断、引用哪条证据都原样带出；链接是真实资源，is_sample 沿用资源本身的标注。
+    ...(profile.recommendations ?? []).map((recommendation): SubmissionRecommendation => {
+      const basis = recommendation.based_on[0];
+      const dimension = profile.dimensions.find((item) => item.id === basis?.dimension_id);
+      return {
+        type: 'referral',
+        id: recommendation.id,
+        resource: recommendation.resource.name,
+        description: recommendation.resource.desc,
+        is_sample: recommendation.resource.is_sample,
+        reason: recommendation.reason,
+        dimension: basis?.dimension_id ?? '',
+        confidence: dimension?.confidence ?? 'low',
+        evidence: recommendation.based_on.flatMap((item) => item.evidence),
+        next_step: `${recommendation.next_step.label}：${recommendation.next_step.url}`,
+        provider: recommendation.resource.provider,
+        url: recommendation.resource.url,
+        category: recommendation.type,
+      };
+    })],
     disclaimer: '规则计算的游戏观察，不是投资建议，也不能证明真实交易能力。',
   };
 }
