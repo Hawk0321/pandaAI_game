@@ -23,7 +23,7 @@ LEVEL_PLANS = [
     {"id": "L05", "dataset": "maotai", "market": "A股", "name": "贵州茅台", "scenario": "v_reversal", "probe": "risk_control"},
     {"id": "L06", "dataset": "eastmoney", "market": "A股", "name": "东方财富", "scenario": "gap", "probe": "calibration"},
     {"id": "L07", "dataset": "zijin", "market": "A股", "name": "紫金矿业", "scenario": "fake_breakout", "probe": "evidence_use"},
-    {"id": "L08", "dataset": "silver", "market": "期货", "name": "沪银2502", "scenario": "range", "probe": "calibration"},
+    {"id": "L08", "dataset": "silver", "market": "期货", "name": "沪银2502", "scenario": "fake_breakout", "probe": "calibration"},
     {"id": "L09", "dataset": "zijin", "market": "A股", "name": "紫金矿业", "scenario": "v_reversal", "probe": "risk_control"},
     {"id": "L10", "dataset": "catl", "market": "A股", "name": "宁德时代", "scenario": "fake_breakout", "probe": "evidence_use"},
 ]
@@ -158,7 +158,7 @@ def probe_eligible(known: list[dict], after: list[dict], clues: list[dict], prob
     if probe == "evidence_use":
         return {"bullish", "bearish"} <= {clue["signal"] for clue in clues}
     if probe == "calibration":
-        return sum(clue["signal"] == "neutral" for clue in clues) >= 3
+        return sum(clue["signal"] == "neutral" for clue in clues) >= 3 and abs(after[-1]["close"] / known[-1]["close"] - 1) >= .02
     if probe == "risk_control":
         return min(row["low"] for row in after[:5]) / known[-1]["close"] <= .96 and after[-1]["close"] / min(row["close"] for row in after[:8]) >= 1.07
     raise ValueError(f"Unsupported ability probe: {probe}")

@@ -92,6 +92,12 @@ async function evaluate(expression) {
 }
 const waitFor = (expression, description = expression) => poll(() => evaluate(`Boolean(${expression})`), description);
 const saved = () => evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(storageKey)}))`);
+async function navigatePage(method, params) {
+  let loaded = false;
+  page.on('Page.loadEventFired', () => { loaded = true; });
+  await page.send(method, params);
+  await poll(() => loaded, 'page load completed');
+}
 async function click(label) {
   const value = JSON.stringify(label);
   await waitFor(`[...document.querySelectorAll('button')].some(button => button.textContent.trim() === ${value} && !button.disabled)`, `enabled button ${label}`);
@@ -114,7 +120,7 @@ async function screenshot(filename) {
 }
 async function cleanReload() {
   await evaluate(`(()=>{for(const key of Object.keys(localStorage))if(key.startsWith(${JSON.stringify(storageKey)}))localStorage.removeItem(key);return true})()`);
-  await page.send('Page.reload', { ignoreCache: true });
+  await navigatePage('Page.reload', { ignoreCache: true });
   await waitFor("document.querySelector('.home-hero') && [...document.querySelectorAll('button')].some(b=>b.textContent==='进入交易观察室'&&!b.disabled)", 'home ready');
 }
 async function begin() {
@@ -122,7 +128,7 @@ async function begin() {
   await waitFor("document.body.innerText.includes('30 秒了解玩法')", 'instructions');
   await checkWidth('instructions at 375px');
   await click('开始这一局');
-  await waitFor("document.querySelector('.play-placeholder')", 'placeholder play');
+  await waitFor("document.querySelector('.play-level')", 'play ready');
 }
 function validateEvents(game) {
   const requiredData = {
@@ -155,70 +161,109 @@ async function downloadProfile(expected) {
 }
 const revealRequests = start => requests.slice(start).filter(url => new URL(url).pathname.endsWith('.reveal.json'));
 
+async function finishPlay() {
+  await click('提交决定，揭晓走势');
+  for (let step = 1; step <= 3; step++) {
+    await waitFor(`document.querySelector('.play-actions h3')?.textContent === '持有第 ${step}/3 步'`, `holding step ${step}`);
+    await click('持有');
+  }
+  await waitFor("document.querySelector('.reveal-page')", 'reveal');
+}
+
 async function actualSample() {
-  const start = requests.length;
-  await page.send('Page.navigate', { url: baseUrl.href });
-  await waitFor("document.querySelector('.home-hero') && document.querySelector('.sample-label')", 'sample home');
-  await checkWidth('home at 375px');
-  await screenshot('pandaai-shell-home-mobile.png');
-  assert.equal(revealRequests(start).length, 0, 'home does not fetch reveal');
-  await begin();
-  await checkWidth('play at 375px');
-  assert.equal(revealRequests(start).length, 0, 'no reveal before decision');
-  assert.equal(await evaluate(`document.body.innerText.includes(${JSON.stringify(sampleReveal.symbol)})`), false, 'symbol hidden before decision');
-  const entered = await saved();
-  validateEvents(entered);
-  assert.deepEqual(entered.events.map(event => event.type), ['session_start', 'level_start']);
-  await click('提交观望，查看揭晓');
-  await waitFor("document.querySelector('.reveal-page')", 'sample reveal');
-  assert.equal(revealRequests(start).length, 1, 'reveal fetched once after decision');
-  assert.equal(await evaluate("document.querySelector('#reveal-market-title').textContent"), sampleReveal.name);
-  assert.deepEqual(await evaluate("[...document.querySelectorAll('.date-grid dd')].map(e=>e.textContent)"), [sampleReveal.start_date, sampleReveal.decision_date, sampleReveal.end_date]);
-  assert.equal(await evaluate("document.querySelectorAll('.market-chart .candle-up,.market-chart .candle-down').length"), samplePlay.bars.length + sampleReveal.after_bars.length);
-  assert.equal(await evaluate("document.querySelectorAll('.chart-decision').length"), 1);
-  assert.equal(await evaluate("document.querySelectorAll('.comparison-row').length"), 4);
-  assert.equal(await evaluate("document.querySelectorAll('.key-clue-list li').length"), sampleReveal.key_clue_ids.length);
-  assert.equal(await evaluate("[...document.querySelectorAll('.clue-status')].every(e=>e.textContent==='未查看')"), true);
-  await checkWidth('reveal at 375px');
-  await screenshot('pandaai-shell-reveal-mobile.png');
-  const preReload = await saved();
-  await page.send('Page.reload', { ignoreCache: true });
-  await waitFor("document.querySelector('.reveal-page')", 'restored reveal');
-  const postReload = await saved();
-  assert.equal(postReload.sessionId, preReload.sessionId);
-  assert.deepEqual(postReload.events.slice(0, preReload.events.length), preReload.events);
-  assert.equal(revealRequests(start).length, 1, 'restored reveal does not refetch future data');
-  await click('继续探索');
-  await waitFor("document.querySelector('.profile-page')", 'sample profile');
-  assert.equal(await evaluate("document.querySelectorAll('.dimension-card').length"), 6);
-  assert.equal(await evaluate("document.querySelectorAll('.dimension-group').length"), 2);
-  assert.equal(await evaluate("document.body.innerText.includes('固定示例画像')"), true, 'unchanged repository fixture is disclosed');
-  assert.equal(await evaluate("document.body.innerText.includes('当前没有可用的补充关卡')"), true);
-  await evaluate("document.querySelectorAll('details').forEach(element=>element.open=true)");
-  assert.equal(await evaluate("document.querySelectorAll('.event-detail').length"), 0, 'sample evidence never links unrelated current events');
-  assert.equal(await evaluate("document.body.innerText.includes('未与本局动作关联')"), true);
-  await checkWidth('expanded profile at 375px');
-  await screenshot('pandaai-shell-profile-mobile.png');
-  const profile = await saved();
-  validateEvents(profile);
-  assert.equal(profile.events.filter(event => event.type === 'profile_view').length, 1);
-  await downloadProfile(profile.profile);
-  await page.send('Page.reload', { ignoreCache: true });
-  await waitFor("document.querySelector('.profile-page')", 'restored profile');
-  assert.equal((await saved()).events.filter(event => event.type === 'profile_view').length, 1, 'refresh does not duplicate profile_view');
-  await viewport(1280, 900);
-  await checkWidth('profile at 1280px');
-  assert.equal(await evaluate("getComputedStyle(document.querySelector('.profile-columns')).gridTemplateColumns.split(' ').length"), 2);
-  await viewport(375);
-  await click('完成本次探索');
-  await waitFor("document.body.innerText.includes('本局已结束')", 'finished session');
-  await click('完成本次探索');
-  assert.equal((await saved()).events.filter(event => event.type === 'session_end').length, 1);
+  const index = await (await fetch(new URL('levels/index.json', baseUrl))).json();
+  assert.equal(index.is_sample, false);
+  assert.equal(index.main.length + index.pool.length, 10);
+  const personas = new Set();
+  for (const mode of ['research', 'heavy', 'flat']) {
+    const start = requests.length;
+    await navigatePage('Page.navigate', { url: baseUrl.href });
+    await waitFor("document.querySelector('.app-shell')", 'app ready');
+    await cleanReload();
+    await checkWidth('home at 375px');
+    if (mode === 'research') await screenshot('pandaai-shell-home-mobile.png');
+    assert.equal(revealRequests(start).length, 0);
+    await begin();
+    for (const [cursor, id] of index.main.entries()) {
+      await waitFor(`document.querySelector('.play-level h2')?.textContent.includes(${JSON.stringify(id)})`, `${id} play`);
+      assert.equal(revealRequests(start).length, cursor, 'no early reveal');
+      const reveal = await (await fetch(new URL(`levels/${id}.reveal.json`, baseUrl))).json();
+      assert.equal(await evaluate(`document.body.innerText.includes(${JSON.stringify(reveal.symbol)})`), false);
+      if (mode === 'research') {
+        await evaluate("(()=>{for(const b of document.querySelectorAll('.play-clues button'))if(!b.disabled)b.click();return true})()");
+        await click('5%');
+      }
+      if (mode === 'heavy') { await click('重仓 100%'); await click('5'); }
+      if (mode === 'flat') await click('观望');
+      await checkWidth(`${mode} play at 375px`);
+      await finishPlay();
+      assert.equal(revealRequests(start).length, cursor + 1);
+      assert.equal(await evaluate("document.querySelector('#reveal-market-title').textContent"), reveal.name);
+      assert.equal(await evaluate("document.querySelectorAll('.comparison-row').length"), 4);
+      await checkWidth('reveal at 375px');
+      if (cursor === 0) {
+        if (mode === 'research') await screenshot('pandaai-shell-reveal-mobile.png');
+        const before = await saved();
+        await navigatePage('Page.reload', { ignoreCache: true });
+        await waitFor("document.querySelector('.reveal-page')", 'restored reveal');
+        assert.deepEqual((await saved()).events.slice(0, before.events.length), before.events);
+        assert.equal(revealRequests(start).length, 1, 'restore does not refetch reveal');
+      }
+      await click('继续探索');
+    }
+    await waitFor("document.querySelector('.profile-page')", 'computed profile');
+    const first = await saved();
+    validateEvents(first);
+    assert.equal(first.completed.length, 4);
+    assert.equal(first.profile.round, 1);
+    assert.equal(first.profile.is_sample, false);
+    assert.equal(first.events.filter(e=>e.type==='hold_step').length,12);
+    assert.equal(await evaluate("document.querySelectorAll('.dimension-card').length"), 6);
+    assert.equal(await evaluate("document.body.innerText.includes('固定示例画像')"), false);
+    personas.add(first.profile.persona.name);
+    if (mode === 'flat') for (const id of ['calibration','risk_control']) assert.equal(first.profile.dimensions.find(d=>d.id===id).score,null);
+    await evaluate("document.querySelectorAll('details').forEach(e=>e.open=true)");
+    assert.ok(await evaluate("document.querySelectorAll('.event-detail').length > 0"));
+    assert.equal(await evaluate("document.body.innerText.includes('本机未找到')"),false);
+    await checkWidth('expanded profile at 375px');
+    if (mode === 'research') await screenshot('pandaai-shell-profile-mobile.png');
+    await downloadProfile(first.profile);
+    await navigatePage('Page.reload', { ignoreCache: true });
+    await waitFor("document.querySelector('.profile-page')", 'restored profile');
+    assert.equal((await saved()).events.filter(e=>e.type==='profile_view').length,1);
+    if (await evaluate("[...document.querySelectorAll('button')].some(b=>b.textContent==='再来一关，补充观察')")) {
+      await click('再来一关，补充观察');
+      await waitFor("document.querySelector('.play-level')", 'supplement');
+      const supplement=(await saved()).play.id;
+      assert.ok(index.pool.some(p=>p.id===supplement));
+      assert.equal(revealRequests(start).length,4);
+      await finishPlay();
+      await click('继续探索');
+      await waitFor("document.querySelector('.changes-panel')", 'round two');
+      const second=await saved();
+      validateEvents(second);
+      assert.equal(second.completed.length,5);
+      assert.equal(second.profile.round,2);
+      assert.equal(second.events.find(e=>e.type==='level_start'&&e.level_id===supplement).data.is_supplementary,true);
+      assert.deepEqual(second.events.filter(e=>e.type==='profile_view').map(e=>e.data.round),[1,2]);
+      assert.ok(second.profile.dimensions.some(d=>d.evidence.some(e=>e.level_id===supplement)));
+      assert.equal(revealRequests(start).length,5);
+      await downloadProfile(second.profile);
+    } else assert.notEqual(mode,'flat','unscored abilities should offer supplementation');
+    await viewport(1280,900);
+    await checkWidth('profile desktop');
+    await viewport(375);
+    await click('完成本次探索');
+    await waitFor("document.body.innerText.includes('本局已结束')", 'finished');
+    assert.equal((await saved()).events.filter(e=>e.type==='session_end').length,1);
+    checks.push(`real ${mode}: four main levels, computed profile, available supplement, evidence, JSON, refresh, mobile/desktop`);
+  }
+  assert.ok(personas.size>=2,'contrasting players produce different personas');
   await click('重新开始');
   await waitFor("document.querySelector('.home-hero')", 'new session home');
   await begin();
   const interrupted = await saved();
-  await page.send('Page.reload', { ignoreCache: true });
+  await navigatePage('Page.reload', { ignoreCache: true });
   await waitFor("document.body.innerText.includes('你的行为记录还在')", 'mid-play recovery notice');
   assert.deepEqual((await saved()).events, interrupted.events, 'mid-play refresh preserves events');
   await click('保留记录，重新开始');
@@ -228,7 +273,7 @@ async function actualSample() {
   assert.deepEqual(archived.events.slice(0, interrupted.events.length), interrupted.events);
   assert.equal((await saved()).events.length, 0);
   assert.notEqual((await saved()).sessionId, interrupted.sessionId);
-  checks.push('actual sample: home → instructions → play → reveal → profile → JSON → finish', 'deferred reveal, complete event envelopes, refresh persistence, sample-evidence isolation, 375px and desktop layout, mid-play preservation');
+  checks.push('real-data three-path end-to-end integration', 'deferred reveal, complete event envelopes, refresh persistence, current-session evidence, 375px and desktop layout, mid-play preservation');
 }
 
 async function fullProtocolFixture() {
@@ -289,9 +334,10 @@ async function fullProtocolFixture() {
   await begin();
   for (let index = 0; index < fixtureIndex.main.length; index++) {
     const id = fixtureIndex.main[index];
-    await waitFor(`document.querySelector('.play-placeholder h2')?.textContent === ${JSON.stringify(`测试关卡 ${id}`)}`, `${id} play`);
+    await waitFor(`document.querySelector('.play-level h2')?.textContent === ${JSON.stringify(`测试关卡 ${id}`)}`, `${id} play`);
     assert.equal(revealRequests(start).length, index, `${id}: no early reveal`);
-    await click('提交观望，查看揭晓');
+    await click('观望');
+    await finishPlay();
     await waitFor(`document.querySelector('.reveal-page') && JSON.parse(localStorage.getItem(${JSON.stringify(storageKey)})).play.id === ${JSON.stringify(id)}`, `${id} reveal`);
     assert.equal(revealRequests(start).length, index + 1);
     await checkWidth(`${id} reveal at 375px`);
@@ -312,10 +358,11 @@ async function fullProtocolFixture() {
   assert.equal(await evaluate("document.querySelector('.event-detail pre').textContent.includes('flat')"), true);
   await checkWidth('expanded real-evidence fixture at 375px');
   await click('再来一关，补充观察');
-  await waitFor("document.querySelector('.play-placeholder h2')?.textContent === '测试关卡 T05'", 'supplementary play');
+  await waitFor("document.querySelector('.play-level h2')?.textContent === '测试关卡 T05'", 'supplementary play');
   assert.equal((await saved()).events.find(event => event.type === 'level_start' && event.level_id === 'T05').data.is_supplementary, true);
   assert.equal(revealRequests(start).length, 4, 'supplementary reveal not prefetched');
-  await click('提交观望，查看揭晓');
+  await click('观望');
+    await finishPlay();
   await waitFor("document.querySelector('.reveal-page')", 'supplementary reveal');
   await click('继续探索');
   await waitFor("document.querySelector('.changes-panel')", 'updated profile and changes');
@@ -352,8 +399,9 @@ async function fullProtocolFixture() {
   await begin();
   assert.equal(await evaluate("document.querySelector('.status-line').textContent.includes('第 1 / 2 关')"), true);
   for (const id of servedMain) {
-    await waitFor(`document.querySelector('.play-placeholder h2')?.textContent === ${JSON.stringify(`测试关卡 ${id}`)}`, `updated index ${id} play`);
-    await click('提交观望，查看揭晓');
+    await waitFor(`document.querySelector('.play-level h2')?.textContent === ${JSON.stringify(`测试关卡 ${id}`)}`, `updated index ${id} play`);
+    await click('观望');
+    await finishPlay();
     await waitFor(`document.querySelector('.reveal-page') && JSON.parse(localStorage.getItem(${JSON.stringify(storageKey)})).play.id === ${JSON.stringify(id)}`, `updated index ${id} reveal`);
     await click('继续探索');
   }
@@ -386,7 +434,7 @@ async function fullProtocolFixture() {
   assert.deepEqual(afterFailureStart.events.map(event => event.type), ['session_start', 'level_start']);
   validateEvents(afterFailureStart);
   assert.deepEqual(fixtureFailures, []);
-  checks.push('CDP-only fixtures: four main levels → round 1 → supplementary level → round 2 changes → JSON', 'computed sample profiles preserve current-session evidence links; fixed repository sample stays separately disclosed', 'analysis gets completed levels and prior profile; supplementary event flag; five reveals requested only after their decisions', 'restart fetches a changed server index and completes the new two-level sequence; archive-quota failure still creates an independent fresh session with a memory-only warning');
+  checks.push('CDP-only fixtures: four main levels → round 1 → supplementary level → round 2 changes → JSON', 'computed sample profiles preserve current-session evidence links', 'analysis gets completed levels and prior profile; supplementary event flag; five reveals requested only after their decisions', 'restart fetches a changed server index and completes the new two-level sequence; archive-quota failure still creates an independent fresh session with a memory-only warning');
 }
 
 try {

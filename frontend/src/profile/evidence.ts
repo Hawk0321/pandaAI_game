@@ -259,7 +259,10 @@ function riskControl(f: LevelFacts): RawEvidence[] {
 
   // 3) 浮亏时加仓还是减仓（按每步之前的持仓）
   let position = sideSign(side) * size;
+  let previousSeq = d.seq;
   for (const h of f.holdSteps) {
+    // B 在行情推进时先自动平仓，再记录玩家动作；已实现亏损不等于仍持仓浮亏。
+    if (f.stops.some((s) => s.seq > previousSeq && s.seq < h.seq)) position = 0;
     const pnl = num(h.data.pnl_before);
     const action = str(h.data.action);
     if (position !== 0 && pnl < T.floatingLoss) {
@@ -271,6 +274,7 @@ function riskControl(f: LevelFacts): RawEvidence[] {
       else out.push({ ...base, event_seqs: [h.seq], value: 0.45, text: `${label}继续持有` });
     }
     position = num(h.data.position_after, position);
+    previousSeq = h.seq;
   }
   return out;
 }

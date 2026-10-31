@@ -26,7 +26,7 @@ async function syncFile(rel: string, data: unknown) {
     fs.writeFileSync(url, text);
     return;
   }
-  expect(committed[DIR + rel], `${rel} 与生成结果不一致，运行 UPDATE_SAMPLES=1 重新生成`).toBe(text);
+  expect(committed[DIR + rel]?.replace(/\r\n/g, '\n'), `${rel} 与生成结果不一致，运行 UPDATE_SAMPLES=1 重新生成`).toBe(text);
 }
 
 async function round1(p: PlayerSample, events: GameEvent[] = buildPlayerEvents(p)) {
