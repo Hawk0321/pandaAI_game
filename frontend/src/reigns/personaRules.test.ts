@@ -31,11 +31,11 @@ describe('COMPATIBLE_PERSONAS：基本形状', () => {
   for (const role of ROLE_IDS) {
     describe(`角色 ${role}`, () => {
       for (const ending of getEndings(role)) {
-        it(`${ending.id}：2–5 个（sp-obsessive 除外）、合法、不重复`, () => {
+        it(`${ending.id}：合法、不重复、黑名单实现`, () => {
           const list = compat(ending.id);
-          expect(list.length).toBeGreaterThanOrEqual(2);
-          // 偏执专家例外：允许全部 9 个（见下方语义护栏），其余结局最多 5 个。
-          expect(list.length).toBeLessThanOrEqual(ending.id === 'sp-obsessive' ? 9 : 5);
+          // 黑名单实现：白名单 = 全部 9 个 - 黑名单，黑名单可以是空（白名单就是 9 个）
+          expect(list.length).toBeGreaterThanOrEqual(1);
+          expect(list.length).toBeLessThanOrEqual(9);
           for (const p of list) expect(ALL_PERSONAS).toContain(p);
           expect(new Set(list).size).toBe(list.length);
         });
