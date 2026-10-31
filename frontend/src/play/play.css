@@ -69,3 +69,25 @@
 .clue-card.is-open .clue-back > span.clue-raw { color: #6a6e7d; font-size: 10px; }
 .clue-card.is-open .clue-back > span.clue-caveat { color: var(--text-muted, #8e8f9a); font-size: 11px; }
 .clue-card.is-open .clue-back > span.clue-verdict { color: var(--ivory, #f1ece0); font-size: 13px; }
+
+/* ---- 综合解读卡 ---- */
+.digest-card { margin: 4px 0 24px; border: 1px solid var(--line, #272d42); border-radius: 14px; background: linear-gradient(180deg, #1a1d2b, var(--ink-1, #10141f)); overflow: hidden; }
+.digest-card[data-open] { border-color: var(--gold-deep, #c99a3d); }
+.play-level .digest-toggle { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 12px 16px; background: transparent; border: 0; border-radius: 0; color: var(--ivory, #f1ece0); text-align: left; font-weight: 400; box-shadow: none; }
+.play-level .digest-toggle:hover:not(:disabled) { background: #ffffff08; }
+.digest-icon { display: grid; place-items: center; flex: 0 0 auto; width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(180deg, var(--gold-soft, #f7d98f), var(--gold, #f2c261)); color: var(--gold-ink, #1d1707); font-size: 15px; }
+.digest-title { display: flex; flex-direction: column; flex: 1; min-width: 0; gap: 1px; }
+.digest-title strong { font-size: 14px; font-weight: 650; }
+.digest-title small { font-size: 11px; color: var(--text-muted, #8e8f9a); }
+.digest-chevron { font-size: 20px; color: var(--gold, #f2c261); }
+.digest-body { padding: 4px 18px 18px; display: grid; gap: 14px; }
+.digest-headline { margin: 0; font-size: 15px; line-height: 1.7; font-weight: 600; color: var(--ivory, #f1ece0); }
+.digest-reads, .digest-facts ul, .digest-missing ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.digest-reads li { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.7; color: var(--text-secondary, #b9b8b1); }
+.digest-reads li .clue-lean { flex: 0 0 auto; margin-top: 2px; }
+.digest-reads li b, .digest-missing li b { color: var(--ivory, #f1ece0); font-weight: 600; }
+.digest-facts h4, .digest-missing h4 { margin: 0 0 6px; font-size: 11px; letter-spacing: .08em; color: var(--gold-deep, #c99a3d); font-weight: 600; }
+.digest-facts li, .digest-missing li { font-size: 13px; line-height: 1.7; color: var(--text-secondary, #b9b8b1); padding-left: 14px; position: relative; }
+.digest-facts li::before, .digest-missing li::before { content: ''; position: absolute; left: 0; top: .72em; width: 5px; height: 5px; border-radius: 50%; background: var(--line-strong, #3a4260); }
+.digest-wrap { margin: 0; font-size: 13px; color: var(--text-secondary, #b9b8b1); }
+.digest-note { margin: 0; padding-top: 12px; border-top: 1px dashed var(--line, #272d42); font-size: 11px; line-height: 1.7; color: var(--text-muted, #8e8f9a); }
