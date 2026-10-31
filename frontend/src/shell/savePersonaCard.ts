@@ -32,7 +32,7 @@ export async function savePersonaCard(persona: Profile['persona'], artwork: Pers
   const context = canvas.getContext('2d');
   if (!context) throw new Error('当前浏览器暂不支持生成卡片图片。');
   const font = '"Microsoft YaHei", "PingFang SC", system-ui, sans-serif';
-  context.fillStyle = '#102923';
+  context.fillStyle = '#121626';
   context.fillRect(0, 0, 900, 1320);
   context.strokeStyle = '#ad9261';
   context.lineWidth = 3;
@@ -48,9 +48,9 @@ export async function savePersonaCard(persona: Profile['persona'], artwork: Pers
 
   const size = Math.min(image.naturalWidth, image.naturalHeight);
   context.drawImage(image, (image.naturalWidth - size) / 2, (image.naturalHeight - size) / 2, size, size, 52, 118, 796, 796);
-  context.strokeStyle = '#6b7660';
+  context.strokeStyle = '#626674';
   context.strokeRect(52, 118, 796, 796);
-  context.fillStyle = '#f2f2df';
+  context.fillStyle = '#f6d58d';
   let titleSize = 60;
   while (titleSize > 32) {
     context.font = `700 ${titleSize}px ${font}`;
@@ -59,10 +59,10 @@ export async function savePersonaCard(persona: Profile['persona'], artwork: Pers
   }
   context.fillText(persona.name, 58, 1000, 784);
   context.font = `400 29px ${font}`;
-  context.fillStyle = '#c5d9ca';
+  context.fillStyle = '#caccd5';
   const lines = wrapText(context, persona.tagline, 780);
   lines.slice(0, 4).forEach((line, index) => context.fillText(line, 58, 1060 + index * 42));
-  context.fillStyle = '#adbdac';
+  context.fillStyle = '#b0b2b9';
   context.font = `400 21px ${font}`;
   context.fillText('趣味标签 · 不代表真实交易能力', 58, 1256);
   if (!matched) {

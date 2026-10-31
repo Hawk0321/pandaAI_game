@@ -6,6 +6,7 @@ import type { LevelPlay, LevelReveal, EventType } from '../shared/protocol';
 import { PlayLevel } from './index';
 import '../styles.css';
 import '../ui.css';
+import '../theme.css';
 const events: { type: EventType; data: Record<string, unknown> }[] = [];
 Object.assign(window, { playEvents: events, revealCalls: 0, playDone: null });
 createRoot(document.getElementById('root')!).render(<StrictMode><main className="app-shell"><PlayLevel
