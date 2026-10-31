@@ -29,6 +29,7 @@ function DimensionCard({ dimension, events, profile, fixedExample }: { dimension
     <div className="dimension-heading"><h3>{dimension.name}</h3><span className={`confidence confidence-${dimension.confidence}`}>{confidenceNames[dimension.confidence]}</span></div>
     <p className="dimension-judgement">{dimension.judgement}</p>
     <div className="dimension-flags"><span>{dimension.group === 'ability' ? '能力分数' : '倾向位置'}：{dimension.score === null ? '证据不足，暂不评分' : `${Math.round(dimension.score * 100)}%`}</span>{dimension.conflict && <span className="conflict-label">存在相反证据</span>}</div>
+    <div className="dimension-meter" data-group={dimension.group} data-empty={dimension.score === null} aria-hidden="true"><span style={{ width: `${(dimension.score ?? 0) * 100}%` }} /></div>
     <details className="dimension-details">
       <summary>查看 {dimension.evidence.length} 条证据与不确定项</summary>
       {dimension.evidence.length === 0 && <p className="muted">画像尚未提供这项判断的行为证据。</p>}
@@ -62,11 +63,11 @@ export function ProfilePage({ profile, events, completed, nextLevelId, onSupplem
       : profile.is_sample && <p className="notice sample-notice">本画像含示例数据。请结合本局行为证据解读，模拟行情不能证明真实交易表现。</p>}
     {storageWarning && <p role="status" className="notice">{storageWarning}</p>}
 
-    <section className="persona-card" aria-labelledby="persona-name"><div className="persona-emoji" aria-hidden="true">{profile.persona.emoji}</div><div><p className="eyebrow">{profile.persona.is_fun_label ? '趣味人物卡' : '人物卡'}</p><h2 id="persona-name">{profile.persona.name}</h2><p className="persona-tagline">{profile.persona.tagline}</p></div><p className="persona-summary">{profile.summary}</p></section>
+    <section className="persona-card" aria-labelledby="persona-name"><div className="persona-emoji" aria-hidden="true">{profile.persona.emoji}</div><div><p className="eyebrow">{profile.persona.is_fun_label ? '你的趣味人物卡' : '人物卡'}</p><h2 id="persona-name">{profile.persona.name}</h2><p className="persona-tagline">{profile.persona.tagline}</p></div><div className="persona-summary"><p>{profile.summary.split('。')[0]}。</p><details><summary>展开完整画像解读</summary><p>{profile.summary}</p></details></div><dl className="persona-stats"><div><dt>完成关卡</dt><dd>{completed.length}<small>关</small></dd></div><div><dt>行为证据</dt><dd>{profile.dimensions.reduce((n, d) => n + d.evidence.length, 0)}<small>条</small></dd></div><div><dt>仍待观察</dt><dd>{profile.needs_more.length}<small>项</small></dd></div></dl></section>
 
     {!fixedExample && <SkillCards key={`${profile.session_id}-${profile.round}`} profile={profile} events={events} completed={completed} />}
 
-    <div className="profile-columns">
+    <div className="profile-columns" id="profile-dimensions">
       {(['ability', 'preference'] as const).map(group => <section className="dimension-group" key={group} aria-labelledby={`dimension-group-${group}`}><div className="group-heading"><h2 id={`dimension-group-${group}`}>{group === 'ability' ? '能力观察' : '交易偏好'}</h2><p>{group === 'ability' ? '如何使用证据、校准判断和控制风险' : '习惯怎样研究、选择方向和承担风险'}</p></div>{profile.dimensions.filter(dimension => dimension.group === group).map(dimension => <DimensionCard key={dimension.id} dimension={dimension} events={events} profile={profile} fixedExample={fixedExample} />)}</section>)}
     </div>
 

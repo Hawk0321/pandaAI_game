@@ -9,8 +9,11 @@
 | `model.ts` | 四张卡的来源版本、游戏改动、推荐排序及同会话证据筛选 |
 | `simulations.ts` | 双均线、止盈止损、反转确认的因果模拟与事件复盘 |
 | `SkillCards.tsx` / `skills.css` | 卡面、实验室、参数、曲线、完成反馈与导出 |
+| `SkillGlyph.tsx` | 四种独立 SVG 技能图形，无外部图片或图标依赖 |
 | `skills.test.ts` | 推荐差异、证据归属、成交/跳空、信号时序、空仓与数据不可变性 |
 
 `npm test` 验证规则；`npm run build` 验证类型及生产构建。先启动 dev 再 `npm run test:browser`，验证三条主线路径中的全部卡片、参数变化、导出及手机布局。
+
+默认显示两张推荐卡，其余可展开。练习打开后聚焦实验室，关闭后焦点返回卡片；卡片种类进度按完成记录去重。全局视觉在 `src/ui.css`，首页装饰图形在 `src/shell/GameVisuals.tsx`，后者为不含真实行情的界面示意。
 
 完整规则、来源、简化范围见 [技能卡说明](../../../docs/skill-cards.md)。这是参考 QuantSkills 用途与通用策略规则、独立编写的游戏练习，不是直接运行其完整 Python Skill。未复制或打包上游源码，未将上游 236 个仓库引入 H5。代码由 OpenAI Codex 协助完成。

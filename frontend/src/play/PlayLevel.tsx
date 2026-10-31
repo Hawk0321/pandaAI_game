@@ -81,7 +81,7 @@ function Round({ level, isSupplementary, loadReveal, emit, onDone }: PlayLevelPr
       setPhase('done'); emit('level_end', result); onDone({ level_id: level.id, ...result });
     } else revealStep(future.slice(step * 5, (step + 1) * 5), step + 1);
   }
-  return <section className="play-level" aria-label="对局玩法">
+  return <section className="play-level" aria-label="对局玩法" data-phase={phase}>
     <p>{isSupplementary ? '补充关卡：再看看你' : `关卡 ${level.id}`} · 研究点 {budget}/{level.budget}</p>
     <h2>{level.masked_name}</h2>
     {level.is_sample && <p>模拟行情示例</p>}
@@ -91,11 +91,11 @@ function Round({ level, isSupplementary, loadReveal, emit, onDone }: PlayLevelPr
       <div className="play-clues">{level.clues.map(clue => <button type="button" key={clue.id} aria-expanded={opened.includes(clue.id)} disabled={opened.includes(clue.id) || clue.cost > budget} onClick={() => open(clue.id)}>
         <strong>{clue.title} · {clue.cost} 点</strong><span>{opened.includes(clue.id) ? clue.text : '点击翻开线索'}</span>
       </button>)}</div>
-      <fieldset><legend>方向</legend>{(['long','flat','short'] as const).map((value, i) => <button type="button" key={value} aria-pressed={side === value} onClick={() => setSide(value)}>{['做多','观望','做空'][i]}</button>)}</fieldset>
+      <div className="decision-grid"><fieldset><legend>方向</legend>{(['long','flat','short'] as const).map((value, i) => <button type="button" key={value} aria-pressed={side === value} onClick={() => setSide(value)}>{['做多','观望','做空'][i]}</button>)}</fieldset>
       <fieldset disabled={side === 'flat'}><legend>仓位{side === 'flat' ? '：观望为 0' : ''}</legend>{[0.2,0.5,1].map((value, i) => <button type="button" key={value} aria-pressed={size === value} onClick={() => setSize(value)}>{['轻仓 20%','中仓 50%','重仓 100%'][i]}</button>)}</fieldset>
       <fieldset><legend>信心</legend>{[1,2,3,4,5].map(value => <button type="button" key={value} aria-pressed={confidence === value} onClick={() => setConfidence(value)}>{value}</button>)}<small>1 没把握 · 5 很确定</small></fieldset>
-      <fieldset><legend>止损</legend>{[null,0.05,0.1].map(value => <button type="button" key={String(value)} aria-pressed={stop === value} onClick={() => setStop(value)}>{value === null ? '不设止损' : `${value * 100}%`}</button>)}</fieldset>
-      <button type="button" onClick={() => void decide()}>提交决定，揭晓走势</button>
+      <fieldset><legend>止损</legend>{[null,0.05,0.1].map(value => <button type="button" key={String(value)} aria-pressed={stop === value} onClick={() => setStop(value)}>{value === null ? '不设止损' : `${value * 100}%`}</button>)}</fieldset></div>
+      <button type="button" className="play-submit" onClick={() => void decide()}>提交决定，揭晓走势</button>
     </>}
     {phase === 'loading' && <p role="status">正在加载后续走势…</p>}
     {phase === 'holding' && <div className="play-actions">

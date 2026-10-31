@@ -100,8 +100,8 @@ async function navigatePage(method, params) {
 }
 async function click(label) {
   const value = JSON.stringify(label);
-  await waitFor(`[...document.querySelectorAll('button')].some(button => button.textContent.trim() === ${value} && !button.disabled)`, `enabled button ${label}`);
-  await evaluate(`(()=>{const button=[...document.querySelectorAll('button')].find(button=>button.textContent.trim()===${value});button.scrollIntoView({block:'center'});button.click();return true})()`);
+  await waitFor(`[...document.querySelectorAll('button')].some(button => (button.getAttribute('aria-label') || button.textContent).trim() === ${value} && !button.disabled)`, `enabled button ${label}`);
+  await evaluate(`(()=>{const button=[...document.querySelectorAll('button')].find(button=>(button.getAttribute('aria-label') || button.textContent).trim()===${value});button.scrollIntoView({block:'center',behavior:'instant'});button.click();return true})()`);
 }
 async function checkWidth(label) {
   const metrics = await evaluate('({width:innerWidth,scrollWidth:document.documentElement.scrollWidth})');
@@ -110,10 +110,10 @@ async function checkWidth(label) {
 async function viewport(width, height = 812) {
   await page.send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: width < 600 });
 }
-async function screenshot(filename) {
+async function screenshot(filename, full = true) {
   await delay(260);
-  await evaluate('scrollTo(0,0)');
-  const result = await page.send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true });
+  await evaluate("scrollTo({top:0,behavior:'instant'})");
+  const result = await page.send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: full });
   const target = path.join(artifactDir, filename);
   await fs.writeFile(target, Buffer.from(result.data, 'base64'));
   screenshots.push(target);
@@ -174,10 +174,12 @@ const skillRecommendations = [];
 async function checkSkillCards(mode) {
   assert.equal(await evaluate("document.querySelectorAll('.skill-card').length"), 4);
   assert.equal(await evaluate("document.querySelectorAll('.skill-card[data-recommended=true]').length"), 2);
+  assert.equal(await evaluate("[...document.querySelectorAll('.skill-card')].filter(c=>!c.hidden).length"), 2, 'two recommendations visible initially');
   skillRecommendations.push(await evaluate("[...document.querySelectorAll('.skill-card[data-recommended=true]')].map(e=>e.dataset.skill).join(',')"));
   const before = await saved();
   const start = requests.length;
   for (const name of ['趋势追踪卡', '止损护盾卡', '反转确认卡', '交易复盘卡']) {
+    if (await evaluate(`[...document.querySelectorAll('.skill-card')].some(c=>c.hidden&&c.querySelector('h3')?.textContent===${JSON.stringify(name)})`)) await click('展开另外 2 张技能卡');
     await click(`体验${name}`);
     await waitFor(`document.querySelector('#skill-lab-title')?.textContent === ${JSON.stringify(`${name}实验室`)}`, `${name} lab`);
     assert.equal(await evaluate("document.querySelectorAll('select[aria-label=练习关卡] option').length"), before.completed.length);
@@ -193,11 +195,20 @@ async function checkSkillCards(mode) {
       assert.equal(await evaluate("document.querySelector('.skill-metrics').innerText.includes('NaN')"), false);
     }
     await checkWidth(`${mode} ${name} at 375px`);
+    if (mode === 'research') for (const width of [320, 390, 768]) { await viewport(width); await checkWidth(`${name} at ${width}px`); }
+    await viewport(375);
     await click('完成这次练习');
     await waitFor("document.querySelector('.skill-completion')", 'practice completion');
-    if (name === '止损护盾卡' && mode === 'research') await screenshot('pandaai-skill-shield-mobile.png');
+    if (name === '止损护盾卡' && mode === 'research') {
+      await screenshot('pandaai-skill-shield-mobile.png');
+      await evaluate("document.querySelector('#skill-lab').scrollIntoView({block:'start',behavior:'instant'})");
+      const shot = await page.send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
+      const target = path.join(artifactDir, 'pandaai-skill-lab-viewport.png');
+      await fs.writeFile(target, Buffer.from(shot.data, 'base64')); screenshots.push(target);
+    }
     await click('关闭练习');
     assert.equal(await evaluate("document.querySelector('#skill-lab') === null"), true);
+    await waitFor(`document.activeElement?.textContent === ${JSON.stringify(`体验${name}`)}`, 'close restores keyboard focus');
   }
   const downloadsBefore = new Set(await fs.readdir(downloadDir));
   await click('导出推荐与练习 JSON');
@@ -230,6 +241,7 @@ async function actualSample() {
     await cleanReload();
     await checkWidth('home at 375px');
     if (mode === 'research') await screenshot('pandaai-shell-home-mobile.png');
+    if (mode === 'research') { await viewport(1280, 900); await checkWidth('desktop home'); await screenshot('pandaai-home-desktop.png', false); await viewport(375); }
     assert.equal(revealRequests(start).length, 0);
     await begin();
     for (const [cursor, id] of index.main.entries()) {
@@ -269,6 +281,7 @@ async function actualSample() {
     assert.equal(await evaluate("document.querySelectorAll('.dimension-card').length"), 6);
     assert.equal(await evaluate("document.body.innerText.includes('固定示例画像')"), false);
     personas.add(first.profile.persona.name);
+    if (mode === 'research') { await screenshot('pandaai-profile-overview-mobile.png', false); await viewport(1280, 900); await screenshot('pandaai-profile-overview-desktop.png', false); await viewport(375); }
     await checkSkillCards(mode);
     if (mode === 'flat') for (const id of ['calibration','risk_control']) assert.equal(first.profile.dimensions.find(d=>d.id===id).score,null);
     await evaluate("document.querySelectorAll('details').forEach(e=>e.open=true)");
