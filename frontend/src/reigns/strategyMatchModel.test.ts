@@ -16,4 +16,3 @@ describe('Qube strategy handoff', () => {
     }
   });
 });
-

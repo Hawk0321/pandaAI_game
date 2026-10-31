@@ -28,4 +28,3 @@ export function StrategyMatch({ state }: { state: GameState }) {
     </section>
   );
 }
-
