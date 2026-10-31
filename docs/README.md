@@ -8,3 +8,4 @@
 - 任务文档：[A 关卡数据](tasks/A-levels.md) · [B 对局玩法](tasks/B-play.md) · [C 流程与展示](tasks/C-shell.md) · [D 证据与画像](tasks/D-profile.md)
 - [队友上传指南](team-guide.md)：怎么把代码和资料传到 GitHub
 - [PandaAI 开发资源调研](pandaai-resources.md)：Panda Data 接口清单、可用策略、QuantSkills 技能与游戏用法建议
+- [参考 Nansen 的标签流程](nansen-labels.md)：Nansen 怎样从交易记录生成标签，以及对画像模块（D）的改进建议
