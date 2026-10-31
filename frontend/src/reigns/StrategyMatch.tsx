@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { qubeChatLink, strategyFor } from './strategyMatch';
+import { qubeChatLink, strategyFor } from './strategyMatchModel';
 import { resolvePersona } from './engine';
 import { ALL_CARDS } from './allCards';
 import { PERSONA_CARDS } from '../profile/persona';
@@ -28,3 +28,4 @@ export function StrategyMatch({ state }: { state: GameState }) {
     </section>
   );
 }
+

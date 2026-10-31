@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ALL_PERSONAS } from './personaRules';
-import { qubeChatLink, strategyFor } from './strategyMatch';
+import { qubeChatLink, strategyFor } from './strategyMatchModel';
 
 describe('Qube strategy handoff', () => {
   it('gives every persona a distinct evidence-based strategy prompt', () => {
@@ -16,3 +16,4 @@ describe('Qube strategy handoff', () => {
     }
   });
 });
+
