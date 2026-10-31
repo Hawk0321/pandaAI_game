@@ -96,4 +96,17 @@ describe('证据层', () => {
     expect(of(run({ side: 'long', size: 1 }), 'risk_appetite')[0].value).toBe(1);
     expect(of(run({}), 'risk_appetite')[0].value).toBe(0);
   });
+
+  it('自动止损后的已实现亏损不被误判为持仓浮亏，重新入场后仍能评分', () => {
+    const ev = of(run({ side: 'long', size: 0.5, stop: 0.05,
+      stop_at: { step: 1, pnl: -0.025 }, steps: [
+        { pnl_before: -0.025, action: 'hold', position_after: 0 },
+        { pnl_before: -0.025, action: 'add', position_after: 0.2 },
+        { pnl_before: -0.04, action: 'reduce', position_after: 0 },
+      ] }), 'risk_control');
+    expect(ev.some((e) => e.text.includes('第 1 步浮亏'))).toBe(false);
+    expect(ev.some((e) => e.text.includes('第 2 步浮亏'))).toBe(false);
+    expect(ev.some((e) => e.text.includes('第 3 步浮亏') && e.text.includes('减仓'))).toBe(true);
+    expect(ev.some((e) => e.text.includes('自动触发'))).toBe(true);
+  });
 });

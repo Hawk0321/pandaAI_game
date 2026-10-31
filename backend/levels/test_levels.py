@@ -147,6 +147,13 @@ class LevelTests(unittest.TestCase):
         index = {"schema": "level-index/v1", "is_sample": False, "main": ["L01", "L02"], "pool": []}
         with self.assertRaisesRegex(ValueError, "10 total"): check.validate_release(index, {key: self.levels[key] for key in index["main"]})
 
+    def test_calibration_supplements_reject_unscorable_flat_outcomes(self):
+        for level_id in ["L06", "L08"]:
+            bad = deepcopy(self.levels)
+            bad[level_id][1]["outcome"]["direction"] = "flat"
+            with self.subTest(level=level_id), self.assertRaisesRegex(ValueError, "directional outcome"):
+                check.validate_release(self.index, bad)
+
     def test_all_candidate_sources_are_real_and_match_the_export_manifest(self):
         total = 0
         for dataset, (method, params) in fetch.QUERIES.items():

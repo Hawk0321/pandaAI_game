@@ -19,9 +19,9 @@ npm run preview
 
 产物在 `dist/`，不提交依赖、构建产物或 `.env`。不需要 Panda Data 凭证，前端不调用 Panda Data。
 
-模块入口：B 替换 `src/play/index.ts` 的 `PlayLevel`；D 替换 `src/profile/index.ts` 的 `analyze` / `pickNextLevel`，并维护 `src/shared/protocol.ts`。C 在骨架 PR 后不再改这三个目录。类型和 props 遵守 `docs/protocol.md`，此阶段不增加协议字段。
+模块入口：`src/play/index.ts` 提供 B 的真实交易交互；`src/profile/index.ts` 提供 D 的规则画像和补关选择；C 的 `src/shell/` 负责串联。类型和 props 遵守 `docs/protocol.md`。
 
-`public/levels/` 原样复制自 `data/samples/levels/`，目前只有 L01；`analyze` 返回固定 `sample_profile.json`。页面明确标记“示例数据”和占位流程，不能把示例判断视为用户本次测试结论。占位玩法先发 `decision`，再调用 `loadReveal()`。C 按 `index.main` 的实际关卡顺序串联，不复制示例来冒充四关；A/B/D 的正式模块接入后沿用相同接口。
+`public/levels/` 为 A 从 Panda Data 历史快照生成的 10 道真实行情题（4 主关 + 6 补关），生成与复核见 `backend/levels/README.md` 和 `docs/panda-data.md`。画像根据本局动作计算，包含 6 个维度、事件证据和不确定项；不再返回固定样例。每局主线 4 关，按画像情况最多补 1 关，题库 10 关不代表一局必须打完 10 关。当前范围为“游戏 → 证据 → 画像”，推荐及后续任务尚未实现。
 
 ### 流程与展示
 
@@ -42,13 +42,13 @@ npm run build
 npm run test:browser
 ```
 
-15 项单元测试覆盖事件时间/序号恢复、存储失败、揭晓延迟和缓存、路径与数据隔离、固定样例识别。浏览器脚本需要本机 Chrome/Edge（可用 `BROWSER_EXECUTABLE` 指定路径），使用独立临时浏览器配置，不接管日常浏览器。脚本以真实示例检查手机 375px 展示、揭晓请求顺序、刷新、画像证据和导出；通过明确的测试请求夹具验证四关主线、补充关卡和第二轮画像、新局索引更新和归档失败，不改写生产关卡或画像模块。浏览器手机模拟不能替代国内手机网络实测。
+44 项单元测试覆盖 B 交易计算、C 的日志/存储/揭晓隔离、D 的证据/校准/置信度/补关与三组模拟玩家。浏览器脚本需要本机 Chrome/Edge（可用 `BROWSER_EXECUTABLE` 指定路径），使用独立临时配置，不接管日常浏览器。真实十关题库验收覆盖研究型、重仓型、全观望三条主线路径、真实画像、可用补关、第二轮画像、证据关联、JSON 导出、刷新和 375px/桌面布局；独立请求夹具保留新局索引更新、第二轮协议与存储归档失败验证。不会改写生产关卡或画像模块。
 
-`PANDAAI_QA_URL` 可指定其他预览地址；验证静态生产站点时设置 `PANDAAI_QA_FIXTURES=0`，仅跑真实示例路径，不执行只适用于 Vite 源模块的拦截夹具。
+`PANDAAI_QA_URL` 可指定预览地址；静态生产站点设置 `PANDAAI_QA_FIXTURES=0`，只验证真实数据流程，跳过 Vite 源模块拦截夹具。桌面手机模拟不替代国内手机网络实测。
 
 ### 静态部署
 
-当前公开演示：[寻找你的交易人格](https://pandaai-trading-persona-arkimo.chirpy-oasis-3049.chatgpt.site)。Sites v1 已于 2026-10-30 发布，允许免登录访问。部署包含 C 的流程与展示，当前 A/B/D 仍使用仓库提供的示例/占位模块。
+当前公开演示：[寻找你的交易人格](https://pandaai-trading-persona-arkimo.chirpy-oasis-3049.chatgpt.site)。Sites v1 已于 2026-10-30 发布，允许免登录访问。这是旧版 C 示例部署，仍使用单关示例/占位模块；本次集成后的十关与真实 B/D 尚未发布，不能用旧站代表当前 main。
 
 部署只需要 `npm ci && npm run build` 生成的 `dist/`；将目录内容放到静态托管根目录即可。Vite 使用相对资源路径，不需要服务端路由或 Panda Data 凭证。
 
@@ -58,9 +58,9 @@ npm run test:browser
 
 国内手机网络实测：ARKimo-mo 已按“关闭 Wi-Fi 和代理、使用国内移动网络打开公开链接，完成开始 → 观望提交 → 揭晓 → 画像 → 导出”的验收请求确认“已在国内移动网络完整跑通”。运营商和手机浏览器型号未提供；该记录来源于用户实机确认，区别于桌面浏览器手机模拟。
 
-来源：React、React DOM、Vite、官方 React 插件、TypeScript；开发测试使用 Vitest 和本机 Chrome/Edge 的 CDP；关卡和画像来自本仓库示例；新增 C 模块代码由 OpenAI Codex 协助生成。未复制外部游戏代码或引入外部图片。原有 `PandaAI_Skill_Card_Demo.html` 保留，仅供视觉参考。
+来源：React、React DOM、Vite、官方 React 插件、TypeScript；开发测试使用 Vitest 和本机 Chrome/Edge 的 CDP；真实关卡来自 Panda Data，测试夹具来自本仓库模拟样例；新增 C 模块代码由 OpenAI Codex 协助生成。未复制外部游戏代码或引入外部图片。原有 `PandaAI_Skill_Card_Demo.html` 保留，仅供视觉参考。
 
-当前代码完成 C 的骨架、流程与展示。A 的真实关卡、B 的完整交互和 D 的真实分析规则由各模块负责；目前示例没有可用的新补充关卡，页面会保留不确定项并说明该限制。
+集成状态与剩余交付事项见 [集成验收与缺口](../docs/integration-status.md)。旧站 2026-10-30 的手机验收仅适用于旧版，发布新版后需重新验证。
 
 ## K 线 Skill 卡牌 Demo
 

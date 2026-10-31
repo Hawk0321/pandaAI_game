@@ -136,6 +136,7 @@ def validate_release(index: dict, levels: dict[str, tuple[dict, dict]]) -> None:
                 require({"bullish", "bearish"} <= set(signals), "Evidence-use level needs conflicting visible signals")
             elif probe == "calibration":
                 require(signals.count("neutral") >= 3, "Calibration level needs visibly uncertain evidence")
+                require(reveal["outcome"]["direction"] != "flat" and abs(after[-1]["c"]/price-1) >= .02-1e-8, "Calibration level needs a directional outcome to score confidence")
             elif probe == "risk_control":
                 require(min(bar["l"] for bar in after[:5])/price <= .96 + 1e-8, "Risk-control level needs a first-step drawdown of at least 4%")
                 require(after[-1]["c"]/min(bar["c"] for bar in after[:8]) >= 1.07 - 1e-8, "Risk-control level needs a rebound of at least 7% from the early trough")

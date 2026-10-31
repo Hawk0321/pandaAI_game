@@ -181,35 +181,34 @@
       "calibration"
     ],
     "dataset": "eastmoney",
-    "decision_index": 320,
+    "decision_index": 183,
     "symbol": "300059.SZ",
-    "start_date": "2025-02-06",
-    "decision_date": "2025-05-06",
-    "end_date": "2025-05-27",
+    "start_date": "2024-07-10",
+    "decision_date": "2024-10-10",
+    "end_date": "2024-10-31",
     "scenario": "gap",
     "outcome": {
-      "ret": -0.0142925202,
-      "direction": "flat"
+      "ret": 0.1284671533,
+      "direction": "up"
     },
     "candidate_counts": {
-      "v_reversal": 20,
-      "range": 15,
+      "v_reversal": 17,
       "crash": 36,
       "uptrend": 9,
-      "gap": 8,
+      "gap": 5,
       "fake_breakout": 2
     },
     "probe_evidence": {
       "signals": {
-        "vol": "bearish",
-        "ma": "neutral",
-        "index": "neutral",
+        "vol": "bullish",
+        "ma": "bullish",
+        "index": "bullish",
         "backtest": "neutral",
         "risk": "neutral",
         "breakout": "neutral"
       },
-      "first_step_min_return": -0.010481181515007099,
-      "rebound_from_first8_close_trough": -0.00672107537205946
+      "first_step_min_return": -0.08077858880778599,
+      "rebound_from_first8_close_trough": 0.1653266331658294
     }
   },
   {
@@ -257,33 +256,30 @@
       "calibration"
     ],
     "dataset": "silver",
-    "decision_index": 141,
+    "decision_index": 130,
     "symbol": "AG2502.SHF",
-    "start_date": "2024-09-30",
-    "decision_date": "2024-12-27",
-    "end_date": "2025-01-20",
-    "scenario": "range",
+    "start_date": "2024-09-11",
+    "decision_date": "2024-12-12",
+    "end_date": "2025-01-03",
+    "scenario": "fake_breakout",
     "outcome": {
-      "ret": 0.0196026839,
-      "direction": "flat"
+      "ret": -0.0470426753,
+      "direction": "down"
     },
     "candidate_counts": {
-      "fake_breakout": 6,
-      "v_reversal": 5,
-      "uptrend": 5,
-      "range": 19
+      "fake_breakout": 2
     },
     "probe_evidence": {
       "signals": {
         "vol": "bearish",
-        "ma": "bearish",
+        "ma": "bullish",
         "index": "neutral",
         "backtest": "neutral",
         "risk": "neutral",
-        "breakout": "neutral"
+        "breakout": "bullish"
       },
-      "first_step_min_return": -0.01960268385738717,
-      "rebound_from_first8_close_trough": 0.03748326639892907
+      "first_step_min_return": -0.07012727726478662,
+      "rebound_from_first8_close_trough": 0.025926921010209547
     }
   },
   {
@@ -339,8 +335,8 @@
       "direction": "down"
     },
     "candidate_counts": {
-      "fake_breakout": 2,
       "crash": 2,
+      "fake_breakout": 2,
       "range": 1,
       "uptrend": 8,
       "gap": 1
