@@ -10,8 +10,8 @@ export function RecommendationPanel({ profile }: { profile: Profile }) {
   const recs = profile.recommendations ?? [];
   if (recs.length === 0) return null;
   return <section className="panel recommend-panel" aria-labelledby="recommend-title">
-    <h2 id="recommend-title">根据这份画像，下一步可以试试</h2>
-    <p className="muted">每张卡都写了它依据哪项判断。链接会在新窗口打开 PandaAI 或 QuantSkills 的页面。</p>
+    <h2 id="recommend-title">下一步去哪儿</h2>
+    <p className="muted">根据这份画像挑的 PandaAI 产品和 QuantSkills 技能包，每张卡都写了它依据哪项判断。链接在新窗口打开。</p>
     <ol className="rec-list">{recs.map((r) => <li key={r.id} className={`rec-card rec-${r.type}`}>
       <div className="rec-heading"><span className="rec-type">{TYPE_NAMES[r.type]}</span><span className="rec-provider">{r.resource.provider}</span></div>
       <h3>{r.title}</h3>

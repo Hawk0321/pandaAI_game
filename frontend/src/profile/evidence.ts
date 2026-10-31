@@ -40,7 +40,7 @@ export const T = {
   lateCut: -0.08,            // 浮亏超过 8% 才减仓/平仓，算止损偏晚
   overconfident: 0.15,       // 平均信心比实际命中率高 15 个百分点以上算信心偏高
   underconfident: 0.25,      // 平均信心比实际命中率低 25 个百分点以上算信心偏低
-  thinkFullMs: 30000,        // 思考 30 秒算"想得充分"
+  perClueMs: 15000,          // 翻开的线索平均每张读了 15 秒，算看进去了
 };
 
 const num = (v: unknown, d = 0) => (typeof v === 'number' && Number.isFinite(v) ? v : d);
@@ -124,13 +124,16 @@ function evidenceUse(f: LevelFacts): RawEvidence[] {
   const opened = openedClues(f);
   const openSeqs = [...seqs(...f.clueOpens), d.seq];
   const key = f.play.clues.filter((c) => f.reveal.key_clue_ids.includes(c.id));
+  const keyHit = key.filter((c) => opened.includes(c));
+  // 关键线索覆盖率：0 张关键线索的关卡视为没有可对标的信息，按 1 处理。
+  const coverage = key.length ? keyHit.length / key.length : 1;
   const base = { dim: 'evidence_use' as const, level_id: f.levelId, event_seqs: openSeqs };
 
   // 1) 关键线索覆盖
   if (key.length) {
-    const hit = key.filter((c) => opened.includes(c));
+    const hit = keyHit;
     const miss = key.filter((c) => !opened.includes(c));
-    const ratio = hit.length / key.length;
+    const ratio = coverage;
     const text = hit.length === key.length
       ? `${f.label}翻开了全部关键线索${titles(key)}`
       : hit.length === 0
@@ -148,13 +151,16 @@ function evidenceUse(f: LevelFacts): RawEvidence[] {
       : { ...base, text: `${f.label}一张线索没翻就${sideText(side)}`, value: 0.15 });
   } else if (sign !== 0 && net !== 0) {
     const agree = Math.sign(net) === sign;
+    // 一致性不能脱离覆盖率单独计分：只翻到顺着自己方向的线索时，"一致"是廉价的一致。
+    // 漏掉关键线索的一致按覆盖率折算，避免 0.8 把"没看关键线索"冲掉。
+    const ratio = coverage;
+    const agreeValue = (opened.length >= 2 ? 0.8 : 0.6) * (0.4 + 0.6 * ratio);
     out.push({
       ...base,
       text: agree
         ? `${f.label}翻开的线索整体${net > 0 ? '看涨' : '看跌'}，决定${sideText(side)}与线索一致`
         : `${f.label}翻开的线索整体${net > 0 ? '看涨' : '看跌'}，却选择${sideText(side)}，决定与证据相反`,
-      // 只翻了 1 张就下单，"一致"说明不了多少，权重放轻
-      value: opened.length >= 2 ? (agree ? 0.8 : 0.2) : (agree ? 0.6 : 0.3),
+      value: agree ? agreeValue : (opened.length >= 2 ? 0.2 : 0.3),
     });
   } else if (sign === 0 && net === 0 && opened.some((c) => c.signal !== 'neutral')) {
     out.push({ ...base, text: `${f.label}看到多空线索互相抵消后选择观望，和证据一致`, value: 0.7 });
@@ -302,13 +308,19 @@ function researchDepth(f: LevelFacts): RawEvidence[] {
   const d = f.decision;
   if (!d) return [];
   const budget = num(f.start?.data.budget, f.play.budget) || f.play.budget;
-  const spent = openedClues(f).reduce((s, c) => s + c.cost, 0);
+  const opened = openedClues(f);
+  const spent = opened.reduce((s, c) => s + c.cost, 0);
   const ratio = budget > 0 ? Math.min(1, spent / budget) : 0;
   const think = num(d.data.think_ms, d.t_ms);
-  const value = 0.6 * ratio + 0.4 * Math.min(1, think / T.thinkFullMs);
+  // 原来按固定的 30 秒折算，实际测的是"打开页面的速度"，手机上慢一点就会被算成研究型。
+  // 改成按翻开张数折算每张的停留时间：没翻线索就没有研究行为，翻得越多才越吃时间。
+  const perClue = opened.length ? think / opened.length : 0;
+  const dwell = opened.length ? Math.min(1, perClue / T.perClueMs) : 0;
+  const value = spent === 0 ? 0 : 0.7 * ratio + 0.3 * dwell;
   return [{
     dim: 'research_depth', level_id: f.levelId, event_seqs: [...seqs(...f.clueOpens), d.seq], value,
-    text: `${f.label}${budget} 个研究点用了 ${spent} 个，思考 ${Math.round(think / 1000)} 秒后决定`,
+    text: `${f.label}${budget} 个研究点用了 ${spent} 个，思考 ${Math.round(think / 1000)} 秒后决定`
+      + (opened.length ? `（平均每张线索 ${Math.round(perClue / 1000)} 秒）` : ''),
   }];
 }
 

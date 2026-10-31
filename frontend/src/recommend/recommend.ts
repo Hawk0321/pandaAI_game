@@ -74,9 +74,9 @@ function candidates(dims: Dims, persona: Profile['persona']): Candidate[] {
       `${said(style)}，${style.score === null || style.confidence === 'low' ? '风格还不明显' : '倾向还不够强，暂不据此定策略'}。QBTI 用五组问答把投资性格翻译成策略参数，可以和这份画像对照着看。`, [style]));
   }
 
-  // ---- 工具：能力短板越明显越靠前 ----
+  // ---- 工具：能力短板越明显越靠前；风险控制关系到本金，短板时总是排第一 ----
   if (isWeak(rc)) {
-    add(100 - rc.score! * 100, card('tool-stop-loss', 'tool', '把止损写成规则', CATALOG.stopLoss,
+    add(100 + (R.weak - rc.score!) * 20, card('tool-stop-loss', 'tool', '把止损写成规则', CATALOG.stopLoss,
       `${said(rc)}${first(rc)}。这个技能包按入场价自动执行止损和仓位上限，把"事前定好最多亏多少"变成习惯。`, [rc, ra]));
   }
   if (isWeak(cal)) {

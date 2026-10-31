@@ -25,6 +25,8 @@
 
 链接都在 2026-10-31 核实过，标 `is_sample: false`。
 
+画像页上有两块推荐，分工不同：上面是本模块的"下一步去哪儿"（引到 PandaAI / QuantSkills），下面是 A 的"技能卡"（在游戏里用已揭晓行情练一练，见 [skill-cards.md](skill-cards.md)）。
+
 ## 2. 触发规则
 
 阈值：能力分 ≤ 0.45 算短板，≥ 0.65 算不错；偏好分 ≥ 0.65 或 ≤ 0.35，且置信度不低、没有冲突，算倾向明确；风险偏好 ≤ 0.2 算几乎不入场。
@@ -35,7 +37,7 @@
 | [skill-ma-crossover-signal](https://github.com/quantskills/skill-ma-crossover-signal) 均线金叉死叉 | 策略 | 无专属策略时，趋势偏好明确 | 70 |
 | [skill-oversold-rebound](https://github.com/quantskills/skill-oversold-rebound) 超跌反弹 | 策略 | 无专属策略时，反转偏好明确 | 70 |
 | [skill-qbti](https://github.com/quantskills/skill-qbti) 性格 → 策略问答 | 策略 | 以上都不满足（兜底） | 40 |
-| [skill-b11-auto-stop-loss-take-profit](https://github.com/quantskills/skill-b11-auto-stop-loss-take-profit) | 工具 | 风险控制短板 | 100 − 分数×100 |
+| [skill-b11-auto-stop-loss-take-profit](https://github.com/quantskills/skill-b11-auto-stop-loss-take-profit) | 工具 | 风险控制短板 | 100 + (0.45 − 分数)×20（关系到本金，短板时总排第一） |
 | [skill-trade-review](https://github.com/quantskills/skill-trade-review) | 工具 | 证据使用短板 | 95 − 分数×100 |
 | [skill-trading-behavior-diagnostics](https://github.com/quantskills/skill-trading-behavior-diagnostics) | 工具 | 判断校准短板 | 92 − 分数×100 |
 | [skill-backtest-overfit](https://github.com/quantskills/skill-backtest-overfit) | 工具 | 证据使用和研究深度都不错 | 50 |
