@@ -1,93 +1,74 @@
-# PandaAI / QuantSkills 可推荐资源盘点
+# PandaAI 开发资源调研（2026-10-30）
 
-> 2026-10-31 盘点，用来回答"推荐卡片能指向什么"。已经用进推荐的资源标 ✅，规则见 [recommend.md](recommend.md)。
-> 来源：pandaaiquant.com 公开页面、github.com/orgs/quantskills/repositories、QuantSkills 组织 README。
+> 说明：pandaaiquant.com 的 API 文档页和 quantskills.ai 都是 JS 渲染，静态抓取拿不到正文。Panda Data 部分是直接下载官方 SDK `panda_data` 1.0.5（PyPI）拆包读出来的函数清单，比文档页更全；QuantSkills 部分来自其 Gitee/GitHub 组织（238 个仓库，未全部逐个打开）。
 
-## 1. QuantSkills 是什么
+## 结论先说
 
-QuantSkills（[quantskills.ai](https://quantskills.ai)，GitHub [quantskills](https://github.com/quantskills)）是 PandaAI 发起的开源量化社区，收录两类资产：
+1. **Panda Data 完全够做"隐藏结局"历史行情关卡**：A股/期货/港股/美股/指数/基金都有日线、分钟线（1m/5m/15m/60m），期货还有 tick。
+2. **没有 MT5 EA / 跟单（copy-trading）那种现成策略**，也没有网格、马丁。PandaAI 不做策略市场和跟单（官网声明不提供证券投资咨询）。
+3. **但有大量"策略型 Skill"可以当推荐项和游戏里的 AI 对手人设**：均线交叉、海龟突破+ATR、CTA 动量/carry、均值回归、配对交易、超跌反弹、全天候等。规则都是公开的，游戏里可以用 JS 复刻成简化版对手。
+4. **期货"席位"数据是天然的"跟单"替代品**：期货公司净持仓排名、席位盈亏、多空比。可以做"跟主力席位"人设，比 MT5 跟单更贴合国内语境，又是真数据。
+5. **QuantSkills 里有两个和你之前"交易记录→用户画像"工作直接对应的技能**：`skill-trading-behavior-diagnostics`（解析交易记录、标出行为偏差）和 `skill-trade-review`。可以当推荐资源，也可以参考它们的偏差分类来对齐你的画像维度。
 
-- **Skill 技能包**（`skill-*`，215 个）：给 Claude Code、Codex 等 AI 编程助手加载的能力包，例如算因子、回测、复盘、生成报告。很多直接调用 Panda Data。
-- **Agent 智能体**（`agent-*`，16 个）：多步工作流，例如市场状态监控、期货策略生成。
+## 1. Panda Data（数据 API）
 
-另有导航仓库 [quantskills/quantskills](https://github.com/quantskills/quantskills)（2.4k star）和本地工作台 [QuantStudio](https://github.com/quantskills/QuantStudio)。组织本身没有分类，下面按我们的用途归类，只列适合推荐给游戏玩家的部分。
+- 接入：`pip install panda_data`（Python ≥3.10，返回 pandas DataFrame）；服务地址默认 `http://pandadata.pandaaiquant.com`。
+- 认证：`panda_data.init_token(username=..., password=...)`，用 PandaAI 平台账号密码换 token。按订阅/算力计费（Free 注册送 500 算力；数据套餐按月/季/年），限频和免费额度文档页拿不到，需要登录确认。
+- 另有 MCP 服务：`https://pandadatamcp.pandaaiquant.com/mcp`（`search_methods` / `call_pandadata`）。
+- **H5 前端不能直接调**（要账号密码、Python SDK）。建议做法：离线用 SDK 拉一批历史片段，打包成 JSON 静态题库放进游戏；或者后端代理一层。
 
-注意：技能包需要在 AI 编程助手里加载，H5 只能跳到 GitHub 仓库页；部分仓库没有描述或标注为社区草稿，推荐前要点开确认。
+### 对游戏有用的接口（函数名为 SDK 原名）
 
-### 1.1 策略类：适合做"你的风格 → 策略卡"
-
-| 技能包 | 说明 | 对应风格 / 人物卡 |
-|---|---|---|
-| ✅ [skill-ma-crossover-signal](https://github.com/quantskills/skill-ma-crossover-signal) | 均线金叉死叉信号 | 趋势跟随 🐬 |
-| ✅ [skill-oversold-rebound](https://github.com/quantskills/skill-oversold-rebound) | A 股超跌反弹择时与选股 | 逆势反转 🦀 |
-| [skill-keynes-contrarian-investment](https://github.com/quantskills/skill-keynes-contrarian-investment) | 凯恩斯式反共识研究：过度乐观/悲观、价值陷阱 | 逆向 🦀 |
-| [skill-shortterm-mean-reversal](https://github.com/quantskills/skill-shortterm-mean-reversal) | 短期均值回归（仓库无描述） | 逆势 🦀 |
-| [skill-dalio-all-weather](https://github.com/quantskills/skill-dalio-all-weather) | 全天候资产配置：宏观象限 + 风险平价 | 风险预算 🐢 |
-| [skill-portfolio-risk-parity](https://github.com/quantskills/skill-portfolio-risk-parity) | 风险平价组合 | 风险预算 🐢 |
-| [skill-market-regime-analysis](https://github.com/quantskills/skill-market-regime-analysis) | 市场状态划分，先认环境再选策略 | 灵活 🦊 |
-| [skill-rotation-radar](https://github.com/quantskills/skill-rotation-radar) | 行业轮动与市场状态识别 | 灵活 🦊 |
-| [skill-a-share-stock-dossier](https://github.com/quantskills/skill-a-share-stock-dossier) | 一键生成 A 股个股研究档案（41 star） | 研究型 🦉 / 集中下注 🦈 |
-| [skill-buffett-moat-screener](https://github.com/quantskills/skill-buffett-moat-screener) | 巴菲特式护城河选股与持仓复核 | 长期持有 |
-| [skill-dividend-yield-scan](https://github.com/quantskills/skill-dividend-yield-scan) | 股息率与分红质量扫描（社区草稿） | 稳健 🐢 / 观望 🦥 |
-| [skill-simons-pairs-trading](https://github.com/quantskills/skill-simons-pairs-trading) | 配对交易：同行业、协整筛选 | 进阶 |
-| [skill-xingtai-catcher](https://github.com/quantskills/skill-xingtai-catcher) | 相似 K 线形态搜索（37 star），和本游戏"看 K 线"最贴近 | 所有人 |
-| [skill-kline-pattern-vision](https://github.com/quantskills/skill-kline-pattern-vision) | 截图或行情识别 K 线形态 | 所有人 |
-| ✅ [skill-qbti](https://github.com/quantskills/skill-qbti) | 五组问答把投资性格翻译成因子方向和策略参数 | 风格不明显时兜底 |
-
-### 1.2 工具类：补能力短板
-
-| 技能包 | 说明 | 对应维度 / 人物卡 |
-|---|---|---|
-| ✅ [skill-b11-auto-stop-loss-take-profit](https://github.com/quantskills/skill-b11-auto-stop-loss-take-profit) | 自动止盈止损、单票仓位上限 | 风险控制 🐂 🦔 |
-| [skill-b12-intraday-position-manager](https://github.com/quantskills/skill-b12-intraday-position-manager) | 日内仓位动态管理 | 风险控制 |
-| ✅ [skill-trading-behavior-diagnostics](https://github.com/quantskills/skill-trading-behavior-diagnostics) | 从交易记录识别行为偏差 | 判断校准 🐂 🦔 |
-| [skill-forecast-calibration-audit](https://github.com/quantskills/skill-forecast-calibration-audit) | 概率预测可靠性：Brier 分数、校准曲线（和我们的校准口径一致） | 判断校准 |
-| ✅ [skill-trade-review](https://github.com/quantskills/skill-trade-review) | 逐笔复盘 | 证据使用 |
-| ✅ [skill-backtest-overfit](https://github.com/quantskills/skill-backtest-overfit) | 回测过拟合检测（41 star） | 研究型进阶 🦉 🦈 |
-| [skill-walk-forward-validator](https://github.com/quantskills/skill-walk-forward-validator) / [skill-backtest-assumption-check](https://github.com/quantskills/skill-backtest-assumption-check) | 滚动验证、回测假设检查 | 研究型进阶 |
-| [skill-portfolio-checkup](https://github.com/quantskills/skill-portfolio-checkup) | 持仓体检：集中度、估值、风险暴露 | 集中下注 🦈 |
-| [skill-a-share-market-risk-radar](https://github.com/quantskills/skill-a-share-market-risk-radar) | 市场风险雷达（Qube 模板里也有） | 风险控制 |
-
-### 1.3 数据与日常类：研究深度偏低时的入门
-
-| 技能包 | 说明 |
+| 用途 | 函数 |
 |---|---|
-| ✅ [skill-market-daily-review](https://github.com/quantskills/skill-market-daily-review) | 收盘复盘报告（53 star） |
-| [skill-pandadata-api](https://github.com/quantskills/skill-pandadata-api) | 让 AI 助手直接调 Panda Data（本游戏数据来源） |
-| [skill-stock-screener](https://github.com/quantskills/skill-stock-screener) | 自然语言选股 |
-| [skill-fin-news](https://github.com/quantskills/skill-fin-news) / [skill-news-sentiment-analyst](https://github.com/quantskills/skill-news-sentiment-analyst) | 财经资讯聚合、新闻情绪 |
-| [skill-futures-deepview-analyst](https://github.com/quantskills/skill-futures-deepview-analyst) | 期货持仓、基差、期限结构报告（25 star），适合沪金沪银关卡 |
+| A股 K线 | `get_stock_daily` / `get_stock_weekly` / `get_stock_monthly`，前/后复权 `_pre` / `_post` |
+| A股分钟线 | `get_stock_min(symbol, start_date, end_date, frequency="1m/5m/15m/60m")` |
+| 指数 | `get_index_daily`、`get_index_min` |
+| 期货 | `get_future_daily`、`get_future_min`、`get_future_tick`、`get_future_dominant`（主力合约） |
+| 港股 / 美股 | `get_hk_daily`、`get_hk_min`、`get_us_daily`、`get_us_index_daily` |
+| 基金/ETF | `get_fund_daily`、`get_fund_min`、`get_fund_nav` |
+| 因子 | `get_factor`、Barra 风格暴露 `get_factor_barra_exposure` 等 |
+| 市场情绪/事件 | 龙虎榜 `get_lhb_list`/`get_lhb_detail`、融资融券 `get_margin`、北向 `get_hsgt_hold`、大宗交易 `get_block_trade` |
+| **"跟单"替代：期货席位** | 净持仓多空榜 `get_future_netposi_rank`、席位品种盈亏 `get_broker_variety_profit`、多空比 `get_future_ls_ratio`、席位评级 `get_broker_grade` |
 
-### 1.4 因子研究类：研究型玩家的进阶，接因子大赛
+没看到 crypto 和外汇（forex）数据，MT5 常见的外汇/黄金差价合约行情这里没有；可以用期货黄金/白银（如 AU、AG 主力）替代。
 
-[skill-pandaai-factor-online](https://github.com/quantskills/skill-pandaai-factor-online)（因子大赛上手）、[skill-factor-mining-pandaai](https://github.com/quantskills/skill-factor-mining-pandaai)、[skill-quant-factor-skill-factory](https://github.com/quantskills/skill-quant-factor-skill-factory)（72 star）、[skill-factor-orthogonalize](https://github.com/quantskills/skill-factor-orthogonalize)、[skill-factor-alpha191-alpha101](https://github.com/quantskills/skill-factor-alpha191-alpha101)，以及几十个 `skill-factor-*`、`skill-alpha-*`。
+## 2. PandaAI 平台本身
 
-### 1.5 暂不推荐
+- 产品：Qube（一句话生成策略+回测）、EVO 多 Agent 投研、因子中心、QuantFlow 工作流、桌面客户端（SimNow 期货仿真）、Qube App。
+- 首页自带策略模板（可直接作推荐项）：**茅台 5/20 双均线**、**海龟突破 + ATR 止损**、**多均线趋势过滤（MA5/20/60）**；因子模板：20日动量、低PB+高ROE、量价相关性。
+- 活动：因子大赛（第四届进行中）、全国期货模拟赛、LLM 对抗赛。这些都可作为"下一步行动"推荐。
+- 套餐：Free / Lite ¥49 / Pro ¥199 / MAX ¥499 每月。
 
-机器学习模型（`skill-dl-*`、`skill-ml-*`、`skill-factor-model-*`）、数据审计（`*-auditor`）、组合优化与归因、港美股专题、名人研究模型、Agent 类。对游戏玩家门槛太高，或者和游戏行为没有对应关系。
+## 3. QuantSkills
 
-## 2. PandaAI 产品与资源
+- PandaAI 发起的开源量化技能社区。`skill-*` 是给 AI Agent（Claude Code、Cursor 等）加载的能力包（SKILL.md + 脚本），`agent-*` 是多步工作流。分 Listed / Runnable / Verified 三级认证。
+- 仓库：github.com/quantskills（gitee.com/quantskills 为镜像）。抽查的两个是 GPL-3.0。
+- 大多是研究/因子/审计工具，明确"仅研究、不实盘"；交易类只部署 SimNow 模拟盘。
 
-| 名称 | 链接 | 是什么 | 门槛 |
-|---|---|---|---|
-| ✅ Qube | [agent_quant](https://www.pandaaiquant.com/agent_quant/) | 自然语言生成策略、回测、调参、仿真盘 | 快速试用免登录 |
-| Qube 能力模板 | 同上 | 首页模板：5/20 双均线、海龟突破 + ATR 止损、多均线趋势过滤；期货模板如黄金 RSI 吊灯止盈；股票模板如红利低估、小市值、风格轮动 | 同上 |
-| ✅ 量化因子中心 | [quantfactor-center](https://www.pandaaiquant.com/quantfactor-center) | 因子搜索、对比、诊断，带 AI 因子助手 | 免费版 20 个因子池，需登录 |
-| AI 工作流 | [quantflow](https://www.pandaaiquant.com/quantflow/)（盘点时页面报错）/ [开源](https://github.com/PandaAI-Tech/panda_quantflow) | 节点式量化工作流 | — |
-| EVO / A2A 办公室 | [evo](https://www.pandaaiquant.com/evo) | 多智能体投研 | 付费版 |
-| 专业版客户端 | [download](https://www.pandaaiquant.com/download) | 策略信号直连交易 | 付费版，涉及真实下单，**不推荐给游戏玩家** |
-| Panda Data | [docs/api](https://www.pandaaiquant.com/docs/api) | 行情、财务数据 SDK（本游戏数据来源） | 需账号 |
-| ✅ 全国期货模拟赛 | [contest](https://www.pandaaiquant.com/contest/) | 模拟盘比赛，手动/策略/AI 辅助三赛道，进行中 | 报名 |
-| ✅ 第四届因子大赛 | [fourthFactorCompetition](https://www.pandaaiquant.com/factorhub/fourthFactorCompetition/) | 永续赛制因子比赛，进行中 | 报名 |
-| ✅ 量变学院 | [learninghub/newcourse](https://www.pandaaiquant.com/learninghub/newcourse) | L1 量化思维入门 → L6，线上视频 + 线下营 | 课程付费 |
-| ✅ 新手入门文档 | [docs](https://www.pandaaiquant.com/docs) | 知识库、新手入门、各产品指南 | 免费 |
-| 用户社区 | [community](https://www.pandaaiquant.com/community) | 策略与因子讨论、问答 | 免费 |
-| 开源项目 | [panda_factor](https://github.com/PandaAI-Tech/panda_factor)（2.8k star） | 因子库开源版 | 免费 |
+### 可当"策略"推荐项或 AI 对手人设的技能
 
-会员：Free（注册送 500 算力）、Lite ¥49/月、Pro ¥199/月、MAX ¥499/月，详见 [pricing](https://www.pandaaiquant.com/pricing)。网站声明不提供投资咨询，内容不构成投资建议。
+| 人设方向 | 技能 |
+|---|---|
+| 趋势跟随 | `skill-ma-crossover-signal`、`skill-global-macro-trend-strategy`、`skill-trendline-breakdown-reversal` |
+| CTA / 期货 | `skill-commodity-carry-cta`、`skill-futures-cta-alpha`、`skill-futures-hedgecraft`、`agent-ssquant` |
+| 均值回归 / 抄底 | `skill-shortterm-mean-reversal`、`skill-oversold-rebound`、`skill-microstructure-vwap-deviation` |
+| 套利 | `skill-simons-pairs-trading`、`skill-statistical-arbitrage-time-series`、`skill-etf-arbitrage` |
+| 大师风格 | `skill-buffett-moat-screener`、`skill-graham-netnet-screener`、`skill-dalio-all-weather`、`skill-soros-reflexivity-detector`、`skill-keynes-contrarian-investment`、`skill-munger-mental-model` |
+| 跟"聪明钱" | `skill-smart-money-profiler`、`skill-alpha-f1/f5/f6/f8`（期货席位持仓因子）、`skill-northbound-margin-monitor` |
+| 风控 | `skill-b11-auto-stop-loss-take-profit` |
+| 生成自己的交易员 | `skill-ssquant-trader-generator`（一句话想法→可加载的 AI 交易员，SimNow 模拟盘） |
 
-## 3. 还能做成卡片的方向
+### 可当"工具/课程"推荐项（对应画像弱点）
 
-- **人物卡 → 策略卡**：每张人物卡对应一个 QuantSkills 策略（见 1.1 右列），画像页直接给"和你风格最像的策略"。
-- **关卡 → 同款工具**：玩家在某关输了，推荐那关用到的同类工具，例如沪金关卡推 `skill-futures-deepview-analyst`、形态关推 `skill-xingtai-catcher`。
-- **对手 → Qube 模板**：揭晓页的双均线、海龟、均值回归三个对手，正好对应 Qube 首页模板，可以加"一键用这个对手的规则回测"。
+- 行为偏差 → `skill-trading-behavior-diagnostics`、`skill-trade-review`
+- 过拟合/回测陷阱 → `skill-backtest-overfit`、`skill-backtest-assumption-check`、`skill-walk-forward-validator`
+- 仓位/组合 → `skill-portfolio-risk-parity`、`skill-portfolio-checkup`
+- 数据入门 → `skill-pandadata-api`
+
+## 4. 建议的游戏用法
+
+- **关卡数据**：离线用 `panda_data` 截取有代表性的历史片段（如暴涨暴跌、震荡、趋势），隐去标的名和日期，玩家做多/做空/观望，结束后揭晓真实标的和结局。
+- **AI 对手**：同一段行情上跑 3 到 5 个简化策略（双均线、海龟、均值回归、跟主力席位、全天候），和玩家同屏比收益，结束后告诉玩家"你最像哪位"。
+- **推荐**：画像标签 → 对应 Skill / PandaAI 策略模板 / 因子大赛 / 期货模拟赛，作为"下一步"。
+- **待确认**：Panda Data 账号的免费额度和限频；比赛规则是否允许离线预取数据。

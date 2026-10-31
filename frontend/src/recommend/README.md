@@ -1,6 +1,6 @@
 # 推荐（D）
 
-`recommend.ts` 导出 `recommend(profile)`，`analyze()` 会自动调用并写入 `profile.recommendations`。规则说明见 [docs/recommend.md](../../../docs/recommend.md)，资源清单见 [docs/pandaai-resources.md](../../../docs/pandaai-resources.md)。
+`recommend.ts` 导出 `recommend(profile)`，`analyze()` 会自动调用并写入 `profile.recommendations`。规则说明见 [docs/recommend.md](../../../docs/recommend.md)，资源清单见 [docs/recommend-resources.md](../../../docs/recommend-resources.md)。
 
 | 文件 | 作用 |
 |---|---|

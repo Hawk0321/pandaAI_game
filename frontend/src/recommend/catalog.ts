@@ -1,6 +1,6 @@
 /**
  * 推荐卡片的资源目录：PandaAI 产品/活动/学习资源 + QuantSkills 开源技能包。
- * 链接都在 2026-10-31 核实过，is_sample: false。完整清单和挑选理由见 docs/pandaai-resources.md。
+ * 链接都在 2026-10-31 核实过，is_sample: false。完整清单和挑选理由见 docs/recommend-resources.md。
  */
 import type { RecResource } from '../shared/protocol';
 

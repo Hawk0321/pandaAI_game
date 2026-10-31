@@ -2,7 +2,7 @@
 
 > 写给评委和队友：画像出来之后，我们推荐什么、为什么推荐、点下去去哪里。
 > 代码在 `frontend/src/recommend/`，阈值在 `recommend.ts` 的 `R`，资源在 `catalog.ts`。全部是规则计算，不用大模型。
-> 可推荐资源的完整盘点见 [pandaai-resources.md](pandaai-resources.md)。
+> 可推荐资源的完整盘点见 [recommend-resources.md](recommend-resources.md)。
 
 ## 1. 思路
 
