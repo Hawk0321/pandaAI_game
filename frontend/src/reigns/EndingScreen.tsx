@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { resolvePersona } from './engine';
 import { ALL_CARDS } from './allCards';
 import { ENDING_THRESHOLDS, getEndings } from './endings';
+import { audio } from './audio/audioManager';
 import { PersonaReveal } from './PersonaReveal';
 import { buildReferrals } from './referral';
 import { ROLES } from './roles';
@@ -19,6 +20,10 @@ export interface EndingScreenProps {
   /** 同一角色再来一次。 */
   readonly onReplay: () => void;
 }
+
+/** 人格卡翻出（对应 rise(0.2) 淡入之后）与结局曲进入的延迟（毫秒）。 */
+const PERSONA_FLIP_MS = 700;
+const ENDING_BGM_MS = 1100;
 
 const TYPE_LABEL = { strategy: '策略', tool: '工具', product: '产品' } as const;
 
@@ -56,6 +61,16 @@ export function EndingScreen({ state, onRestart, onReplay }: EndingScreenProps) 
   const roleDef = ROLES[role];
   const headingRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => { headingRef.current?.focus({ preventScroll: false }); }, []);
+
+  // 结局音频：先让触底/爆满音效单独响一下（父组件已停掉游戏音乐），再翻人格卡，最后换结局曲。
+  // 曲目或音效缺失时 audioManager 会自己静默跳过 / 沿用 bgm-select。
+  const hasEnding = ending !== null;
+  useEffect(() => {
+    if (!hasEnding) return undefined;
+    const flip = window.setTimeout(() => audio.playSfx('sfx-persona-flip'), PERSONA_FLIP_MS);
+    const bgm = window.setTimeout(() => audio.playBgm('bgm-ending-idle'), ENDING_BGM_MS);
+    return () => { window.clearTimeout(flip); window.clearTimeout(bgm); };
+  }, [hasEnding]);
 
   // 引流卡和人物卡用同一个最终人格，文案里的次数才不会和人物卡打架。
   const personaId = useMemo(() => (ending ? resolvePersona(state, ALL_CARDS).id : null), [state, ending]);
@@ -107,8 +122,8 @@ export function EndingScreen({ state, onRestart, onReplay }: EndingScreenProps) 
       </div>
 
       <div className="reigns-again reigns-rise" style={rise(0.3)}>
-        <button type="button" className="reigns-restart reigns-restart-wide" onClick={onRestart}>再来一局</button>
-        <button type="button" className="reigns-again-same" onClick={onReplay}>同一角色再来一次（{roleDef.name}）</button>
+        <button type="button" className="reigns-restart reigns-restart-wide" onClick={() => { audio.playSfx('sfx-restart'); onRestart(); }}>再来一局</button>
+        <button type="button" className="reigns-again-same" onClick={() => { audio.playSfx('sfx-btn-click'); onReplay(); }}>同一角色再来一次（{roleDef.name}）</button>
       </div>
 
       <section className="reigns-refs reigns-rise" style={rise(0.4)} aria-labelledby="reigns-refs-title">

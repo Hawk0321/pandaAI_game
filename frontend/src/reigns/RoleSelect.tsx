@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { COMING_SOON_ROLE, ROLES, ROLE_IDS } from './roles';
 import { STAT_KEYS } from './types';
 import type { RoleId } from './types';
+import { audio } from './audio/audioManager';
 
 export interface RoleSelectProps {
   readonly onSelect: (role: RoleId) => void;
@@ -14,6 +15,8 @@ export interface RoleSelectProps {
 export function RoleSelect({ onSelect, focusHeading = false }: RoleSelectProps) {
   const headingRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => { if (focusHeading) headingRef.current?.focus(); }, [focusHeading]);
+  // 选角页的音乐。unlock 之前只是登记，第一次手势后才真正出声。悬停/聚焦不放音效，避免划过三张卡时吵。
+  useEffect(() => { audio.playBgm('bgm-select'); }, []);
 
   return (
     <div className="reigns-select">
@@ -34,7 +37,7 @@ export function RoleSelect({ onSelect, focusHeading = false }: RoleSelectProps) 
                 className="reigns-role"
                 aria-labelledby={nameId}
                 aria-describedby={descId}
-                onClick={() => onSelect(id)}
+                onClick={() => { audio.playSfx('sfx-role-confirm'); onSelect(id); }}
               >
                 <span className="reigns-role-top">
                   <span className="reigns-role-emoji" aria-hidden="true">{role.emoji}</span>

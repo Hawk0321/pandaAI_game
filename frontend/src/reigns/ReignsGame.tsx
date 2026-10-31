@@ -8,6 +8,10 @@ import { RoleSelect } from './RoleSelect';
 import { ROLES } from './roles';
 import { STAT_KEYS } from './types';
 import type { GameState, RoleId, Side, StatKey } from './types';
+import { audio } from './audio/audioManager';
+import { finalSfxFor, isInDanger, newlyDangerous, playBgmFor } from './audio/bgmPlan';
+import { MuteButton } from './audio/MuteButton';
+import { useAudioUnlock } from './audio/useAudioUnlock';
 import './reigns.css';
 
 /** 位移超过卡宽的这个比例，松手即算选择。 */
@@ -44,6 +48,52 @@ export function ReignsGame() {
 
   useEffect(() => () => window.clearTimeout(timer.current), []);
 
+  // 音频：第一次手势时解锁；选角页的音乐由 RoleSelect 自己放。
+  useAudioUnlock();
+  /** 上一次是否在危险区：只在边界切换时调用 setTension。 */
+  const dangerRef = useRef(false);
+  /** 上一次的数值，用来找出“首次进入危险区”的那一项。 */
+  const prevStatsRef = useRef<GameState['stats'] | null>(null);
+  /** 已经播过结局音效的结局，防止 StrictMode 重复执行副作用时放两遍。 */
+  const endedRef = useRef<GameState['ending']>(null);
+  const setTension = (on: boolean) => {
+    if (dangerRef.current === on) return;
+    dangerRef.current = on;
+    audio.setTension(on);
+  };
+
+  const inPlay = game !== null && game.ending === null;
+  const playRole = game?.role ?? null;
+  useEffect(() => {
+    if (inPlay && playRole) audio.playBgm(playBgmFor(playRole));
+  }, [inPlay, playRole]);
+
+  // 每次 state 更新后检查危险区。
+  useEffect(() => {
+    if (!game) return;
+    if (game.ending) {
+      if (endedRef.current === game.ending) return;
+      endedRef.current = game.ending;
+      setTension(false);
+      prevStatsRef.current = null;
+      const sfx = finalSfxFor(game.stats);
+      if (sfx) audio.playSfx(sfx);
+      audio.stopBgm();
+      return;
+    }
+    const prev = prevStatsRef.current;
+    if (prev && newlyDangerous(prev, game.stats).length > 0) audio.playSfx('sfx-stat-danger');
+    prevStatsRef.current = game.stats;
+    setTension(isInDanger(game.stats));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game]);
+
+  // 新卡牌进入（第一张卡由“确认角色”的音效覆盖，不重复响）。
+  const turn = game?.turn ?? 0;
+  useEffect(() => {
+    if (inPlay && turn > 0) audio.playSfx('sfx-card-enter');
+  }, [inPlay, turn]);
+
   // 每次选完出现新的“后来……”，停几秒后淡出。
   useEffect(() => {
     if (!game?.lastAftermath) { setAftermathShown(false); return undefined; }
@@ -54,6 +104,7 @@ export function ReignsGame() {
 
   const commit = useCallback((side: Side) => {
     if (exiting || !game || game.ending || !game.current) return;
+    audio.playSfx(side === 'left' ? 'sfx-card-left' : 'sfx-card-right');
     setDragging(false);
     setExiting(side);
     const apply = () => {
@@ -79,6 +130,7 @@ export function ReignsGame() {
 
   const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     if (exiting || e.button > 0) return;
+    audio.playSfx('sfx-card-grab');
     e.currentTarget.setPointerCapture(e.pointerId);
     setAftermathShown(false);
     startX.current = e.clientX - dx;
@@ -98,9 +150,10 @@ export function ReignsGame() {
   const onPointerCancel = () => { setDragging(false); setDx(0); };
 
   const resetCard = () => { setDx(0); setDragging(false); setExiting(null); setAftermathShown(false); setOpenStat(null); };
-  const start = (role: RoleId) => { setGame(newGame(role)); setBackToSelect(false); resetCard(); };
+  const resetAudioState = () => { setTension(false); prevStatsRef.current = null; endedRef.current = null; };
+  const start = (role: RoleId) => { resetAudioState(); setGame(newGame(role)); setBackToSelect(false); resetCard(); };
   /** “再来一局”：回到选角页。 */
-  const restart = () => { setGame(null); setBackToSelect(true); resetCard(); };
+  const restart = () => { resetAudioState(); setGame(null); setBackToSelect(true); resetCard(); };
   /** 同一角色再来一次。 */
   const replay = () => { if (game) start(game.role); };
 
@@ -110,6 +163,7 @@ export function ReignsGame() {
         <header className="reigns-header">
           <h1 className="reigns-title">交易滑牌</h1>
           <p className="reigns-turn"><span className="reigns-sample">示例内容</span></p>
+          <MuteButton />
         </header>
         <RoleSelect onSelect={start} focusHeading={backToSelect} />
       </section>
@@ -139,6 +193,7 @@ export function ReignsGame() {
       <header className="reigns-header">
         <h1 className="reigns-title">交易滑牌 <span className="reigns-role-chip">{roleDef.emoji} {roleDef.name}</span></h1>
         <p className="reigns-turn">{game.ending ? `共 ${game.turn} 回合` : `第 ${game.turn + 1} 回合`} <span className="reigns-sample">示例内容</span></p>
+        <MuteButton />
       </header>
 
       {!game.ending && (
