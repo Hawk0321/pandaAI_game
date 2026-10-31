@@ -18,6 +18,16 @@ import {
   type SfxId,
 } from './audioTypes';
 
+/**
+ * 音频文件所在位置：public/audio/。用 Vite 注入的 BASE_URL 拼接，而不是页面相对路径，
+ * 这样无论页面在 /、/src/reigns/demo.html 还是子路径部署都能找到。
+ * dev 下 BASE_URL 是 '/'；构建后是 vite.config.ts 里的 base（'./'，相对 index.html，正确）。
+ */
+function audioUrl(path: string): string {
+  const base = import.meta.env.BASE_URL || '/';
+  return `${base.endsWith('/') ? base : `${base}/`}audio/${path}`;
+}
+
 const FADE_MS = 600;
 const FILTER_FADE_MS = 300;
 const TENSION_GAIN = Math.pow(10, -2 / 20); // -2 dB
@@ -185,7 +195,7 @@ class AudioManagerImpl implements AudioManager {
           cleanup();
           return;
         }
-        el.src = `./audio/sfx/${id}.${exts[idx]}`;
+        el.src = audioUrl(`sfx/${id}.${exts[idx]}`);
         idx += 1;
         el.play()?.catch((e: unknown) => {
           // 自动播放拦截不是文件问题，别继续换格式
@@ -376,7 +386,7 @@ class AudioManagerImpl implements AudioManager {
         this.onTrackFailed(track);
         return;
       }
-      el.src = `./audio/${resolved.file}.${exts[idx]}`;
+      el.src = audioUrl(`${resolved.file}.${exts[idx]}`);
       idx += 1;
       this.playElement(track);
     };
