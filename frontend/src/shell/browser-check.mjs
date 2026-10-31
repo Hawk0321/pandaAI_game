@@ -118,6 +118,153 @@ async function screenshot(filename) {
   await fs.writeFile(target, Buffer.from(result.data, 'base64'));
   screenshots.push(target);
 }
+async function screenshotElement(selector, filename) {
+  await delay(100);
+  const clip = await evaluate(`(()=>{const element=document.querySelector(${JSON.stringify(selector)});const rect=element.getBoundingClientRect();return {x:Math.max(0,rect.left+scrollX-4),y:Math.max(0,rect.top+scrollY-4),width:Math.min(rect.width+8,document.documentElement.scrollWidth),height:rect.height+8,scale:1}})()`);
+  const result = await page.send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true, clip });
+  const target = path.join(artifactDir, filename);
+  await fs.writeFile(target, Buffer.from(result.data, 'base64'));
+  screenshots.push(target);
+}
+async function screenshotViewport(filename) {
+  // A top-layer dialog is fixed to the viewport, so document clips can displace it.
+  const result = await page.send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
+  const target = path.join(artifactDir, filename);
+  await fs.writeFile(target, Buffer.from(result.data, 'base64'));
+  screenshots.push(target);
+}
+async function mouseClick(selector) {
+  await evaluate(`document.querySelector(${JSON.stringify(selector)}).scrollIntoView({block:'center',inline:'center'})`);
+  await delay(80);
+  const point = await evaluate(`(()=>{const rect=document.querySelector(${JSON.stringify(selector)}).getBoundingClientRect();return {x:rect.left+rect.width/2,y:rect.top+rect.height/2}})()`);
+  await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', ...point });
+  await page.send('Input.dispatchMouseEvent', { type: 'mousePressed', button: 'left', clickCount: 1, ...point });
+  await page.send('Input.dispatchMouseEvent', { type: 'mouseReleased', button: 'left', clickCount: 1, ...point });
+}
+async function keyPress(key) {
+  const code = key === ' ' ? 'Space' : key;
+  const virtualKey = key === ' ' ? 32 : key === 'Enter' ? 13 : 27;
+  // keyDown + text includes the native keypress activation used by Enter on buttons.
+  const text = key === 'Enter' ? '\r' : key === ' ' ? ' ' : '';
+  await page.send('Input.dispatchKeyEvent', { type: text ? 'keyDown' : 'rawKeyDown', key, code, ...(text ? { text, unmodifiedText: text } : {}), windowsVirtualKeyCode: virtualKey, nativeVirtualKeyCode: virtualKey });
+  await page.send('Input.dispatchKeyEvent', { type: 'keyUp', key, code, windowsVirtualKeyCode: virtualKey, nativeVirtualKeyCode: virtualKey });
+}
+async function settleCard() {
+  await evaluate("Promise.all(document.querySelector('.persona-trading-card').getAnimations({subtree:true}).map(animation=>animation.finished.catch(()=>{})))");
+}
+
+const personaArtworks = [
+  ['bull', '冲锋蛮牛'], ['owl', '夜猫研究员'], ['shark', '深海猎鲨'], ['turtle', '稳健老龟'],
+  ['crab', '逆行螃蟹'], ['dolphin', '冲浪海豚'], ['fox', '灵活狐狸'], ['sloth', '树懒观察员'],
+];
+
+async function personaCardChecks(profile, interactions = false) {
+  await waitFor("document.querySelector('.persona-card-art')?.complete && document.querySelector('.persona-card-art').naturalWidth > 0", 'computed persona artwork loaded');
+  const matched = personaArtworks.find(([, name]) => name === profile.persona.name);
+  const expectedArtwork = matched ?? personaArtworks[profile.persona.name === '冲锋熊猫' ? 0 : 6];
+  assert.equal(await evaluate("document.querySelector('#persona-name').textContent"), profile.persona.name);
+  assert.equal(await evaluate(`document.querySelector('.persona-card-art').currentSrc.includes(${JSON.stringify(`persona-${expectedArtwork[0]}`)})`), true, 'artwork matches the computed persona');
+  assert.equal(await evaluate("document.querySelector('.persona-trading-card').classList.contains('is-flipped')"), false, 'a profile opens on the front of its card');
+  await checkWidth('persona card at 375px');
+  if (!interactions) return;
+  const before = await saved();
+  await settleCard();
+  await screenshotElement('.persona-card-column', 'persona-card-front-mobile.png');
+
+  await mouseClick('.persona-art-turn');
+  await waitFor("document.querySelector('.persona-trading-card.is-flipped')", 'mouse artwork flip');
+  assert.equal(await evaluate("document.activeElement === document.querySelector('.persona-flip-button')"), true, 'artwork flip moves focus outside the aria-hidden front face');
+  assert.equal(await evaluate("document.querySelector('.persona-flip-button').getAttribute('aria-pressed')"), 'true');
+  assert.equal(await evaluate("document.querySelector('.persona-card-front').getAttribute('aria-hidden')"), 'true');
+  assert.equal(await evaluate("document.querySelector('.persona-card-back').getAttribute('aria-hidden')"), 'false');
+  assert.equal(await evaluate("document.querySelector('.persona-art-turn').tabIndex"), -1);
+  assert.equal(await evaluate("document.querySelector('.persona-back-return').tabIndex"), 0);
+  assert.equal(await evaluate("document.querySelector('.persona-card-back-content').tabIndex"), 0, 'visible scrolling back face can receive keyboard focus');
+  await settleCard();
+  await checkWidth('persona card back at 375px');
+  await screenshotElement('.persona-card-column', 'persona-card-back-mobile.png');
+  await evaluate("document.querySelector('.persona-flip-button').focus()");
+  await keyPress('Enter');
+  await waitFor("!document.querySelector('.persona-trading-card.is-flipped')", 'Enter flips to front');
+  await settleCard();
+  await keyPress(' ');
+  await waitFor("document.querySelector('.persona-trading-card.is-flipped')", 'Space flips to back');
+  await settleCard();
+  await mouseClick('.persona-back-return');
+  await waitFor("!document.querySelector('.persona-trading-card.is-flipped')", 'back button returns to front');
+  assert.equal(await evaluate("document.activeElement === document.querySelector('.persona-flip-button')"), true, 'back return moves focus outside the aria-hidden back face');
+  assert.equal(await evaluate("document.querySelector('.persona-card-back-content').tabIndex"), -1, 'hidden back face is excluded from keyboard navigation');
+  await settleCard();
+
+  await page.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
+  assert.equal(await evaluate("matchMedia('(prefers-reduced-motion:reduce)').matches"), true);
+  const motion = await evaluate("({animation:getComputedStyle(document.querySelector('.persona-trading-card')).animationName,rotor:getComputedStyle(document.querySelector('.persona-card-rotor')).transitionDuration,art:getComputedStyle(document.querySelector('.persona-card-art')).transitionDuration})");
+  assert.equal(motion.animation, 'none');
+  assert.equal(motion.rotor, '0s');
+  assert.equal(motion.art, '0s');
+  await evaluate("document.querySelector('.persona-flip-button').focus()");
+  await keyPress(' ');
+  await waitFor("document.querySelector('.persona-trading-card.is-flipped')", 'reduced-motion flip still works');
+  await keyPress('Enter');
+  await waitFor("!document.querySelector('.persona-trading-card.is-flipped')", 'reduced-motion return still works');
+  await page.send('Emulation.setEmulatedMedia', { features: [] });
+
+  assert.equal(await evaluate("document.querySelectorAll('.persona-gallery-item').length"), 8);
+  for (const [index, [id, name]] of personaArtworks.entries()) {
+    const selector = `.persona-gallery-item[aria-label="预览${name}插画"]`;
+    await mouseClick(selector);
+    await waitFor(`document.querySelector('.persona-gallery-dialog[open] .persona-preview-content h2')?.textContent === ${JSON.stringify(name)}`, `${name} gallery dialog`);
+    await waitFor("document.querySelector('.persona-gallery-dialog[open] .persona-preview-content > img')?.complete && document.querySelector('.persona-gallery-dialog[open] .persona-preview-content > img').naturalWidth > 0", `${name} full artwork loaded`);
+    assert.equal(await evaluate(`document.querySelector('.persona-gallery-dialog[open] .persona-preview-content > img').currentSrc.includes(${JSON.stringify(`persona-${id}`)})`), true);
+    assert.equal(await evaluate("document.querySelector('.persona-gallery-dialog[open]').contains(document.activeElement)"), true, 'modal receives keyboard focus');
+    assert.equal(await evaluate("(()=>{const rect=document.querySelector('.persona-gallery-dialog[open]').getBoundingClientRect();return rect.left>=0&&rect.right<=innerWidth&&rect.top>=0&&rect.bottom<=innerHeight})()"), true, 'gallery preview fits the mobile viewport');
+    await checkWidth(`${name} gallery at 375px`);
+    if (index === 0) await screenshotViewport('persona-card-gallery-preview-mobile.png');
+    if (index === 0) await keyPress('Escape');
+    else await mouseClick('.persona-gallery-dialog[open] .persona-close-preview');
+    await waitFor("!document.querySelector('.persona-gallery-dialog[open]')", `${name} gallery closed`);
+    assert.equal(await evaluate(`document.activeElement === document.querySelector(${JSON.stringify(selector)})`), true, 'modal restores focus to its gallery button');
+  }
+  assert.equal(await evaluate("[...document.querySelectorAll('.persona-gallery-image img')].every(image=>image.complete&&image.naturalWidth>0)"), true, 'all eight thumbnails loaded');
+  assert.equal(await evaluate("new Set([...document.querySelectorAll('.persona-gallery-image img')].map(image=>image.currentSrc)).size"), 8, 'all eight roles have distinct artwork resources');
+  await evaluate("document.querySelector('.persona-gallery-strip').scrollLeft=0");
+  await screenshotElement('.persona-gallery', 'persona-card-gallery-mobile.png');
+  assert.deepEqual((await saved()).profile, before.profile, 'gallery and flip actions do not mutate the Profile');
+  assert.deepEqual((await saved()).events, before.events, 'gallery and flip actions do not invent game events');
+  assert.equal(await evaluate("document.querySelector('#persona-name').textContent"), profile.persona.name, 'gallery never changes the computed persona');
+
+  const priorDownloads = new Set(await fs.readdir(downloadDir));
+  await evaluate("(()=>{globalThis.__C_QA_DRAW_TEXT=[];globalThis.__C_QA_FILL_TEXT=CanvasRenderingContext2D.prototype.fillText;CanvasRenderingContext2D.prototype.fillText=function(text,...args){globalThis.__C_QA_DRAW_TEXT.push(String(text));return globalThis.__C_QA_FILL_TEXT.call(this,text,...args)};return true})()");
+  let drawn;
+  let exportedFile;
+  try {
+    await click('保存人物卡图片');
+    exportedFile = await poll(async () => (await fs.readdir(downloadDir)).find(name => name.endsWith('.png') && !priorDownloads.has(name)), 'persona PNG download');
+    await waitFor("document.querySelector('.persona-save-status').textContent.includes('人物卡图片已生成')", 'persona PNG generated successfully');
+    drawn = await evaluate('globalThis.__C_QA_DRAW_TEXT');
+  } finally {
+    await evaluate('CanvasRenderingContext2D.prototype.fillText=globalThis.__C_QA_FILL_TEXT;delete globalThis.__C_QA_FILL_TEXT;delete globalThis.__C_QA_DRAW_TEXT;true');
+  }
+  const exportedBytes = await fs.readFile(path.join(downloadDir, exportedFile));
+  assert.deepEqual([...exportedBytes.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10], 'valid PNG signature');
+  assert.equal(exportedBytes.readUInt32BE(16), 900);
+  assert.equal(exportedBytes.readUInt32BE(20), 1320);
+  const artworkNumber = String(personaArtworks.indexOf(expectedArtwork) + 1).padStart(2, '0');
+  assert.deepEqual(drawn.slice(0, 3), ['PANDAAI · 交易人格', matched ? `图鉴 ${artworkNumber}` : '趣味人物卡', profile.persona.name]);
+  const footerIndex = drawn.indexOf('趣味标签 · 不代表真实交易能力');
+  assert.ok(footerIndex >= 3);
+  assert.equal(drawn.slice(3, footerIndex).join(''), profile.persona.tagline.replace(/\n/g, ''), 'PNG draws only the public persona tagline');
+  assert.deepEqual(drawn.slice(footerIndex), matched ? ['趣味标签 · 不代表真实交易能力'] : ['趣味标签 · 不代表真实交易能力', '通用角色插画']);
+  assert.equal(drawn.join('\n').includes(profile.session_id), false, 'no session identifier is drawn');
+  for (const key of ['session_id', 'event_seqs', 'level_id', 't_ms', 'clues_opened', 'hold_step', 'stop_triggered', 'think_ms']) assert.equal(drawn.join('\n').includes(key), false, `PNG excludes raw behavior field ${key}`);
+  for (const event of before.events) assert.equal(drawn.join('\n').includes(JSON.stringify(event)), false, 'no serialized raw event is drawn');
+  const preservedExport = path.join(artifactDir, `persona-card-export-${expectedArtwork[0]}.png`);
+  await fs.copyFile(path.join(downloadDir, exportedFile), preservedExport);
+  screenshots.push(preservedExport);
+  assert.deepEqual((await saved()).profile, before.profile, 'saving a card does not mutate its Profile');
+  assert.deepEqual((await saved()).events, before.events, 'saving a card does not append raw behavior events');
+  checks.push('persona cards: artwork matches computed persona; mouse/Enter/Space flip, aria states, reduced motion, all eight distinct gallery images, read-only previews, 375px layout', 'persona PNG: valid 900×1320 download; captured canvas text contains only public card labels/name/tagline and no session, evidence, or raw behavior');
+}
 async function cleanReload() {
   await evaluate(`(()=>{for(const key of Object.keys(localStorage))if(key.startsWith(${JSON.stringify(storageKey)}))localStorage.removeItem(key);return true})()`);
   await navigatePage('Page.reload', { ignoreCache: true });
@@ -221,6 +368,7 @@ async function actualSample() {
     assert.equal(await evaluate("document.querySelectorAll('.dimension-card').length"), 6);
     assert.equal(await evaluate("document.body.innerText.includes('固定示例画像')"), false);
     personas.add(first.profile.persona.name);
+    await personaCardChecks(first.profile, mode === 'research');
     if (mode === 'flat') for (const id of ['calibration','risk_control']) assert.equal(first.profile.dimensions.find(d=>d.id===id).score,null);
     await evaluate("document.querySelectorAll('details').forEach(e=>e.open=true)");
     assert.ok(await evaluate("document.querySelectorAll('.event-detail').length > 0"));
@@ -244,6 +392,7 @@ async function actualSample() {
       validateEvents(second);
       assert.equal(second.completed.length,5);
       assert.equal(second.profile.round,2);
+      await personaCardChecks(second.profile);
       assert.equal(second.events.find(e=>e.type==='level_start'&&e.level_id===supplement).data.is_supplementary,true);
       assert.deepEqual(second.events.filter(e=>e.type==='profile_view').map(e=>e.data.round),[1,2]);
       assert.ok(second.profile.dimensions.some(d=>d.evidence.some(e=>e.level_id===supplement)));
@@ -349,9 +498,9 @@ async function fullProtocolFixture() {
   assert.equal(roundOne.completed.length, 4);
   assert.equal(roundOne.profile.is_sample, true);
   assert.equal(await evaluate("document.body.innerText.includes('固定示例画像')"), false, 'computed sample profile is not mislabeled as the fixed fixture');
-  assert.equal(await evaluate("document.querySelectorAll('.confidence-high').length"), 2);
-  assert.equal(await evaluate("document.querySelectorAll('.confidence-medium').length"), 2);
-  assert.equal(await evaluate("document.querySelectorAll('.confidence-low').length"), 2);
+  assert.equal(await evaluate("document.querySelectorAll('.dimension-card .confidence-high').length"), 2);
+  assert.equal(await evaluate("document.querySelectorAll('.dimension-card .confidence-medium').length"), 2);
+  assert.equal(await evaluate("document.querySelectorAll('.dimension-card .confidence-low').length"), 2);
   assert.equal(await evaluate("document.body.innerText.includes('证据不足，暂不评分')"), true, 'null scores stay unscored');
   await evaluate("document.querySelectorAll('details').forEach(element=>element.open=true)");
   assert.equal(await evaluate("document.querySelectorAll('.event-detail').length"), 6, 'computed sample evidence links matching current-session events');

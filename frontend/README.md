@@ -33,6 +33,61 @@ npm run preview
 - 画像页仅展示 `analyze()` 返回的内容：人物卡、能力/偏好两栏、置信度、证据、冲突、不确定项、补充理由和第二轮 `changes`。真实画像的事件编号可展开本局动作；固定示例的编号不误关联本局同序号事件。
 - 导出仅下载 Profile JSON，不附加原始事件日志；没有把原始行为公开分享的入口。
 
+### 插画交易人格卡（2026-10-31）
+
+画像页新增八种动物人格插画、揭卡/翻面、图鉴预览和人物卡图片下载。角色名称、tagline、能力数值及卡背概览均读取 D 的 Profile；图鉴只是插画预览，不修改本局画像、不新增稀有度或人物等级。未知人物名保留原值并使用明确标记的通用插画。保存 PNG 只接收 `Profile.persona` 和插画，不包含会话 ID、原始事件、证据列表或私密行为记录；原 Profile JSON 导出继续保留。
+
+素材位于 `src/shell/assets/persona-{bull,owl,shark,turtle,crab,dolphin,fox,sloth}.webp`，每张 1024×1024、约 225–304 KB，共约 2.1 MB。8 张原创插画由 OpenAI 内置 image_gen 生成，统一使用深翡翠绿、古铜光和手绘桌游风格；仅做尺寸与 WebP 编码优化，没有引入外部角色 IP、付费图库或新运行依赖。图片文字由页面/Canvas 绘制，避免生成图片中的错字；减少动态偏好会关闭开卡和翻面过渡。
+
+<details>
+<summary>生成提示词与素材记录</summary>
+
+下列七个角色使用 `shared_prompt + prompt_suffix`，猫头鹰使用独立 prompt。工具为内置 image_gen，未使用 API/CLI fallback。
+
+```json
+{
+  "tool": "built-in image_gen",
+  "shared_prompt": "Use case: stylized-concept. Asset type: one square character illustration for a collectible trading-personality card in a mobile financial-learning game. Original anthropomorphic animal adventurer. Hand-painted premium board-game illustration with textured gouache and finely brushed details, charming, expressive and adventurous, strong appealing silhouette, polished fantasy game concept art, not corporate clip art. Square 1024 x 1024 composition, one central character fills 75% of the frame with room around the head and feet/fins. Rich deep emerald and near-black teal atmospheric backdrop, warm copper-gold light, restrained mint highlights, tactile fabric and brass details, dramatic soft lighting. No writing, letters, numbers, logos, watermarks, UI, card border, money symbols or performance claims. No existing copyrighted characters. Opaque background. ",
+  "roles": [
+    {
+      "asset": "src/shell/assets/persona-bull.webp",
+      "prompt_suffix": "A spirited copper-brown bull with large rounded horns, wearing a tailored dark-teal adventurer coat and a flowing burnt-orange scarf, charging forward across a stone bridge with confident energy. Wind catches the scarf; small blank parchment charts fly behind, abstract emerald mountain skyline. It is bold and charming rather than angry or violent. No weapons. This is the Charging Bull."
+    },
+    {
+      "asset": "src/shell/assets/persona-shark.webp",
+      "prompt_suffix": "An agile blue-gray anthropomorphic shark explorer, in an elegant deep-teal captain's waistcoat with brass details, swimming with a small brass magnifying lens studying an unlabeled translucent research chart in deep emerald water. Soft underwater light rays and a mysterious reef behind. Intelligent and focused, not frightening, no open toothy mouth. This is the Deep Sea Research Hunter."
+    },
+    {
+      "asset": "src/shell/assets/persona-turtle.webp",
+      "prompt_suffix": "A thoughtful old green tortoise adventurer with kind wise eyes, a beautifully textured protective shell and a teal travelling cloak, carefully holding a brass compass and a small closed ledger. Standing securely on a mossy stone in a tranquil emerald forest, warm lantern light. Charming and resolute. No numeric compass labels. This is the Steady Tortoise."
+    },
+    {
+      "asset": "src/shell/assets/persona-crab.webp",
+      "prompt_suffix": "A lively coral-orange crab adventurer with expressive eyes and a dark-teal explorer scarf, moving sideways across a tide pool against a flowing emerald current. One claw holds a small unlabeled brass compass, the other raised playfully. Painterly splashes and rounded tide rocks, copper sunset glow. Original charming fantasy game character. This is the Contrarian Crab."
+    },
+    {
+      "asset": "src/shell/assets/persona-dolphin.webp",
+      "prompt_suffix": "A joyful silver-blue dolphin adventurer with a flowing teal-and-copper neck scarf, surfing along the crest of a luminous emerald ocean wave. Dynamic upward curved body, clever friendly eyes, arcs of spray and distant sunset glow. No surfboard, no clothing covering the dolphin's body, fins anatomically recognizable. This is the Trend Surfer Dolphin."
+    },
+    {
+      "asset": "src/shell/assets/persona-fox.webp",
+      "prompt_suffix": "A clever red-orange fox adventurer with a white chest and rich fluffy tail, wearing a finely detailed dark-teal waistcoat with brass clasps, holding three small blank strategy cards and choosing between two winding emerald forest paths. Warm copper lantern glow, composed and adaptable expression. This is the Flexible Fox. No playing-card symbols or writing."
+    },
+    {
+      "asset": "src/shell/assets/persona-sloth.webp",
+      "prompt_suffix": "A relaxed but attentive brown sloth observer with gentle expressive eyes, wearing a small teal explorer cape and brass-trimmed round spectacles. Resting comfortably on a sturdy emerald rainforest branch while studying the distance through small brass binoculars, a closed blank field notebook nearby. Peaceful mist and warm lantern-like firefly light, deliberate and perceptive rather than sleepy. This is the Patient Sloth Observer."
+    }
+  ],
+  "owl": {
+    "asset": "src/shell/assets/persona-owl.webp",
+    "prompt": "Use case: stylized-concept. Asset type: square character illustration for a collectible trading-personality card in a mobile financial-learning game. Create one original anthropomorphic owl researcher, full character visible, expressive intelligent eyes, small round spectacles, a dark teal explorer waistcoat, studying a few unlabeled paper charts under a warm brass desk lamp. A tiny crescent moon and atmospheric observatory shapes behind it. Hand-painted premium board-game illustration, textured gouache and finely brushed details, charming and adventurous, strong appealing silhouette, polished game concept art rather than corporate clip art. Portrait-like square composition 1024 x 1024, central character fills 75% of the frame with room around ears and feet. Rich deep emerald and near-black teal backdrop, warm copper-gold highlights and restrained mint glow. Soft dramatic cinematic light. This is the Night Owl Researcher personality. NO writing, letters, numbers, logos, watermarks, UI, card border, monetary symbols, or performance claims. No existing copyrighted characters. Opaque background."
+  },
+  "optimization": "PNG originals retained in Codex generated_images; project assets resized to 1024px and encoded as WebP quality 84 with bundled Sharp. No semantic content edits."
+}
+```
+
+</details>
+
 ### 自动验证
 
 ```sh
@@ -58,7 +113,7 @@ npm run test:browser
 
 国内手机网络实测：ARKimo-mo 已按“关闭 Wi-Fi 和代理、使用国内移动网络打开公开链接，完成开始 → 观望提交 → 揭晓 → 画像 → 导出”的验收请求确认“已在国内移动网络完整跑通”。运营商和手机浏览器型号未提供；该记录来源于用户实机确认，区别于桌面浏览器手机模拟。
 
-来源：React、React DOM、Vite、官方 React 插件、TypeScript；开发测试使用 Vitest 和本机 Chrome/Edge 的 CDP；真实关卡来自 Panda Data，测试夹具来自本仓库模拟样例；新增 C 模块代码由 OpenAI Codex 协助生成。未复制外部游戏代码或引入外部图片。原有 `PandaAI_Skill_Card_Demo.html` 保留，仅供视觉参考。
+来源：React、React DOM、Vite、官方 React 插件、TypeScript；开发测试使用 Vitest 和本机 Chrome/Edge 的 CDP；真实关卡来自 Panda Data，测试夹具来自本仓库模拟样例；新增 C 模块代码由 OpenAI Codex 协助生成。人格插画由内置 image_gen 生成，提示词见上节。未复制外部游戏代码。原有 `PandaAI_Skill_Card_Demo.html` 保留，仅供视觉参考。
 
 集成状态与剩余交付事项见 [集成验收与缺口](../docs/integration-status.md)。旧站 2026-10-30 的手机验收仅适用于旧版，发布新版后需重新验证。
 

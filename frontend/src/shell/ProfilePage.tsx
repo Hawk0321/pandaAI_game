@@ -1,4 +1,5 @@
 import type { Dimension, GameEvent, Profile } from '../shared/protocol';
+import { PersonaCard } from './PersonaCard';
 
 interface ProfilePageProps {
   profile: Profile;
@@ -53,13 +54,13 @@ function generatedTime(value: string) {
 
 export function ProfilePage({ profile, events, nextLevelId, onSupplement, onExport, onFinish, onRestart, busy = false, storageWarning, fixedExample = false }: ProfilePageProps) {
   return <div className="profile-page page-enter">
-    <section className="page-heading"><p className="eyebrow">第 {profile.round} 次画像 · {profile.round === 2 ? '补充观察之后' : '从选择里认识自己'}</p><h1>属于你的交易观察。</h1><p>能力与偏好分别看。结论背后的证据，比一个标签更重要。</p></section>
+    <section className="page-heading"><p className="eyebrow">第 {profile.round} 次画像 · {profile.round === 2 ? '补充观察之后' : '从选择里认识自己'}</p><h1>你的交易人格，亮牌。</h1><p>翻开人物卡，再看看选择留下的证据。</p></section>
 
     {fixedExample ? <p className="notice sample-notice">固定示例画像：内容与仓库示例一致，不能视为你本次操作的计算结论。证据里的事件编号属于样例。</p>
       : profile.is_sample && <p className="notice sample-notice">本画像含示例数据。请结合本局行为证据解读，模拟行情不能证明真实交易表现。</p>}
     {storageWarning && <p role="status" className="notice">{storageWarning}</p>}
 
-    <section className="persona-card" aria-labelledby="persona-name"><div className="persona-emoji" aria-hidden="true">{profile.persona.emoji}</div><div><p className="eyebrow">{profile.persona.is_fun_label ? '趣味人物卡' : '人物卡'}</p><h2 id="persona-name">{profile.persona.name}</h2><p className="persona-tagline">{profile.persona.tagline}</p></div><p className="persona-summary">{profile.summary}</p></section>
+    <PersonaCard profile={profile} />
 
     <div className="profile-columns">
       {(['ability', 'preference'] as const).map(group => <section className="dimension-group" key={group} aria-labelledby={`dimension-group-${group}`}><div className="group-heading"><h2 id={`dimension-group-${group}`}>{group === 'ability' ? '能力观察' : '交易偏好'}</h2><p>{group === 'ability' ? '如何使用证据、校准判断和控制风险' : '习惯怎样研究、选择方向和承担风险'}</p></div>{profile.dimensions.filter(dimension => dimension.group === group).map(dimension => <DimensionCard key={dimension.id} dimension={dimension} events={events} profile={profile} fixedExample={fixedExample} />)}</section>)}
