@@ -19,6 +19,7 @@ import './reigns.css';
 import './card-motion.css';
 import './light-theme.css';
 import './game-stage.css';
+import './mobile-polish.css';
 
 /** 位移超过卡宽的这个比例，松手即算选择。 */
 const COMMIT_RATIO = 0.3;
@@ -50,9 +51,12 @@ export function ReignsGame() {
   const cardRef = useRef<HTMLDivElement>(null);
   const startX = useRef(0);
   const [aftermathShown, setAftermathShown] = useState(false);
+  const [statDelta, setStatDelta] = useState<Partial<Record<StatKey, number>>>({});
   const timer = useRef<number | undefined>(undefined);
+  const frame = useRef<number | undefined>(undefined);
+  const nextDx = useRef(0);
 
-  useEffect(() => () => window.clearTimeout(timer.current), []);
+  useEffect(() => () => { window.clearTimeout(timer.current); if (frame.current) cancelAnimationFrame(frame.current); }, []);
 
   // 音频：第一次手势时解锁；选角页的音乐由 RoleSelect 自己放。
   useAudioUnlock();
@@ -111,6 +115,9 @@ export function ReignsGame() {
   const commit = useCallback((side: Side) => {
     if (exiting || !game || game.ending || !game.current) return;
     audio.playSfx(side === 'left' ? 'sfx-card-left' : 'sfx-card-right');
+    const changes = Object.fromEntries(STAT_KEYS.map((key) => [key, game.current![side].effects[key]]).filter((entry): entry is [StatKey, number] => typeof entry[1] === 'number'));
+    setStatDelta(changes);
+    if (navigator.vibrate && !prefersReducedMotion()) navigator.vibrate(8);
     setDragging(false);
     setExiting(side);
     const apply = () => {
@@ -144,7 +151,9 @@ export function ReignsGame() {
   };
   const onPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
     if (!dragging) return;
-    setDx(e.clientX - startX.current);
+    nextDx.current = e.clientX - startX.current;
+    if (frame.current) return;
+    frame.current = requestAnimationFrame(() => { setDx(nextDx.current); frame.current = undefined; });
   };
   const onPointerUp = (e: ReactPointerEvent<HTMLDivElement>) => {
     if (!dragging) return;
@@ -155,7 +164,7 @@ export function ReignsGame() {
   };
   const onPointerCancel = () => { setDragging(false); setDx(0); };
 
-  const resetCard = () => { setDx(0); setDragging(false); setExiting(null); setAftermathShown(false); setOpenStat(null); };
+  const resetCard = () => { setDx(0); setDragging(false); setExiting(null); setAftermathShown(false); setOpenStat(null); setStatDelta({}); };
   const resetAudioState = () => { setTension(false); prevStatsRef.current = null; endedRef.current = null; };
   const start = (role: RoleId) => { resetAudioState(); setGame(newGame(role)); setBackToSelect(false); resetCard(); };
   /** “再来一局”：回到选角页。 */
@@ -224,7 +233,7 @@ export function ReignsGame() {
               const open = openStat === key;
               return (
                 <li key={key} className={`reigns-stat${low ? ' reigns-stat-danger' : ''}${affected.includes(key) ? ' reigns-stat-affected' : ''}`}>
-                  <div className="reigns-stat-heading"><img className="reigns-stat-icon" src={statIcon(game.role, key, value)} alt="" width="32" height="32" /><strong>{value}</strong></div>
+                  <div className="reigns-stat-heading"><img className="reigns-stat-icon" src={statIcon(game.role, key, value)} alt="" width="32" height="32" /><strong>{value}</strong>{statDelta[key] !== undefined && <span key={game.turn} className={`reigns-stat-delta${statDelta[key]! > 0 ? ' is-up' : ' is-down'}`} aria-hidden="true">{statDelta[key]! > 0 ? '+' : ''}{statDelta[key]}</span>}</div>
                   <button type="button" className="reigns-stat-name" title={def.meaning} aria-expanded={open} aria-controls="reigns-stat-meaning" onClick={() => setOpenStat(open ? null : key)}>{def.label}</button>
                   <span className="reigns-dot-slot" aria-hidden="true">{affected.includes(key) && <img className="reigns-hint-icon" src={hintIcon(key)} alt="" width="12" height="12" />}</span>
                   <div className="reigns-bar" role="meter" aria-label={def.label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={value}><div className={`reigns-bar-fill${low ? ' reigns-bar-danger' : ''}`} style={{ width: `${value}%` }} /></div>
@@ -263,8 +272,10 @@ export function ReignsGame() {
               {card.adventure && <span className="reigns-adv-tag">奇遇</span>}
               <div className="reigns-card-portrait">
                 <span className="reigns-card-index">EVENT / {String(game.turn + 1).padStart(2, '0')}</span>
+                <span className="reigns-card-watermark" aria-hidden="true">{scene.code.split(' / ')[0]}</span>
                 {cardArtwork && <img className="reigns-speaker-art" src={cardArtwork} alt="" width="144" height="144" />}
                 <span className="reigns-card-role">{card.speaker}</span>
+                <span className="reigns-card-seal" aria-hidden="true">P</span>
               </div>
               <div className="reigns-card-body" aria-live="polite" aria-atomic="true">
                 <p className="reigns-speaker">{card.speaker}发来一张决策卡</p>
@@ -295,7 +306,7 @@ export function ReignsGame() {
               </button>
             ))}
           </div>
-          <p className="reigns-help"><span>拖动决策卡</span><i /> <span>或使用 A / D 与方向键</span></p>
+          <p className="reigns-help"><span>拖动决策卡</span><i /> <span>滑向你的选择</span></p>
         </main>
       )}
         {game.ending && <div className="reigns-ending-scene-copy"><p>{SCENE_COPY.ending.kicker}</p><h2>{SCENE_COPY.ending.title}</h2><span>{SCENE_COPY.ending.subtitle}</span></div>}
