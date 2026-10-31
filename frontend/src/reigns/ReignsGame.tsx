@@ -18,6 +18,7 @@ import { ROLE_SCENES, SCENE_COPY } from './sceneArt';
 import './reigns.css';
 import './card-motion.css';
 import './light-theme.css';
+import './game-stage.css';
 
 /** 位移超过卡宽的这个比例，松手即算选择。 */
 const COMMIT_RATIO = 0.3;

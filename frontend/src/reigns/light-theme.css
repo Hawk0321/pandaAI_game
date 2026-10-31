@@ -10,7 +10,9 @@
 .reigns-scene-select { --scene-rgb: 167, 117, 55; --scene-accent: #9a6a30; background: radial-gradient(ellipse at 50% 0%, #ffffffe6, transparent 52%), linear-gradient(160deg, #f7f3ea, #e8e1d4); }
 .reigns-scene-ending { --scene-rgb: 151, 109, 47; --scene-accent: #936128; background: radial-gradient(ellipse at 50% 0%, #fffdf4eb, transparent 50%), linear-gradient(160deg, #f5f0e4, #e5ddce); }
 .reigns-ambient { opacity: .75; }
-.reigns-root { --text-secondary: #55646f; --text-muted: #687681; --up: #bd4e47; }
+.reigns-root { --text-secondary: #55646f; --text-muted: #687681; --up: #bd4e47; color: var(--rg-text); }
+.reigns-root :where(h1,h2,h3,h4,p,span,strong,button,summary) { color: inherit; }
+.reigns-header, .reigns-title, .reigns-select-title, .reigns-scene-intro h2, .reigns-ending-scene-copy h2 { color: #24313b; }
 .reigns-brand-mark { color: #fffdf7; }
 .reigns-turn, .reigns-chapter, .reigns-card-index, .reigns-choice-copy small, .reigns-choice-tick, .reigns-help { color: var(--rg-muted); }
 .reigns-sample { color: #765a31; border-color: #cdbb9c; background: #fff9e9; }
@@ -45,7 +47,7 @@
 .reigns-role { color: var(--rg-text); background: linear-gradient(155deg, #ffffff, #f8f4e9); border-color: #fff; box-shadow: 0 14px 32px -24px #31445f66, 0 0 0 1px #cbd3da; }
 .reigns-role:hover:not(:disabled) { background: #fffdf6; border-color: var(--scene-accent); transform: translateY(-3px); }
 .reigns-role-name { color: var(--scene-accent); }
-.reigns-role-tagline, .reigns-role-meaning { color: #5b6a74; }
+.reigns-role-tagline, .reigns-role-stat-meaning, .reigns-role-intro { color: #5b6a74; }
 .reigns-role-stat { background: #edf1f2; border: 1px solid #dce4e7; }
 .reigns-role-stat-label { color: #35444e; }
 .reigns-role-soon, .reigns-role-soon:hover:not(:disabled) { background: #ecece7; border-color: #c6cbc9; }
@@ -55,7 +57,8 @@
 .reigns-ending-special { background: linear-gradient(160deg, #fffdf4, #f4e7c9); border-color: #c6a565; box-shadow: 0 12px 30px -22px #a7844466; }
 .reigns-ending-special .reigns-ending-title { color: #855928; }
 .reigns-ending-desc, .reigns-summary-turns, .reigns-summary-name, .reigns-ref-reason, .reigns-ref-provider, .reigns-ref-desc, .reigns-codex-note, .reigns-footnote { color: #64716f; }
-.reigns-summary, .reigns-summary-bar { background: #f6f3e9; }
+.reigns-summary-bar { background: #e2ddd1; }
+.reigns-summary-value, .reigns-summary-turns strong { color: #2e393f; }
 .reigns-summary-fill { background: #b78b43; }
 .reigns-persona { --rg-persona: #9a6a30; --rg-persona-soft: #f8f0df; }
 .reigns-persona-name, .reigns-persona-tagline, .reigns-why, .reigns-codex-reached, .reigns-codex-summary, .reigns-ref-name { color: #3b423e; }
