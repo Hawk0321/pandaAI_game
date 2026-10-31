@@ -36,3 +36,58 @@
   .play-clues > .clue-card > .clue-inner, .play-level .market-chart g.candle-up, .play-level .market-chart g.candle-down { transition: none; }
   .play-level .chart-decision, .play-level .chart-decision-label, .play-level .chart-future-zone, .reveal-progress::before { animation: none; }
 }
+
+/* ---- 线索卡背面：人话结论 + 方向标 + 小图 ---- */
+/* 没翻开的卡只按正面高度排版（背面叠在后面），翻开后再按背面内容撑高，避免一排卡被最高的那张撑出大片空白。 */
+.play-clues { align-items: start; }
+.play-clues > .clue-card:not(.is-open) .clue-front { position: relative; inset: auto; }
+.play-clues > .clue-card:not(.is-open) .clue-back { position: absolute; inset: 0; min-height: 0; overflow: hidden; }
+.play-clues > .clue-card.is-open .clue-front { position: absolute; inset: 0; }
+.play-clues > .clue-card.is-open .clue-back { position: relative; }
+.clue-back { gap: 9px; }
+.clue-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px 8px; width: 100%; }
+.clue-head strong { white-space: nowrap; }
+.clue-head strong { font-size: 13px; }
+.clue-lean { font-style: normal; font-size: 11px; font-weight: 650; padding: 2px 8px; border-radius: 999px; border: 1px solid currentColor; white-space: nowrap; }
+.clue-lean.lean-up { color: var(--up); }
+.clue-lean.lean-down { color: var(--down); }
+.clue-lean.lean-flat { color: var(--text-muted); }
+.clue-verdict { font-size: 13px; line-height: 1.7; color: var(--ivory, #f1ece0); }
+.clue-chart { display: block; width: 100%; height: 38px; overflow: visible; }
+.clue-chart polyline { stroke: var(--gold, #f2c261); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.clue-chart rect { fill: #f2c26150; }
+.clue-chart rect.is-recent { fill: var(--gold, #f2c261); }
+.clue-meter { display: block; width: 100%; }
+.clue-meter-track { position: relative; display: block; height: 8px; border-radius: 99px; background: var(--ink-3, #1d2336); overflow: hidden; }
+.clue-meter-track i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, var(--gold-deep, #c99a3d), var(--gold, #f2c261)); border-radius: 99px; }
+.clue-meter-track b { position: absolute; left: 50%; top: -1px; bottom: -1px; width: 1px; background: #f1ece099; }
+.clue-range i { inset: -2px auto -2px; width: 3px; border-radius: 2px; background: var(--gold, #f2c261); transform: translateX(-50%); }
+.clue-range::after { content: ''; position: absolute; left: 80%; top: 0; bottom: 0; width: 1px; background: #f1ece0aa; }
+.clue-meter small { display: block; margin-top: 5px; font-size: 11px; color: var(--text-muted, #8e8f9a); }
+.clue-caveat { font-size: 11px; line-height: 1.6; color: var(--text-muted, #8e8f9a); }
+.clue-back .clue-raw { margin-top: auto; padding-top: 7px; border-top: 1px dashed var(--line, #272d42); font-size: 10px; line-height: 1.6; color: #6a6e7d; width: 100%; }
+.clue-card.is-open .clue-back > span.clue-raw { color: #6a6e7d; font-size: 10px; }
+.clue-card.is-open .clue-back > span.clue-caveat { color: var(--text-muted, #8e8f9a); font-size: 11px; }
+.clue-card.is-open .clue-back > span.clue-verdict { color: var(--ivory, #f1ece0); font-size: 13px; }
+
+/* ---- 综合解读卡 ---- */
+.digest-card { margin: 4px 0 24px; border: 1px solid var(--line, #272d42); border-radius: 14px; background: linear-gradient(180deg, #1a1d2b, var(--ink-1, #10141f)); overflow: hidden; }
+.digest-card[data-open] { border-color: var(--gold-deep, #c99a3d); }
+.play-level .digest-toggle { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 12px 16px; background: transparent; border: 0; border-radius: 0; color: var(--ivory, #f1ece0); text-align: left; font-weight: 400; box-shadow: none; }
+.play-level .digest-toggle:hover:not(:disabled) { background: #ffffff08; }
+.digest-icon { display: grid; place-items: center; flex: 0 0 auto; width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(180deg, var(--gold-soft, #f7d98f), var(--gold, #f2c261)); color: var(--gold-ink, #1d1707); font-size: 15px; }
+.digest-title { display: flex; flex-direction: column; flex: 1; min-width: 0; gap: 1px; }
+.digest-title strong { font-size: 14px; font-weight: 650; }
+.digest-title small { font-size: 11px; color: var(--text-muted, #8e8f9a); }
+.digest-chevron { font-size: 20px; color: var(--gold, #f2c261); }
+.digest-body { padding: 4px 18px 18px; display: grid; gap: 14px; }
+.digest-headline { margin: 0; font-size: 15px; line-height: 1.7; font-weight: 600; color: var(--ivory, #f1ece0); }
+.digest-reads, .digest-facts ul, .digest-missing ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.digest-reads li { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.7; color: var(--text-secondary, #b9b8b1); }
+.digest-reads li .clue-lean { flex: 0 0 auto; margin-top: 2px; }
+.digest-reads li b, .digest-missing li b { color: var(--ivory, #f1ece0); font-weight: 600; }
+.digest-facts h4, .digest-missing h4 { margin: 0 0 6px; font-size: 11px; letter-spacing: .08em; color: var(--gold-deep, #c99a3d); font-weight: 600; }
+.digest-facts li, .digest-missing li { font-size: 13px; line-height: 1.7; color: var(--text-secondary, #b9b8b1); padding-left: 14px; position: relative; }
+.digest-facts li::before, .digest-missing li::before { content: ''; position: absolute; left: 0; top: .72em; width: 5px; height: 5px; border-radius: 50%; background: var(--line-strong, #3a4260); }
+.digest-wrap { margin: 0; font-size: 13px; color: var(--text-secondary, #b9b8b1); }
+.digest-note { margin: 0; padding-top: 12px; border-top: 1px dashed var(--line, #272d42); font-size: 11px; line-height: 1.7; color: var(--text-muted, #8e8f9a); }

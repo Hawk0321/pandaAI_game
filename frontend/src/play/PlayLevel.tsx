@@ -4,6 +4,9 @@ import { MarketChart } from '../shell/MarketChart';
 import { checkStop, emptyAccount, pnl, targetPosition, trade } from './trading';
 import type { Action } from './trading';
 import { prefersReducedMotion, scheduleReveal } from './reveal';
+import { ClueBack } from './ClueFace';
+import { DigestCard } from './DigestCard';
+import { clueName, clueTeaser } from './clueView';
 import './play.css';
 
 export function PlayLevel(props: PlayLevelProps): JSX.Element {
@@ -123,11 +126,12 @@ function Round({ level, isSupplementary, loadReveal, emit, onDone }: PlayLevelPr
         const isLocked = !isOpen && clue.cost > budget;
         return <button type="button" key={clue.id} className={`clue-card${isOpen ? ' is-open' : ''}${isLocked ? ' is-locked' : ''}`} aria-expanded={isOpen} disabled={isOpen || isLocked} onClick={() => open(clue.id)}>
           <span className="clue-inner">
-            <span className="clue-face clue-front" aria-hidden={isOpen}><strong>{clue.title} · {clue.cost} 点</strong><span>{isLocked ? `研究点不足（还剩 ${budget} 点），翻不开` : '点击翻开线索'}</span></span>
-            <span className="clue-face clue-back" aria-hidden={!isOpen}><strong>{clue.title} · {clue.cost} 点</strong><span>{clue.text}</span></span>
+            <span className="clue-face clue-front" aria-hidden={isOpen}><strong>{clueName(clue)} · {clue.cost} 点</strong><span>{isLocked ? `研究点不足（还剩 ${budget} 点），翻不开` : clueTeaser(clue)}</span></span>
+            <span className="clue-face clue-back" aria-hidden={!isOpen}><ClueBack clue={clue} /></span>
           </span>
         </button>;
       })}</div>
+      <DigestCard bars={level.bars} clues={level.clues} opened={opened} budget={budget} />
       <div className="decision-grid"><fieldset><legend>方向{side === null ? '：必选' : ''}</legend>{(['long','flat','short'] as const).map((value, i) => <button type="button" key={value} aria-pressed={side === value} onClick={() => { setSide(value); if (value === 'flat') { setSize(0); } else if (size === 0) setSize(null); }}>{['做多','观望','做空'][i]}</button>)}</fieldset>
       <fieldset disabled={side === null || side === 'flat'}><legend>仓位{side === 'flat' ? '：观望为 0' : side === null ? '：先选方向' : size === null ? '：必选' : ''}</legend>{[0.2,0.5,1].map((value, i) => <button type="button" key={value} aria-pressed={size === value} onClick={() => setSize(value)}>{['轻仓 20%','中仓 50%','重仓 100%'][i]}</button>)}</fieldset>
       <fieldset><legend>信心{confidence === null ? '：必选' : ''}</legend>{[1,2,3,4,5].map(value => <button type="button" key={value} aria-pressed={confidence === value} onClick={() => setConfidence(value)}>{value}</button>)}<small>1 没把握 · 5 很确定</small></fieldset>
