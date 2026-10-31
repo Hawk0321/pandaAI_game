@@ -6,7 +6,7 @@ import { ALL_CARDS } from './allCards';
 import { ENDING_THRESHOLDS, getEndings } from './endings';
 import { audio } from './audio/audioManager';
 import { PersonaReveal } from './PersonaReveal';
-import { buildReferrals } from './referral';
+import { buildEncounterReferral, buildReferrals } from './referral';
 import { ROLES } from './roles';
 import { endingArtwork, survivalBadge } from './endingArt';
 import { SURVIVAL_TIERS, recordBest, survivalBlurb, survivalProgress, survivalTier } from './survival';
@@ -28,7 +28,7 @@ export interface EndingScreenProps {
 const PERSONA_FLIP_MS = 700;
 const ENDING_BGM_MS = 1100;
 
-const TYPE_LABEL = { strategy: '策略', tool: '工具', product: '产品' } as const;
+const TYPE_LABEL = { strategy: '策略', tool: '工具', product: '产品', encounter: '本局遇到' } as const;
 
 /** 分段淡入：delay 为秒，减少动态效果时由样式直接关闭动画。 */
 const rise = (delay: number): CSSProperties => ({ '--rg-delay': `${delay}s` } as CSSProperties);
@@ -145,7 +145,13 @@ export function EndingScreen({ state, onRestart, onReplay }: EndingScreenProps) 
 
   // 引流卡和人物卡用同一个最终人格，文案里的次数才不会和人物卡打架。
   const personaId = useMemo(() => (ending ? resolvePersona(state, ALL_CARDS).id : null), [state, ending]);
-  const referrals = useMemo(() => (ending && personaId ? buildReferrals(personaId, ending, stats, tally, role) : []), [personaId, ending, stats, tally, role]);
+  const referrals = useMemo(() => {
+    if (!ending || !personaId) return [];
+    const base = buildReferrals(personaId, ending, stats, tally, role);
+    // 第 4 张：本局遇到过 PandaAI 事件才出现，推荐事件里点名的产品。
+    const encounter = buildEncounterReferral(state.log, ALL_CARDS, new Set(base.map((r) => r.resource.url)), role);
+    return encounter ? [...base, encounter] : base;
+  }, [personaId, ending, stats, tally, role, state.log]);
   const codex = useMemo(() => getEndings(role), [role]);
   const best = useMemo(() => (ending ? bestFor(state) : null), [state, ending]);
   if (!ending) return null;

@@ -69,23 +69,61 @@ QuantSkills（[quantskills.ai](https://quantskills.ai)，GitHub [quantskills](ht
 
 ## 2. PandaAI 产品与资源
 
-| 名称 | 链接 | 是什么 | 门槛 |
-|---|---|---|---|
-| ✅ Qube | [agent_quant](https://www.pandaaiquant.com/agent_quant/) | 自然语言生成策略、回测、调参、仿真盘 | 快速试用免登录 |
-| Qube 能力模板 | 同上 | 首页模板：5/20 双均线、海龟突破 + ATR 止损、多均线趋势过滤；期货模板如黄金 RSI 吊灯止盈；股票模板如红利低估、小市值、风格轮动 | 同上 |
-| ✅ 量化因子中心 | [quantfactor-center](https://www.pandaaiquant.com/quantfactor-center) | 因子搜索、对比、诊断，带 AI 因子助手 | 免费版 20 个因子池，需登录 |
-| AI 工作流 | [quantflow](https://www.pandaaiquant.com/quantflow/)（盘点时页面报错）/ [开源](https://github.com/PandaAI-Tech/panda_quantflow) | 节点式量化工作流 | — |
-| EVO / A2A 办公室 | [evo](https://www.pandaaiquant.com/evo) | 多智能体投研 | 付费版 |
-| 专业版客户端 | [download](https://www.pandaaiquant.com/download) | 策略信号直连交易 | 付费版，涉及真实下单，**不推荐给游戏玩家** |
-| Panda Data | [docs/api](https://www.pandaaiquant.com/docs/api) | 行情、财务数据 SDK（本游戏数据来源） | 需账号 |
-| ✅ 全国期货模拟赛 | [contest](https://www.pandaaiquant.com/contest/) | 模拟盘比赛，手动/策略/AI 辅助三赛道，进行中 | 报名 |
-| ✅ 第四届因子大赛 | [fourthFactorCompetition](https://www.pandaaiquant.com/factorhub/fourthFactorCompetition/) | 永续赛制因子比赛，进行中 | 报名 |
-| ✅ 量变学院 | [learninghub/newcourse](https://www.pandaaiquant.com/learninghub/newcourse) | L1 量化思维入门 → L6，线上视频 + 线下营 | 课程付费 |
-| ✅ 新手入门文档 | [docs](https://www.pandaaiquant.com/docs) | 知识库、新手入门、各产品指南 | 免费 |
-| 用户社区 | [community](https://www.pandaaiquant.com/community) | 策略与因子讨论、问答 | 免费 |
-| 开源项目 | [panda_factor](https://github.com/PandaAI-Tech/panda_factor)（2.8k star） | 因子库开源版 | 免费 |
+2026-10-31 重新盘点：读了官网首页导航、`/pricing`、`/docs/evo`、`/docs/a2a-office`、`/docs/client`，下表所有链接都用 curl 确认返回 200。✅ = 已进 `frontend/src/recommend/catalog.ts`，推荐里可能出现。
 
-会员：Free（注册送 500 算力）、Lite ¥49/月、Pro ¥199/月、MAX ¥499/月，详见 [pricing](https://www.pandaaiquant.com/pricing)。网站声明不提供投资咨询，内容不构成投资建议。
+### 2.1 产品
+
+| 名称 | 链接 | 是什么 | 门槛 | 推荐里 |
+|---|---|---|---|---|
+| Qube | [agent_quant](https://www.pandaaiquant.com/agent_quant/) · [文档](https://www.pandaaiquant.com/docs/qube) | 自然语言生成策略并回测；首页有 5/20 双均线、海龟突破 + ATR 止损、多均线趋势过滤等模板 | 四档都能用；Free 只有基础对话研究，Lite 起全部研究能力，仿真盘 Lite 1 个 / Pro 3 个 / MAX 5 个 | ✅ 画像页、结局页 |
+| 量化因子中心 | [quantfactor-center](https://www.pandaaiquant.com/quantfactor-center) | 因子搜索、对比、诊断，带 AI 因子助手 | 四档都能用，因子池 20 / 20 / 50 / 100，机器学习因子仅 MAX | ✅ 画像页、结局页 |
+| EVO | [evo](https://www.pandaaiquant.com/evo) · [文档](https://www.pandaaiquant.com/docs/evo) | 云端量化研究环境：中央 Agent 拆任务给子代理，审查官复核；云端 IDE，可组合 Skills | 需登录，Lite 起可用，计算和存储按算力计费 | ✅ 结局页“本局遇到”（链接指向文档页） |
+| A2A 办公室 | [文档](https://www.pandaaiquant.com/docs/a2a-office) | 多 Agent 投研团队：主持人把任务分给行情、资讯、基本面、风控四个 Agent | 官网写“即将上线”，没有产品入口 | 否：未上线 |
+| AI 工作流（QuantFlow） | [quantflow](https://www.pandaaiquant.com/quantflow/) · [开源](https://github.com/PandaAI-Tech/panda_quantflow) | 智能体驱动的节点式量化研究流程 | pricing 页没写档位 | 否：门槛和档位不清楚 |
+| 专业版客户端 | [download](https://www.pandaaiquant.com/download) · [文档](https://www.pandaaiquant.com/docs/client) | 桌面终端：实时行情、研究，把策略信号接到委托；支持登录 SimNow 仿真账户 | Lite 起；实盘要绑定本人在持牌期货公司的资金账户 | 否：涉及真实下单，**不推荐给游戏玩家** |
+| Qube App | [download/app](https://www.pandaaiquant.com/download/app) · [文档](https://www.pandaaiquant.com/docs/qube-app) | 手机端对话研究 | pricing 页没写档位 | 否：可作为后续候选 |
+| Panda Data / 数据服务 | [data-service](https://www.pandaaiquant.com/data-service) · [API 文档](https://www.pandaaiquant.com/docs/api) | A 股、期货、港美股、基金、宏观数据订阅（本游戏关卡数据来源） | 需账号和订阅；**没有加密货币数据** | 否：通过 `skill-pandadata-api` 间接出现 |
+
+### 2.2 活动
+
+| 名称 | 链接 | 状态 | 推荐里 |
+|---|---|---|---|
+| 全国期货模拟赛“巅峰交易者 S1” | [contest](https://www.pandaaiquant.com/contest/) | 进行中，手动 / 策略 / AI 辅助三赛道 | ✅ 画像页、结局页“本局遇到” |
+| 第四届因子大赛 | [fourthFactorCompetition](https://www.pandaaiquant.com/factorhub/fourthFactorCompetition/) | 进行中，永续赛制 | ✅ 画像页、结局页“本局遇到” |
+| LLM 对抗赛 | 官网没有链接 | **已结束**：多个大模型在相同行情下各自下单比收益 | 否：游戏卡里提到时，结局页改推 Qube 并说明已结束 |
+| 第一至三届因子大赛 | 官网没有链接 | 已结束 | 否 |
+
+### 2.3 学习与社区
+
+| 名称 | 链接 | 门槛 | 推荐里 |
+|---|---|---|---|
+| 量变学院（量化课程） | [learninghub/newcourse](https://www.pandaaiquant.com/learninghub/newcourse) | 课程付费 | ✅ 画像页、结局页“本局遇到”备选 |
+| 知识库 / 新手入门 | [docs](https://www.pandaaiquant.com/docs) | 免费 | ✅ 画像页 |
+| 用户社区 | [community](https://www.pandaaiquant.com/community) | 免费 | ✅ 结局页“本局遇到”兜底 |
+| 官方博客 | [blog](https://www.pandaaiquant.com/blog) | 免费，产品更新与论文精选 | 否 |
+| QuantSkills | [quantskills.ai](https://www.quantskills.ai/) · [GitHub](https://github.com/quantskills) | 开源 | ✅ 见第 1 节 |
+| 开源项目 | [PandaAI-Tech](https://github.com/PandaAI-Tech)，如 [panda_factor](https://github.com/PandaAI-Tech/panda_factor) | 开源 | 否 |
+
+会员（年付 8 折）：Free 免费（注册送 500 算力）、Lite ¥49/月（700 算力）、Pro ¥199/月（2,900 算力）、MAX ¥499/月（7,500 算力），详见 [pricing](https://www.pandaaiquant.com/pricing)。pricing 页注明部分权益“仍在开发中、暂未上线”。网站声明不提供投资咨询，内容不构成投资建议。
+
+### 2.4 游戏卡点名 → 结局页推荐
+
+结局页第 4 张卡“本局遇到”（`frontend/src/reigns/referral.ts` 的 `ENCOUNTERS`）：取本局最近一张 PandaAI 事件卡，推荐卡里点名的真实产品；主资源已被前三张卡占用就换备选，都占用就推用户社区。
+
+| 事件卡 | 卡里点名 | 推荐 | 备选 |
+|---|---|---|---|
+| `fund-quant-factor-center` | 量化因子中心 | 量化因子中心 | `skill-pandaai-factor-online` |
+| `fund-quant-evo` | EVO | EVO 文档页 | 用户社区 |
+| `fund-quant-factor-contest` | 因子大赛 | 第四届因子大赛 | `skill-pandaai-factor-online` |
+| `crypto-quant-llm-battle` | LLM 对抗赛 | Qube（注明对抗赛已结束） | 用户社区 |
+| `crypto-quant-diagnostics` | 交易行为诊断 | `skill-trading-behavior-diagnostics` | `skill-trade-review` |
+| `crypto-quant-qube-learn` | Qube | Qube | `skill-backtest-overfit` |
+| `stock-quant-ma` | 双均线模板 | Qube | `skill-ma-crossover-signal` |
+| `stock-quant-turtle` | 海龟突破模板 | Qube | `skill-b11-auto-stop-loss-take-profit` |
+| `stock-quant-qube` | Qube | Qube | `skill-backtest-overfit` |
+| `stock-quant-simnow` | 全国期货模拟赛（含 SimNow） | 全国期货模拟赛 | 量变学院 |
+
+新增点名 PandaAI 的事件卡时，要给卡加 `pandaai: true`，并在 `ENCOUNTERS` 里补一行（`encounterReferral.test.ts` 会检查两边一致）。
 
 ## 3. 还能做成卡片的方向
 

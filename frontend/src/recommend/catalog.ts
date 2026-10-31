@@ -1,6 +1,6 @@
 /**
  * 推荐卡片的资源目录：PandaAI 产品/活动/学习资源 + QuantSkills 开源技能包。
- * 链接都在 2026-10-31 核实过，is_sample: false。完整清单和挑选理由见 docs/recommend-resources.md。
+ * 链接都在 2026-10-31 核实过（HTTP 200），is_sample: false。完整清单和挑选理由见 docs/recommend-resources.md。
  */
 import type { RecResource } from '../shared/protocol';
 
@@ -33,6 +33,7 @@ export const CATALOG = {
   // ---- PandaAI 产品 ----
   qube: pa('Qube', 'agent_quant/', '用自然语言生成策略并回测，支持调参和仿真盘；快速试用不用登录', ['免登录试用', '自然语言']),
   factorCenter: pa('量化因子中心', 'quantfactor-center', '因子搜索、对比和诊断，带 AI 因子助手；免费版有 20 个因子的因子池', ['因子', '免费版']),
+  evo: pa('EVO 研究平台', 'docs/evo', '云端量化研究环境：中央 Agent 拆任务给子代理，再由审查官复核；需登录，Lite 会员起可用', ['多 Agent', '付费']),
 
   // ---- 活动 ----
   futuresContest: pa('全国期货模拟赛', 'contest/', '模拟盘交易比赛，手动、策略、AI 辅助三个赛道，不用真金白银', ['模拟盘', '进行中']),
@@ -41,6 +42,9 @@ export const CATALOG = {
   // ---- 学习 ----
   course: pa('量变学院 · 量化思维入门', 'learninghub/newcourse', 'PandaAI 的量化课程体系，从 L1 量化思维入门开始', ['课程', '入门']),
   guide: pa('PandaAI 新手入门', 'docs', '知识库里的新手入门和各产品使用指南，免费阅读', ['文档', '免费']),
+
+  // ---- 社区 ----
+  community: pa('PandaAI 用户社区', 'community', '和其他量化研究者讨论策略与因子、提问交流', ['社区', '免费']),
 } satisfies Record<string, RecResource>;
 
 export type CatalogId = keyof typeof CATALOG;
