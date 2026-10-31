@@ -1,4 +1,5 @@
 import type { Dimension, GameEvent, Profile } from '../shared/protocol';
+import { RecommendationPanel } from '../recommend/RecommendationPanel';
 
 interface ProfilePageProps {
   profile: Profile;
@@ -68,6 +69,8 @@ export function ProfilePage({ profile, events, nextLevelId, onSupplement, onExpo
     {profile.round === 2 && <section className="panel changes-panel" aria-labelledby="profile-changes-title"><h2 id="profile-changes-title">补充之后，哪些判断变了？</h2>{profile.changes && profile.changes.length > 0 ? <ul className="changes-list">{profile.changes.map((change, index) => <li key={`${change.dimension_id}-${index}`}><h3>{profile.dimensions.find(dimension => dimension.id === change.dimension_id)?.name ?? change.dimension_id}</h3><p><span className="muted">之前：</span>{change.before}</p><p><span className="muted">现在：</span>{change.after}</p></li>)}</ul> : <p className="muted">本次画像未提供变化记录。</p>}</section>}
 
     {(profile.needs_more.length > 0 || (profile.round === 1 && nextLevelId)) && <section className="panel followup-panel" aria-labelledby="profile-needs-title"><h2 id="profile-needs-title">还有一点看不准</h2><ul className="needs-list">{profile.needs_more.map((need, index) => <li key={`${need.dimension_id}-${index}`}><strong>{profile.dimensions.find(dimension => dimension.id === need.dimension_id)?.name ?? need.dimension_id}</strong><p>{need.reason}</p></li>)}</ul>{profile.round === 1 && nextLevelId ? <button className="primary-button" disabled={busy} onClick={onSupplement}>再来一关，补充观察</button> : <p className="muted">{profile.round === 2 ? '本次补充观察已完成，以上项目仍需更多行为证据。' : '当前没有可用的补充关卡。先保留这些不确定项，等待关卡与画像模块接入。'}</p>}</section>}
+
+    {!fixedExample && <RecommendationPanel profile={profile} events={events} />}
 
     <section className="panel profile-actions" aria-labelledby="profile-save-title"><h2 id="profile-save-title">把这份观察留给自己</h2><p>导出只包含 Profile 画像，不附带完整动作日志。动作详情仅用于当前页面核对。</p><div className="button-row"><button className="primary-button" disabled={busy} onClick={onExport}>导出画像 JSON</button><button className="secondary-button" disabled={busy} onClick={onFinish}>完成本次探索</button><button className="text-button" disabled={busy} onClick={onRestart}>重新开始</button></div></section>
 
