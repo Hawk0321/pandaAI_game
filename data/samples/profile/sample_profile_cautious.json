@@ -1,0 +1,377 @@
+{
+ "is_sample": true,
+ "name": "谨慎研究型",
+ "profiles": [
+  {
+   "schema": "profile/v1",
+   "session_id": "sample-cautious",
+   "is_sample": true,
+   "generated_at": "2026-10-30T00:00:00.000Z",
+   "method": "rules",
+   "round": 1,
+   "dimensions": [
+    {
+     "id": "evidence_use",
+     "group": "ability",
+     "name": "证据使用",
+     "judgement": "会先找关键线索，决定和证据一致",
+     "score": 0.86,
+     "evidence": [
+      {
+       "level_id": "S01",
+       "event_seqs": [
+        3,
+        4,
+        5,
+        6
+       ],
+       "text": "第 1 关翻开了全部关键线索「成交量」「同期大盘」",
+       "direction": "+"
+      },
+      {
+       "level_id": "S01",
+       "event_seqs": [
+        3,
+        4,
+        5,
+        6
+       ],
+       "text": "第 1 关翻开的线索整体看涨，决定做多与线索一致",
+       "direction": "+"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        13,
+        14,
+        15,
+        16
+       ],
+       "text": "第 2 关翻开了全部关键线索「成交量」「北向资金」",
+       "direction": "+"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        13,
+        14,
+        15,
+        16
+       ],
+       "text": "第 2 关翻开的线索整体看跌，决定做空与线索一致",
+       "direction": "+"
+      },
+      {
+       "level_id": "S03",
+       "event_seqs": [
+        23,
+        24,
+        25
+       ],
+       "text": "第 3 关翻开了全部关键线索「区间回测」",
+       "direction": "+"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        32,
+        33,
+        34
+       ],
+       "text": "第 4 关翻开了全部关键线索「成交量」「超跌回测」",
+       "direction": "+"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        32,
+        33,
+        34
+       ],
+       "text": "第 4 关翻开的线索整体看涨，决定做多与线索一致",
+       "direction": "+"
+      }
+     ],
+     "confidence": "high",
+     "uncertain": "",
+     "conflict": false
+    },
+    {
+     "id": "calibration",
+     "group": "ability",
+     "name": "判断校准",
+     "judgement": "信心和对错比较匹配",
+     "score": 0.81,
+     "evidence": [
+      {
+       "level_id": "S01",
+       "event_seqs": [
+        6
+       ],
+       "text": "第 1 关信心 4/5，做多，之后上涨：信心高且方向判断正确",
+       "direction": "+"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        16
+       ],
+       "text": "第 2 关信心 4/5，做空，之后下跌：信心高且方向判断正确",
+       "direction": "+"
+      },
+      {
+       "level_id": "S03",
+       "event_seqs": [
+        25
+       ],
+       "text": "第 3 关信心 2/5，做多，之后上涨：方向对了，但信心给得偏低",
+       "direction": "+"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        34
+       ],
+       "text": "第 4 关信心 3/5，做多，之后上涨：方向对了，但信心给得偏低",
+       "direction": "+"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        34
+       ],
+       "text": "截至第 4 关，4 次可检验的判断平均信心 3.3/5（约 73% 把握），实际对了 4 次（100%）：信心偏低",
+       "direction": "+"
+      }
+     ],
+     "confidence": "high",
+     "uncertain": "",
+     "conflict": false
+    },
+    {
+     "id": "risk_control",
+     "group": "ability",
+     "name": "风险控制",
+     "judgement": "会用止损和仓位管住风险",
+     "score": 0.82,
+     "evidence": [
+      {
+       "level_id": "S01",
+       "event_seqs": [
+        6
+       ],
+       "text": "第 1 关半仓做多时设了 5.0% 止损",
+       "direction": "+"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        16
+       ],
+       "text": "第 2 关半仓做空时设了 5.0% 止损",
+       "direction": "+"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        16
+       ],
+       "text": "第 2 关走势波动大（日波动约 2.5%），只用了半仓",
+       "direction": "+"
+      },
+      {
+       "level_id": "S03",
+       "event_seqs": [
+        25
+       ],
+       "text": "第 3 关轻仓做多时设了 5.0% 止损",
+       "direction": "+"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        34
+       ],
+       "text": "第 4 关半仓做多时设了 10.0% 止损",
+       "direction": "+"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        34
+       ],
+       "text": "第 4 关走势波动大（日波动约 2.1%），只用了半仓",
+       "direction": "+"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        35
+       ],
+       "text": "第 4 关第 1 步浮亏 1.5% 时选择减仓",
+       "direction": "+"
+      }
+     ],
+     "confidence": "high",
+     "uncertain": "",
+     "conflict": false
+    },
+    {
+     "id": "style",
+     "group": "preference",
+     "name": "趋势 vs 反转",
+     "judgement": "偏逆势反转：涨多了空、跌多了买",
+     "score": 0.33,
+     "evidence": [
+      {
+       "level_id": "S01",
+       "event_seqs": [
+        6
+       ],
+       "text": "第 1 关决定前 20 天上涨 12.0%，选择做多（顺势）",
+       "direction": "-"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        16
+       ],
+       "text": "第 2 关决定前 20 天上涨 15.0%，选择做空（逆势）",
+       "direction": "+"
+      },
+      {
+       "level_id": "S03",
+       "event_seqs": [
+        25
+       ],
+       "text": "第 3 关决定前 20 天涨跌不到 3.0%，没有明显趋势，不计入顺势/逆势",
+       "direction": "?"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        34
+       ],
+       "text": "第 4 关决定前 20 天下跌 14.0%，选择做多（逆势）",
+       "direction": "+"
+      }
+     ],
+     "confidence": "medium",
+     "uncertain": "顺势和逆势都做过，可能是在看具体线索而不是固定风格",
+     "conflict": true
+    },
+    {
+     "id": "research_depth",
+     "group": "preference",
+     "name": "研究深度",
+     "judgement": "偏研究型：先把研究点用足再决定",
+     "score": 1,
+     "evidence": [
+      {
+       "level_id": "S01",
+       "event_seqs": [
+        3,
+        4,
+        5,
+        6
+       ],
+       "text": "第 1 关3 个研究点用了 3 个，思考 38 秒后决定",
+       "direction": "+"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        13,
+        14,
+        15,
+        16
+       ],
+       "text": "第 2 关3 个研究点用了 3 个，思考 42 秒后决定",
+       "direction": "+"
+      },
+      {
+       "level_id": "S03",
+       "event_seqs": [
+        23,
+        24,
+        25
+       ],
+       "text": "第 3 关3 个研究点用了 3 个，思考 35 秒后决定",
+       "direction": "+"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        32,
+        33,
+        34
+       ],
+       "text": "第 4 关3 个研究点用了 3 个，思考 45 秒后决定",
+       "direction": "+"
+      }
+     ],
+     "confidence": "high",
+     "uncertain": "",
+     "conflict": false
+    },
+    {
+     "id": "risk_appetite",
+     "group": "preference",
+     "name": "风险偏好",
+     "judgement": "仓位适中",
+     "score": 0.43,
+     "evidence": [
+      {
+       "level_id": "S01",
+       "event_seqs": [
+        6
+       ],
+       "text": "第 1 关半仓做多",
+       "direction": "?"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        16
+       ],
+       "text": "第 2 关半仓做空",
+       "direction": "?"
+      },
+      {
+       "level_id": "S03",
+       "event_seqs": [
+        25
+       ],
+       "text": "第 3 关轻仓做多",
+       "direction": "+"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        34
+       ],
+       "text": "第 4 关半仓做多",
+       "direction": "?"
+      }
+     ],
+     "confidence": "high",
+     "uncertain": "",
+     "conflict": false
+    }
+   ],
+   "persona": {
+    "name": "夜猫研究员",
+    "emoji": "🦉",
+    "tagline": "线索翻遍才出手，证据说话",
+    "is_fun_label": true
+   },
+   "summary": "能力上表现稳定，证据使用最突出（会先找关键线索，决定和证据一致）。偏好上，偏研究型、仓位适中；人物卡依据是\"研究点用足、紧跟关键线索\"。趋势 vs 反转还看不准，结论仅供参考。",
+   "needs_more": [
+    {
+     "dimension_id": "style",
+     "reason": "顺势和逆势都做过，可能是在看具体线索而不是固定风格"
+    }
+   ]
+  }
+ ]
+}

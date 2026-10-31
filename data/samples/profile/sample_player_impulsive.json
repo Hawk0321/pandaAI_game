@@ -1,0 +1,551 @@
+{
+ "is_sample": true,
+ "name": "冲动重仓型",
+ "note": "模拟玩家：几秒内下决定、最多翻一张线索，满仓不设止损，信心总是 5，浮亏时加仓",
+ "events": [
+  {
+   "seq": 1,
+   "session_id": "sample-impulsive",
+   "level_id": null,
+   "t_ms": 0,
+   "at": "2026-10-31T10:00:01.000Z",
+   "type": "session_start",
+   "data": {
+    "device": "mobile"
+   }
+  },
+  {
+   "seq": 2,
+   "session_id": "sample-impulsive",
+   "level_id": "S01",
+   "t_ms": 0,
+   "at": "2026-10-31T10:00:02.000Z",
+   "type": "level_start",
+   "data": {
+    "budget": 3,
+    "is_supplementary": false
+   }
+  },
+  {
+   "seq": 3,
+   "session_id": "sample-impulsive",
+   "level_id": "S01",
+   "t_ms": 3000,
+   "at": "2026-10-31T10:00:03.000Z",
+   "type": "clue_open",
+   "data": {
+    "clue_id": "ma",
+    "kind": "ma",
+    "signal": "bullish",
+    "cost": 1,
+    "budget_left": 2
+   }
+  },
+  {
+   "seq": 4,
+   "session_id": "sample-impulsive",
+   "level_id": "S01",
+   "t_ms": 6000,
+   "at": "2026-10-31T10:00:04.000Z",
+   "type": "decision",
+   "data": {
+    "side": "long",
+    "size": 1,
+    "confidence": 5,
+    "stop": null,
+    "clues_opened": [
+     "ma"
+    ],
+    "think_ms": 6000
+   }
+  },
+  {
+   "seq": 5,
+   "session_id": "sample-impulsive",
+   "level_id": "S01",
+   "t_ms": 8500,
+   "at": "2026-10-31T10:00:05.000Z",
+   "type": "hold_step",
+   "data": {
+    "step": 1,
+    "pnl_before": 0.03,
+    "action": "add",
+    "position_after": 1
+   }
+  },
+  {
+   "seq": 6,
+   "session_id": "sample-impulsive",
+   "level_id": "S01",
+   "t_ms": 10500,
+   "at": "2026-10-31T10:00:06.000Z",
+   "type": "hold_step",
+   "data": {
+    "step": 2,
+    "pnl_before": 0.05,
+    "action": "hold",
+    "position_after": 1
+   }
+  },
+  {
+   "seq": 7,
+   "session_id": "sample-impulsive",
+   "level_id": "S01",
+   "t_ms": 12500,
+   "at": "2026-10-31T10:00:07.000Z",
+   "type": "hold_step",
+   "data": {
+    "step": 3,
+    "pnl_before": 0.08,
+    "action": "hold",
+    "position_after": 1
+   }
+  },
+  {
+   "seq": 8,
+   "session_id": "sample-impulsive",
+   "level_id": "S01",
+   "t_ms": 14000,
+   "at": "2026-10-31T10:00:08.000Z",
+   "type": "level_end",
+   "data": {
+    "pnl": 0.08,
+    "final_position": 1
+   }
+  },
+  {
+   "seq": 9,
+   "session_id": "sample-impulsive",
+   "level_id": "S01",
+   "t_ms": 15000,
+   "at": "2026-10-31T10:00:09.000Z",
+   "type": "reveal_view",
+   "data": {
+    "dwell_ms": 6000
+   }
+  },
+  {
+   "seq": 10,
+   "session_id": "sample-impulsive",
+   "level_id": "S02",
+   "t_ms": 0,
+   "at": "2026-10-31T10:00:10.000Z",
+   "type": "level_start",
+   "data": {
+    "budget": 3,
+    "is_supplementary": false
+   }
+  },
+  {
+   "seq": 11,
+   "session_id": "sample-impulsive",
+   "level_id": "S02",
+   "t_ms": 2500,
+   "at": "2026-10-31T10:00:11.000Z",
+   "type": "clue_open",
+   "data": {
+    "clue_id": "ma",
+    "kind": "ma",
+    "signal": "bullish",
+    "cost": 1,
+    "budget_left": 2
+   }
+  },
+  {
+   "seq": 12,
+   "session_id": "sample-impulsive",
+   "level_id": "S02",
+   "t_ms": 5000,
+   "at": "2026-10-31T10:00:12.000Z",
+   "type": "decision",
+   "data": {
+    "side": "long",
+    "size": 1,
+    "confidence": 5,
+    "stop": null,
+    "clues_opened": [
+     "ma"
+    ],
+    "think_ms": 5000
+   }
+  },
+  {
+   "seq": 13,
+   "session_id": "sample-impulsive",
+   "level_id": "S02",
+   "t_ms": 7500,
+   "at": "2026-10-31T10:00:13.000Z",
+   "type": "hold_step",
+   "data": {
+    "step": 1,
+    "pnl_before": -0.05,
+    "action": "add",
+    "position_after": 1
+   }
+  },
+  {
+   "seq": 14,
+   "session_id": "sample-impulsive",
+   "level_id": "S02",
+   "t_ms": 9500,
+   "at": "2026-10-31T10:00:14.000Z",
+   "type": "hold_step",
+   "data": {
+    "step": 2,
+    "pnl_before": -0.1,
+    "action": "hold",
+    "position_after": 1
+   }
+  },
+  {
+   "seq": 15,
+   "session_id": "sample-impulsive",
+   "level_id": "S02",
+   "t_ms": 11500,
+   "at": "2026-10-31T10:00:15.000Z",
+   "type": "hold_step",
+   "data": {
+    "step": 3,
+    "pnl_before": -0.15,
+    "action": "close",
+    "position_after": 0
+   }
+  },
+  {
+   "seq": 16,
+   "session_id": "sample-impulsive",
+   "level_id": "S02",
+   "t_ms": 13000,
+   "at": "2026-10-31T10:00:16.000Z",
+   "type": "level_end",
+   "data": {
+    "pnl": -0.15,
+    "final_position": 0
+   }
+  },
+  {
+   "seq": 17,
+   "session_id": "sample-impulsive",
+   "level_id": "S02",
+   "t_ms": 14000,
+   "at": "2026-10-31T10:00:17.000Z",
+   "type": "reveal_view",
+   "data": {
+    "dwell_ms": 6000
+   }
+  },
+  {
+   "seq": 18,
+   "session_id": "sample-impulsive",
+   "level_id": "S03",
+   "t_ms": 0,
+   "at": "2026-10-31T10:00:18.000Z",
+   "type": "level_start",
+   "data": {
+    "budget": 3,
+    "is_supplementary": false
+   }
+  },
+  {
+   "seq": 19,
+   "session_id": "sample-impulsive",
+   "level_id": "S03",
+   "t_ms": 4000,
+   "at": "2026-10-31T10:00:19.000Z",
+   "type": "decision",
+   "data": {
+    "side": "long",
+    "size": 1,
+    "confidence": 5,
+    "stop": null,
+    "clues_opened": [],
+    "think_ms": 4000
+   }
+  },
+  {
+   "seq": 20,
+   "session_id": "sample-impulsive",
+   "level_id": "S03",
+   "t_ms": 6500,
+   "at": "2026-10-31T10:00:20.000Z",
+   "type": "hold_step",
+   "data": {
+    "step": 1,
+    "pnl_before": 0.01,
+    "action": "hold",
+    "position_after": 1
+   }
+  },
+  {
+   "seq": 21,
+   "session_id": "sample-impulsive",
+   "level_id": "S03",
+   "t_ms": 8500,
+   "at": "2026-10-31T10:00:21.000Z",
+   "type": "hold_step",
+   "data": {
+    "step": 2,
+    "pnl_before": 0.03,
+    "action": "hold",
+    "position_after": 1
+   }
+  },
+  {
+   "seq": 22,
+   "session_id": "sample-impulsive",
+   "level_id": "S03",
+   "t_ms": 10500,
+   "at": "2026-10-31T10:00:22.000Z",
+   "type": "hold_step",
+   "data": {
+    "step": 3,
+    "pnl_before": 0.045,
+    "action": "hold",
+    "position_after": 1
+   }
+  },
+  {
+   "seq": 23,
+   "session_id": "sample-impulsive",
+   "level_id": "S03",
+   "t_ms": 12000,
+   "at": "2026-10-31T10:00:23.000Z",
+   "type": "level_end",
+   "data": {
+    "pnl": 0.045,
+    "final_position": 1
+   }
+  },
+  {
+   "seq": 24,
+   "session_id": "sample-impulsive",
+   "level_id": "S03",
+   "t_ms": 13000,
+   "at": "2026-10-31T10:00:24.000Z",
+   "type": "reveal_view",
+   "data": {
+    "dwell_ms": 6000
+   }
+  },
+  {
+   "seq": 25,
+   "session_id": "sample-impulsive",
+   "level_id": "S04",
+   "t_ms": 0,
+   "at": "2026-10-31T10:00:25.000Z",
+   "type": "level_start",
+   "data": {
+    "budget": 3,
+    "is_supplementary": false
+   }
+  },
+  {
+   "seq": 26,
+   "session_id": "sample-impulsive",
+   "level_id": "S04",
+   "t_ms": 3500,
+   "at": "2026-10-31T10:00:26.000Z",
+   "type": "clue_open",
+   "data": {
+    "clue_id": "ma",
+    "kind": "ma",
+    "signal": "bearish",
+    "cost": 1,
+    "budget_left": 2
+   }
+  },
+  {
+   "seq": 27,
+   "session_id": "sample-impulsive",
+   "level_id": "S04",
+   "t_ms": 7000,
+   "at": "2026-10-31T10:00:27.000Z",
+   "type": "decision",
+   "data": {
+    "side": "short",
+    "size": 1,
+    "confidence": 5,
+    "stop": null,
+    "clues_opened": [
+     "ma"
+    ],
+    "think_ms": 7000
+   }
+  },
+  {
+   "seq": 28,
+   "session_id": "sample-impulsive",
+   "level_id": "S04",
+   "t_ms": 9500,
+   "at": "2026-10-31T10:00:28.000Z",
+   "type": "hold_step",
+   "data": {
+    "step": 1,
+    "pnl_before": -0.03,
+    "action": "add",
+    "position_after": -1
+   }
+  },
+  {
+   "seq": 29,
+   "session_id": "sample-impulsive",
+   "level_id": "S04",
+   "t_ms": 11500,
+   "at": "2026-10-31T10:00:29.000Z",
+   "type": "hold_step",
+   "data": {
+    "step": 2,
+    "pnl_before": -0.07,
+    "action": "hold",
+    "position_after": -1
+   }
+  },
+  {
+   "seq": 30,
+   "session_id": "sample-impulsive",
+   "level_id": "S04",
+   "t_ms": 13500,
+   "at": "2026-10-31T10:00:30.000Z",
+   "type": "hold_step",
+   "data": {
+    "step": 3,
+    "pnl_before": -0.1,
+    "action": "hold",
+    "position_after": -1
+   }
+  },
+  {
+   "seq": 31,
+   "session_id": "sample-impulsive",
+   "level_id": "S04",
+   "t_ms": 15000,
+   "at": "2026-10-31T10:00:31.000Z",
+   "type": "level_end",
+   "data": {
+    "pnl": -0.1,
+    "final_position": -1
+   }
+  },
+  {
+   "seq": 32,
+   "session_id": "sample-impulsive",
+   "level_id": "S04",
+   "t_ms": 16000,
+   "at": "2026-10-31T10:00:32.000Z",
+   "type": "reveal_view",
+   "data": {
+    "dwell_ms": 6000
+   }
+  },
+  {
+   "seq": 33,
+   "session_id": "sample-impulsive",
+   "level_id": "S05",
+   "t_ms": 0,
+   "at": "2026-10-31T10:00:33.000Z",
+   "type": "level_start",
+   "data": {
+    "budget": 3,
+    "is_supplementary": true
+   }
+  },
+  {
+   "seq": 34,
+   "session_id": "sample-impulsive",
+   "level_id": "S05",
+   "t_ms": 2500,
+   "at": "2026-10-31T10:00:34.000Z",
+   "type": "clue_open",
+   "data": {
+    "clue_id": "ma",
+    "kind": "ma",
+    "signal": "bullish",
+    "cost": 1,
+    "budget_left": 2
+   }
+  },
+  {
+   "seq": 35,
+   "session_id": "sample-impulsive",
+   "level_id": "S05",
+   "t_ms": 5000,
+   "at": "2026-10-31T10:00:35.000Z",
+   "type": "decision",
+   "data": {
+    "side": "long",
+    "size": 1,
+    "confidence": 5,
+    "stop": null,
+    "clues_opened": [
+     "ma"
+    ],
+    "think_ms": 5000
+   }
+  },
+  {
+   "seq": 36,
+   "session_id": "sample-impulsive",
+   "level_id": "S05",
+   "t_ms": 7500,
+   "at": "2026-10-31T10:00:36.000Z",
+   "type": "hold_step",
+   "data": {
+    "step": 1,
+    "pnl_before": -0.03,
+    "action": "add",
+    "position_after": 1
+   }
+  },
+  {
+   "seq": 37,
+   "session_id": "sample-impulsive",
+   "level_id": "S05",
+   "t_ms": 9500,
+   "at": "2026-10-31T10:00:37.000Z",
+   "type": "hold_step",
+   "data": {
+    "step": 2,
+    "pnl_before": -0.06,
+    "action": "hold",
+    "position_after": 1
+   }
+  },
+  {
+   "seq": 38,
+   "session_id": "sample-impulsive",
+   "level_id": "S05",
+   "t_ms": 11500,
+   "at": "2026-10-31T10:00:38.000Z",
+   "type": "hold_step",
+   "data": {
+    "step": 3,
+    "pnl_before": -0.09,
+    "action": "hold",
+    "position_after": 1
+   }
+  },
+  {
+   "seq": 39,
+   "session_id": "sample-impulsive",
+   "level_id": "S05",
+   "t_ms": 13000,
+   "at": "2026-10-31T10:00:39.000Z",
+   "type": "level_end",
+   "data": {
+    "pnl": -0.09,
+    "final_position": 1
+   }
+  },
+  {
+   "seq": 40,
+   "session_id": "sample-impulsive",
+   "level_id": "S05",
+   "t_ms": 14000,
+   "at": "2026-10-31T10:00:40.000Z",
+   "type": "reveal_view",
+   "data": {
+    "dwell_ms": 6000
+   }
+  }
+ ]
+}

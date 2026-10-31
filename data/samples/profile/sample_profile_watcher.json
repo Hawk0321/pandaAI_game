@@ -1,0 +1,819 @@
+{
+ "is_sample": true,
+ "name": "只看不做型",
+ "profiles": [
+  {
+   "schema": "profile/v1",
+   "session_id": "sample-watcher",
+   "is_sample": true,
+   "generated_at": "2026-10-30T00:00:00.000Z",
+   "method": "rules",
+   "round": 1,
+   "dimensions": [
+    {
+     "id": "evidence_use",
+     "group": "ability",
+     "name": "证据使用",
+     "judgement": "会看线索，但关键线索常有遗漏",
+     "score": 0.43,
+     "evidence": [
+      {
+       "level_id": "S01",
+       "event_seqs": [
+        3,
+        4,
+        5,
+        6
+       ],
+       "text": "第 1 关翻开了全部关键线索「成交量」「同期大盘」",
+       "direction": "-"
+      },
+      {
+       "level_id": "S01",
+       "event_seqs": [
+        3,
+        4,
+        5,
+        6
+       ],
+       "text": "第 1 关线索整体看涨，但仍选择观望",
+       "direction": "?"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        13,
+        14,
+        15,
+        16
+       ],
+       "text": "第 2 关翻开了关键线索「成交量」，漏看了「北向资金」",
+       "direction": "?"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        13,
+        14,
+        15,
+        16
+       ],
+       "text": "第 2 关线索整体看跌，但仍选择观望",
+       "direction": "?"
+      },
+      {
+       "level_id": "S03",
+       "event_seqs": [
+        23,
+        24,
+        25,
+        26
+       ],
+       "text": "第 3 关没有翻开任何关键线索（本关关键是「区间回测」）",
+       "direction": "+"
+      },
+      {
+       "level_id": "S03",
+       "event_seqs": [
+        23,
+        24,
+        25,
+        26
+       ],
+       "text": "第 3 关线索整体看跌，但仍选择观望",
+       "direction": "?"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        33,
+        34,
+        35,
+        36
+       ],
+       "text": "第 4 关没有翻开任何关键线索（本关关键是「成交量」「超跌回测」）",
+       "direction": "+"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        33,
+        34,
+        35,
+        36
+       ],
+       "text": "第 4 关线索整体看跌，但仍选择观望",
+       "direction": "?"
+      }
+     ],
+     "confidence": "medium",
+     "uncertain": "有时紧跟证据、有时与证据相反，还不清楚是看不懂线索还是有意逆向判断",
+     "conflict": true
+    },
+    {
+     "id": "calibration",
+     "group": "ability",
+     "name": "判断校准",
+     "judgement": "证据不足，暂不下结论",
+     "score": null,
+     "evidence": [
+      {
+       "level_id": "S01",
+       "event_seqs": [
+        6
+       ],
+       "text": "第 1 关选择观望，这关无法检验信心是否准确",
+       "direction": "?"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        16
+       ],
+       "text": "第 2 关选择观望，这关无法检验信心是否准确",
+       "direction": "?"
+      },
+      {
+       "level_id": "S03",
+       "event_seqs": [
+        26
+       ],
+       "text": "第 3 关选择观望，这关无法检验信心是否准确",
+       "direction": "?"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        36
+       ],
+       "text": "第 4 关选择观望，这关无法检验信心是否准确",
+       "direction": "?"
+      }
+     ],
+     "confidence": "low",
+     "uncertain": "还没有做出可检验的方向判断（观望或横盘），无法评估信心准不准",
+     "conflict": false
+    },
+    {
+     "id": "risk_control",
+     "group": "ability",
+     "name": "风险控制",
+     "judgement": "证据不足，暂不下结论",
+     "score": null,
+     "evidence": [
+      {
+       "level_id": "S01",
+       "event_seqs": [
+        6
+       ],
+       "text": "第 1 关观望没有持仓，看不出风险控制",
+       "direction": "?"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        16
+       ],
+       "text": "第 2 关观望没有持仓，看不出风险控制",
+       "direction": "?"
+      },
+      {
+       "level_id": "S03",
+       "event_seqs": [
+        26
+       ],
+       "text": "第 3 关观望没有持仓，看不出风险控制",
+       "direction": "?"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        36
+       ],
+       "text": "第 4 关观望没有持仓，看不出风险控制",
+       "direction": "?"
+      }
+     ],
+     "confidence": "low",
+     "uncertain": "还没有真正入场持仓，看不出遇到浮亏会怎么做",
+     "conflict": false
+    },
+    {
+     "id": "style",
+     "group": "preference",
+     "name": "趋势 vs 反转",
+     "judgement": "证据不足，暂不下结论",
+     "score": null,
+     "evidence": [
+      {
+       "level_id": "S01",
+       "event_seqs": [
+        6
+       ],
+       "text": "第 1 关观望，看不出顺势还是逆势",
+       "direction": "?"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        16
+       ],
+       "text": "第 2 关观望，看不出顺势还是逆势",
+       "direction": "?"
+      },
+      {
+       "level_id": "S03",
+       "event_seqs": [
+        26
+       ],
+       "text": "第 3 关决定前 20 天涨跌不到 3.0%，没有明显趋势，不计入顺势/逆势",
+       "direction": "?"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        36
+       ],
+       "text": "第 4 关观望，看不出顺势还是逆势",
+       "direction": "?"
+      }
+     ],
+     "confidence": "low",
+     "uncertain": "还没有在明显上涨或下跌的行情里下过方向，看不出偏好",
+     "conflict": false
+    },
+    {
+     "id": "research_depth",
+     "group": "preference",
+     "name": "研究深度",
+     "judgement": "偏研究型：先把研究点用足再决定",
+     "score": 0.98,
+     "evidence": [
+      {
+       "level_id": "S01",
+       "event_seqs": [
+        3,
+        4,
+        5,
+        6
+       ],
+       "text": "第 1 关3 个研究点用了 3 个，思考 30 秒后决定",
+       "direction": "+"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        13,
+        14,
+        15,
+        16
+       ],
+       "text": "第 2 关3 个研究点用了 3 个，思考 28 秒后决定",
+       "direction": "+"
+      },
+      {
+       "level_id": "S03",
+       "event_seqs": [
+        23,
+        24,
+        25,
+        26
+       ],
+       "text": "第 3 关3 个研究点用了 3 个，思考 25 秒后决定",
+       "direction": "+"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        33,
+        34,
+        35,
+        36
+       ],
+       "text": "第 4 关3 个研究点用了 3 个，思考 32 秒后决定",
+       "direction": "+"
+      }
+     ],
+     "confidence": "high",
+     "uncertain": "",
+     "conflict": false
+    },
+    {
+     "id": "risk_appetite",
+     "group": "preference",
+     "name": "风险偏好",
+     "judgement": "偏保守：轻仓或观望为主",
+     "score": 0,
+     "evidence": [
+      {
+       "level_id": "S01",
+       "event_seqs": [
+        6
+       ],
+       "text": "第 1 关选择观望不入场",
+       "direction": "+"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        16
+       ],
+       "text": "第 2 关选择观望不入场",
+       "direction": "+"
+      },
+      {
+       "level_id": "S03",
+       "event_seqs": [
+        26
+       ],
+       "text": "第 3 关选择观望不入场",
+       "direction": "+"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        36
+       ],
+       "text": "第 4 关选择观望不入场",
+       "direction": "+"
+      }
+     ],
+     "confidence": "high",
+     "uncertain": "",
+     "conflict": false
+    }
+   ],
+   "persona": {
+    "name": "树懒观察员",
+    "emoji": "🦥",
+    "tagline": "看得多、动得少，按兵不动也是一种选择",
+    "is_fun_label": true
+   },
+   "summary": "能力上，证据使用会看线索，但关键线索常有遗漏。偏好上，偏研究型、偏保守；人物卡依据是\"大多数关卡观望或极轻仓\"。证据使用、判断校准、风险控制、趋势 vs 反转还看不准，结论仅供参考。",
+   "needs_more": [
+    {
+     "dimension_id": "evidence_use",
+     "reason": "有时紧跟证据、有时与证据相反，还不清楚是看不懂线索还是有意逆向判断"
+    },
+    {
+     "dimension_id": "calibration",
+     "reason": "还没有做出可检验的方向判断（观望或横盘），无法评估信心准不准"
+    },
+    {
+     "dimension_id": "risk_control",
+     "reason": "还没有真正入场持仓，看不出遇到浮亏会怎么做"
+    },
+    {
+     "dimension_id": "style",
+     "reason": "还没有在明显上涨或下跌的行情里下过方向，看不出偏好"
+    }
+   ]
+  },
+  {
+   "schema": "profile/v1",
+   "session_id": "sample-watcher",
+   "is_sample": true,
+   "generated_at": "2026-10-30T00:00:00.000Z",
+   "method": "rules",
+   "round": 2,
+   "dimensions": [
+    {
+     "id": "evidence_use",
+     "group": "ability",
+     "name": "证据使用",
+     "judgement": "会看线索，但关键线索常有遗漏",
+     "score": 0.57,
+     "evidence": [
+      {
+       "level_id": "S01",
+       "event_seqs": [
+        3,
+        4,
+        5,
+        6
+       ],
+       "text": "第 1 关翻开了全部关键线索「成交量」「同期大盘」",
+       "direction": "+"
+      },
+      {
+       "level_id": "S01",
+       "event_seqs": [
+        3,
+        4,
+        5,
+        6
+       ],
+       "text": "第 1 关线索整体看涨，但仍选择观望",
+       "direction": "?"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        13,
+        14,
+        15,
+        16
+       ],
+       "text": "第 2 关翻开了关键线索「成交量」，漏看了「北向资金」",
+       "direction": "?"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        13,
+        14,
+        15,
+        16
+       ],
+       "text": "第 2 关线索整体看跌，但仍选择观望",
+       "direction": "?"
+      },
+      {
+       "level_id": "S03",
+       "event_seqs": [
+        23,
+        24,
+        25,
+        26
+       ],
+       "text": "第 3 关没有翻开任何关键线索（本关关键是「区间回测」）",
+       "direction": "-"
+      },
+      {
+       "level_id": "S03",
+       "event_seqs": [
+        23,
+        24,
+        25,
+        26
+       ],
+       "text": "第 3 关线索整体看跌，但仍选择观望",
+       "direction": "?"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        33,
+        34,
+        35,
+        36
+       ],
+       "text": "第 4 关没有翻开任何关键线索（本关关键是「成交量」「超跌回测」）",
+       "direction": "-"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        33,
+        34,
+        35,
+        36
+       ],
+       "text": "第 4 关线索整体看跌，但仍选择观望",
+       "direction": "?"
+      },
+      {
+       "level_id": "S05",
+       "event_seqs": [
+        43,
+        44,
+        45
+       ],
+       "text": "补充关翻开了全部关键线索「成交量」「突破回测」",
+       "direction": "+"
+      },
+      {
+       "level_id": "S05",
+       "event_seqs": [
+        43,
+        44,
+        45
+       ],
+       "text": "补充关翻开的线索整体看跌，决定做空与线索一致",
+       "direction": "+"
+      }
+     ],
+     "confidence": "medium",
+     "uncertain": "有时紧跟证据、有时与证据相反，还不清楚是看不懂线索还是有意逆向判断",
+     "conflict": true
+    },
+    {
+     "id": "calibration",
+     "group": "ability",
+     "name": "判断校准",
+     "judgement": "信心和对错比较匹配",
+     "score": 0.89,
+     "evidence": [
+      {
+       "level_id": "S01",
+       "event_seqs": [
+        6
+       ],
+       "text": "第 1 关选择观望，这关无法检验信心是否准确",
+       "direction": "?"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        16
+       ],
+       "text": "第 2 关选择观望，这关无法检验信心是否准确",
+       "direction": "?"
+      },
+      {
+       "level_id": "S03",
+       "event_seqs": [
+        26
+       ],
+       "text": "第 3 关选择观望，这关无法检验信心是否准确",
+       "direction": "?"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        36
+       ],
+       "text": "第 4 关选择观望，这关无法检验信心是否准确",
+       "direction": "?"
+      },
+      {
+       "level_id": "S05",
+       "event_seqs": [
+        45
+       ],
+       "text": "补充关信心 3/5，做空，之后下跌：方向对了，但信心给得偏低",
+       "direction": "+"
+      }
+     ],
+     "confidence": "low",
+     "uncertain": "只有 1 次可检验的判断，一次对错可能只是运气",
+     "conflict": false
+    },
+    {
+     "id": "risk_control",
+     "group": "ability",
+     "name": "风险控制",
+     "judgement": "会用止损和仓位管住风险",
+     "score": 0.85,
+     "evidence": [
+      {
+       "level_id": "S01",
+       "event_seqs": [
+        6
+       ],
+       "text": "第 1 关观望没有持仓，看不出风险控制",
+       "direction": "?"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        16
+       ],
+       "text": "第 2 关观望没有持仓，看不出风险控制",
+       "direction": "?"
+      },
+      {
+       "level_id": "S03",
+       "event_seqs": [
+        26
+       ],
+       "text": "第 3 关观望没有持仓，看不出风险控制",
+       "direction": "?"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        36
+       ],
+       "text": "第 4 关观望没有持仓，看不出风险控制",
+       "direction": "?"
+      },
+      {
+       "level_id": "S05",
+       "event_seqs": [
+        45
+       ],
+       "text": "补充关轻仓做空时设了 5.0% 止损",
+       "direction": "+"
+      }
+     ],
+     "confidence": "low",
+     "uncertain": "只有 1 关持仓记录，还不清楚遇到不同行情时是否一致",
+     "conflict": false
+    },
+    {
+     "id": "style",
+     "group": "preference",
+     "name": "趋势 vs 反转",
+     "judgement": "偏逆势反转：涨多了空、跌多了买",
+     "score": 0,
+     "evidence": [
+      {
+       "level_id": "S01",
+       "event_seqs": [
+        6
+       ],
+       "text": "第 1 关观望，看不出顺势还是逆势",
+       "direction": "?"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        16
+       ],
+       "text": "第 2 关观望，看不出顺势还是逆势",
+       "direction": "?"
+      },
+      {
+       "level_id": "S03",
+       "event_seqs": [
+        26
+       ],
+       "text": "第 3 关决定前 20 天涨跌不到 3.0%，没有明显趋势，不计入顺势/逆势",
+       "direction": "?"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        36
+       ],
+       "text": "第 4 关观望，看不出顺势还是逆势",
+       "direction": "?"
+      },
+      {
+       "level_id": "S05",
+       "event_seqs": [
+        45
+       ],
+       "text": "补充关决定前 20 天上涨 6.0%，选择做空（逆势）",
+       "direction": "+"
+      }
+     ],
+     "confidence": "low",
+     "uncertain": "只在 1 关有明显趋势时下过单，还不能说是稳定偏好",
+     "conflict": false
+    },
+    {
+     "id": "research_depth",
+     "group": "preference",
+     "name": "研究深度",
+     "judgement": "偏研究型：先把研究点用足再决定",
+     "score": 0.98,
+     "evidence": [
+      {
+       "level_id": "S01",
+       "event_seqs": [
+        3,
+        4,
+        5,
+        6
+       ],
+       "text": "第 1 关3 个研究点用了 3 个，思考 30 秒后决定",
+       "direction": "+"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        13,
+        14,
+        15,
+        16
+       ],
+       "text": "第 2 关3 个研究点用了 3 个，思考 28 秒后决定",
+       "direction": "+"
+      },
+      {
+       "level_id": "S03",
+       "event_seqs": [
+        23,
+        24,
+        25,
+        26
+       ],
+       "text": "第 3 关3 个研究点用了 3 个，思考 25 秒后决定",
+       "direction": "+"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        33,
+        34,
+        35,
+        36
+       ],
+       "text": "第 4 关3 个研究点用了 3 个，思考 32 秒后决定",
+       "direction": "+"
+      },
+      {
+       "level_id": "S05",
+       "event_seqs": [
+        43,
+        44,
+        45
+       ],
+       "text": "补充关3 个研究点用了 3 个，思考 30 秒后决定",
+       "direction": "+"
+      }
+     ],
+     "confidence": "high",
+     "uncertain": "",
+     "conflict": false
+    },
+    {
+     "id": "risk_appetite",
+     "group": "preference",
+     "name": "风险偏好",
+     "judgement": "偏保守：轻仓或观望为主",
+     "score": 0.04,
+     "evidence": [
+      {
+       "level_id": "S01",
+       "event_seqs": [
+        6
+       ],
+       "text": "第 1 关选择观望不入场",
+       "direction": "+"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        16
+       ],
+       "text": "第 2 关选择观望不入场",
+       "direction": "+"
+      },
+      {
+       "level_id": "S03",
+       "event_seqs": [
+        26
+       ],
+       "text": "第 3 关选择观望不入场",
+       "direction": "+"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        36
+       ],
+       "text": "第 4 关选择观望不入场",
+       "direction": "+"
+      },
+      {
+       "level_id": "S05",
+       "event_seqs": [
+        45
+       ],
+       "text": "补充关轻仓做空",
+       "direction": "+"
+      }
+     ],
+     "confidence": "high",
+     "uncertain": "",
+     "conflict": false
+    }
+   ],
+   "persona": {
+    "name": "树懒观察员",
+    "emoji": "🦥",
+    "tagline": "看得多、动得少，按兵不动也是一种选择",
+    "is_fun_label": true
+   },
+   "summary": "能力上，判断校准相对最好（信心和对错比较匹配），证据使用最需要加强（会看线索，但关键线索常有遗漏）。偏好上，偏研究型、偏保守；人物卡依据是\"大多数关卡观望或极轻仓\"。证据使用、判断校准、风险控制、趋势 vs 反转还看不准，结论仅供参考。",
+   "needs_more": [
+    {
+     "dimension_id": "evidence_use",
+     "reason": "有时紧跟证据、有时与证据相反，还不清楚是看不懂线索还是有意逆向判断"
+    },
+    {
+     "dimension_id": "calibration",
+     "reason": "只有 1 次可检验的判断，一次对错可能只是运气"
+    },
+    {
+     "dimension_id": "risk_control",
+     "reason": "只有 1 关持仓记录，还不清楚遇到不同行情时是否一致"
+    },
+    {
+     "dimension_id": "style",
+     "reason": "只在 1 关有明显趋势时下过单，还不能说是稳定偏好"
+    }
+   ],
+   "changes": [
+    {
+     "dimension_id": "calibration",
+     "before": "证据不足，暂不下结论（置信度低）",
+     "after": "信心和对错比较匹配（置信度低）"
+    },
+    {
+     "dimension_id": "risk_control",
+     "before": "证据不足，暂不下结论（置信度低）",
+     "after": "会用止损和仓位管住风险（置信度低）"
+    },
+    {
+     "dimension_id": "style",
+     "before": "证据不足，暂不下结论（置信度低）",
+     "after": "偏逆势反转：涨多了空、跌多了买（置信度低）"
+    }
+   ]
+  }
+ ]
+}

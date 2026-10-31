@@ -1,0 +1,404 @@
+{
+ "is_sample": true,
+ "name": "冲动重仓型",
+ "profiles": [
+  {
+   "schema": "profile/v1",
+   "session_id": "sample-impulsive",
+   "is_sample": true,
+   "generated_at": "2026-10-30T00:00:00.000Z",
+   "method": "rules",
+   "round": 1,
+   "dimensions": [
+    {
+     "id": "evidence_use",
+     "group": "ability",
+     "name": "证据使用",
+     "judgement": "倾向先下结论，较少依据线索",
+     "score": 0.32,
+     "evidence": [
+      {
+       "level_id": "S01",
+       "event_seqs": [
+        3,
+        4
+       ],
+       "text": "第 1 关没有翻开任何关键线索（本关关键是「成交量」「同期大盘」）",
+       "direction": "+"
+      },
+      {
+       "level_id": "S01",
+       "event_seqs": [
+        3,
+        4
+       ],
+       "text": "第 1 关翻开的线索整体看涨，决定做多与线索一致",
+       "direction": "?"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        11,
+        12
+       ],
+       "text": "第 2 关没有翻开任何关键线索（本关关键是「成交量」「北向资金」）",
+       "direction": "+"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        11,
+        12
+       ],
+       "text": "第 2 关翻开的线索整体看涨，决定做多与线索一致",
+       "direction": "?"
+      },
+      {
+       "level_id": "S03",
+       "event_seqs": [
+        19
+       ],
+       "text": "第 3 关没有翻开任何关键线索（本关关键是「区间回测」）",
+       "direction": "+"
+      },
+      {
+       "level_id": "S03",
+       "event_seqs": [
+        19
+       ],
+       "text": "第 3 关一张线索没翻就做多",
+       "direction": "+"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        26,
+        27
+       ],
+       "text": "第 4 关没有翻开任何关键线索（本关关键是「成交量」「超跌回测」）",
+       "direction": "+"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        26,
+        27
+       ],
+       "text": "第 4 关翻开的线索整体看跌，决定做空与线索一致",
+       "direction": "?"
+      }
+     ],
+     "confidence": "high",
+     "uncertain": "",
+     "conflict": false
+    },
+    {
+     "id": "calibration",
+     "group": "ability",
+     "name": "判断校准",
+     "judgement": "信心和实际对错不匹配",
+     "score": 0.35,
+     "evidence": [
+      {
+       "level_id": "S01",
+       "event_seqs": [
+        4
+       ],
+       "text": "第 1 关信心 5/5，做多，之后上涨：信心高且方向判断正确",
+       "direction": "-"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        12
+       ],
+       "text": "第 2 关信心 5/5，做多，之后下跌：信心很高，但方向判断错了",
+       "direction": "+"
+      },
+      {
+       "level_id": "S03",
+       "event_seqs": [
+        19
+       ],
+       "text": "第 3 关信心 5/5，做多，之后上涨：信心高且方向判断正确",
+       "direction": "-"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        27
+       ],
+       "text": "第 4 关信心 5/5，做空，之后上涨：信心很高，但方向判断错了",
+       "direction": "+"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        27
+       ],
+       "text": "截至第 4 关，4 次可检验的判断平均信心 5.0/5（约 90% 把握），实际对了 2 次（50%）：信心偏高",
+       "direction": "+"
+      }
+     ],
+     "confidence": "medium",
+     "uncertain": "证据来自 4 关，方向基本一致，再多几关会更有把握",
+     "conflict": false
+    },
+    {
+     "id": "risk_control",
+     "group": "ability",
+     "name": "风险控制",
+     "judgement": "风险敞口偏大，浮亏时不太收手",
+     "score": 0.28,
+     "evidence": [
+      {
+       "level_id": "S01",
+       "event_seqs": [
+        4
+       ],
+       "text": "第 1 关满仓做多却没有设止损",
+       "direction": "+"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        12
+       ],
+       "text": "第 2 关满仓做多却没有设止损",
+       "direction": "+"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        12
+       ],
+       "text": "第 2 关走势波动大（日波动约 2.5%），仍然满仓",
+       "direction": "+"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        13
+       ],
+       "text": "第 2 关第 1 步浮亏 5.0% 时选择加仓",
+       "direction": "+"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        14
+       ],
+       "text": "第 2 关第 2 步浮亏 10.0% 时继续持有",
+       "direction": "?"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        15
+       ],
+       "text": "第 2 关第 3 步浮亏 15.0% 时才平仓，止损偏晚",
+       "direction": "?"
+      },
+      {
+       "level_id": "S03",
+       "event_seqs": [
+        19
+       ],
+       "text": "第 3 关满仓做多却没有设止损",
+       "direction": "+"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        27
+       ],
+       "text": "第 4 关满仓做空却没有设止损",
+       "direction": "+"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        27
+       ],
+       "text": "第 4 关走势波动大（日波动约 2.1%），仍然满仓",
+       "direction": "+"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        28
+       ],
+       "text": "第 4 关第 1 步浮亏 3.0% 时选择加仓",
+       "direction": "+"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        29
+       ],
+       "text": "第 4 关第 2 步浮亏 7.0% 时继续持有",
+       "direction": "?"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        30
+       ],
+       "text": "第 4 关第 3 步浮亏 10.0% 时继续持有",
+       "direction": "?"
+      }
+     ],
+     "confidence": "high",
+     "uncertain": "",
+     "conflict": false
+    },
+    {
+     "id": "style",
+     "group": "preference",
+     "name": "趋势 vs 反转",
+     "judgement": "偏趋势跟随：涨了追、跌了空",
+     "score": 1,
+     "evidence": [
+      {
+       "level_id": "S01",
+       "event_seqs": [
+        4
+       ],
+       "text": "第 1 关决定前 20 天上涨 12.0%，选择做多（顺势）",
+       "direction": "+"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        12
+       ],
+       "text": "第 2 关决定前 20 天上涨 15.0%，选择做多（顺势）",
+       "direction": "+"
+      },
+      {
+       "level_id": "S03",
+       "event_seqs": [
+        19
+       ],
+       "text": "第 3 关决定前 20 天涨跌不到 3.0%，没有明显趋势，不计入顺势/逆势",
+       "direction": "?"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        27
+       ],
+       "text": "第 4 关决定前 20 天下跌 14.0%，选择做空（顺势）",
+       "direction": "+"
+      }
+     ],
+     "confidence": "high",
+     "uncertain": "",
+     "conflict": false
+    },
+    {
+     "id": "research_depth",
+     "group": "preference",
+     "name": "研究深度",
+     "judgement": "偏直觉型：很少翻线索、决定快",
+     "score": 0.22,
+     "evidence": [
+      {
+       "level_id": "S01",
+       "event_seqs": [
+        3,
+        4
+       ],
+       "text": "第 1 关3 个研究点用了 1 个，思考 6 秒后决定",
+       "direction": "+"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        11,
+        12
+       ],
+       "text": "第 2 关3 个研究点用了 1 个，思考 5 秒后决定",
+       "direction": "+"
+      },
+      {
+       "level_id": "S03",
+       "event_seqs": [
+        19
+       ],
+       "text": "第 3 关3 个研究点用了 0 个，思考 4 秒后决定",
+       "direction": "+"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        26,
+        27
+       ],
+       "text": "第 4 关3 个研究点用了 1 个，思考 7 秒后决定",
+       "direction": "+"
+      }
+     ],
+     "confidence": "high",
+     "uncertain": "",
+     "conflict": false
+    },
+    {
+     "id": "risk_appetite",
+     "group": "preference",
+     "name": "风险偏好",
+     "judgement": "偏激进：常常重仓、愿意加仓",
+     "score": 1,
+     "evidence": [
+      {
+       "level_id": "S01",
+       "event_seqs": [
+        4,
+        5
+       ],
+       "text": "第 1 关满仓做多，之后又加仓 1 次",
+       "direction": "+"
+      },
+      {
+       "level_id": "S02",
+       "event_seqs": [
+        12,
+        13
+       ],
+       "text": "第 2 关满仓做多，之后又加仓 1 次",
+       "direction": "+"
+      },
+      {
+       "level_id": "S03",
+       "event_seqs": [
+        19
+       ],
+       "text": "第 3 关满仓做多",
+       "direction": "+"
+      },
+      {
+       "level_id": "S04",
+       "event_seqs": [
+        27,
+        28
+       ],
+       "text": "第 4 关满仓做空，之后又加仓 1 次",
+       "direction": "+"
+      }
+     ],
+     "confidence": "high",
+     "uncertain": "",
+     "conflict": false
+    }
+   ],
+   "persona": {
+    "name": "冲锋蛮牛",
+    "emoji": "🐂",
+    "tagline": "看到机会就冲，先上车再说",
+    "is_fun_label": true
+   },
+   "summary": "能力上几项都还有提升空间，最需要加强的是风险控制（风险敞口偏大，浮亏时不太收手）。偏好上，偏趋势跟随、偏直觉型、偏激进；人物卡依据是\"仓位重、研究少、决定快\"。",
+   "needs_more": []
+  }
+ ]
+}

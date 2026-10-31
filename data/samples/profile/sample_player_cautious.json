@@ -1,0 +1,680 @@
+{
+ "is_sample": true,
+ "name": "谨慎研究型",
+ "note": "模拟玩家：每关先翻关键线索、用足研究点，半仓以下并设止损，浮亏时减仓",
+ "events": [
+  {
+   "seq": 1,
+   "session_id": "sample-cautious",
+   "level_id": null,
+   "t_ms": 0,
+   "at": "2026-10-31T10:00:01.000Z",
+   "type": "session_start",
+   "data": {
+    "device": "mobile"
+   }
+  },
+  {
+   "seq": 2,
+   "session_id": "sample-cautious",
+   "level_id": "S01",
+   "t_ms": 0,
+   "at": "2026-10-31T10:00:02.000Z",
+   "type": "level_start",
+   "data": {
+    "budget": 3,
+    "is_supplementary": false
+   }
+  },
+  {
+   "seq": 3,
+   "session_id": "sample-cautious",
+   "level_id": "S01",
+   "t_ms": 9500,
+   "at": "2026-10-31T10:00:03.000Z",
+   "type": "clue_open",
+   "data": {
+    "clue_id": "vol",
+    "kind": "volume",
+    "signal": "bullish",
+    "cost": 1,
+    "budget_left": 2
+   }
+  },
+  {
+   "seq": 4,
+   "session_id": "sample-cautious",
+   "level_id": "S01",
+   "t_ms": 19000,
+   "at": "2026-10-31T10:00:04.000Z",
+   "type": "clue_open",
+   "data": {
+    "clue_id": "idx",
+    "kind": "index",
+    "signal": "bullish",
+    "cost": 1,
+    "budget_left": 1
+   }
+  },
+  {
+   "seq": 5,
+   "session_id": "sample-cautious",
+   "level_id": "S01",
+   "t_ms": 28500,
+   "at": "2026-10-31T10:00:05.000Z",
+   "type": "clue_open",
+   "data": {
+    "clue_id": "ma",
+    "kind": "ma",
+    "signal": "bullish",
+    "cost": 1,
+    "budget_left": 0
+   }
+  },
+  {
+   "seq": 6,
+   "session_id": "sample-cautious",
+   "level_id": "S01",
+   "t_ms": 38000,
+   "at": "2026-10-31T10:00:06.000Z",
+   "type": "decision",
+   "data": {
+    "side": "long",
+    "size": 0.5,
+    "confidence": 4,
+    "stop": 0.05,
+    "clues_opened": [
+     "vol",
+     "idx",
+     "ma"
+    ],
+    "think_ms": 38000
+   }
+  },
+  {
+   "seq": 7,
+   "session_id": "sample-cautious",
+   "level_id": "S01",
+   "t_ms": 40500,
+   "at": "2026-10-31T10:00:07.000Z",
+   "type": "hold_step",
+   "data": {
+    "step": 1,
+    "pnl_before": 0.03,
+    "action": "hold",
+    "position_after": 0.5
+   }
+  },
+  {
+   "seq": 8,
+   "session_id": "sample-cautious",
+   "level_id": "S01",
+   "t_ms": 42500,
+   "at": "2026-10-31T10:00:08.000Z",
+   "type": "hold_step",
+   "data": {
+    "step": 2,
+    "pnl_before": 0.05,
+    "action": "hold",
+    "position_after": 0.5
+   }
+  },
+  {
+   "seq": 9,
+   "session_id": "sample-cautious",
+   "level_id": "S01",
+   "t_ms": 44500,
+   "at": "2026-10-31T10:00:09.000Z",
+   "type": "hold_step",
+   "data": {
+    "step": 3,
+    "pnl_before": 0.08,
+    "action": "hold",
+    "position_after": 0.5
+   }
+  },
+  {
+   "seq": 10,
+   "session_id": "sample-cautious",
+   "level_id": "S01",
+   "t_ms": 46000,
+   "at": "2026-10-31T10:00:10.000Z",
+   "type": "level_end",
+   "data": {
+    "pnl": 0.08,
+    "final_position": 0.5
+   }
+  },
+  {
+   "seq": 11,
+   "session_id": "sample-cautious",
+   "level_id": "S01",
+   "t_ms": 47000,
+   "at": "2026-10-31T10:00:11.000Z",
+   "type": "reveal_view",
+   "data": {
+    "dwell_ms": 6000
+   }
+  },
+  {
+   "seq": 12,
+   "session_id": "sample-cautious",
+   "level_id": "S02",
+   "t_ms": 0,
+   "at": "2026-10-31T10:00:12.000Z",
+   "type": "level_start",
+   "data": {
+    "budget": 3,
+    "is_supplementary": false
+   }
+  },
+  {
+   "seq": 13,
+   "session_id": "sample-cautious",
+   "level_id": "S02",
+   "t_ms": 10500,
+   "at": "2026-10-31T10:00:13.000Z",
+   "type": "clue_open",
+   "data": {
+    "clue_id": "vol",
+    "kind": "volume",
+    "signal": "bearish",
+    "cost": 1,
+    "budget_left": 2
+   }
+  },
+  {
+   "seq": 14,
+   "session_id": "sample-cautious",
+   "level_id": "S02",
+   "t_ms": 21000,
+   "at": "2026-10-31T10:00:14.000Z",
+   "type": "clue_open",
+   "data": {
+    "clue_id": "nb",
+    "kind": "northbound",
+    "signal": "bearish",
+    "cost": 1,
+    "budget_left": 1
+   }
+  },
+  {
+   "seq": 15,
+   "session_id": "sample-cautious",
+   "level_id": "S02",
+   "t_ms": 31500,
+   "at": "2026-10-31T10:00:15.000Z",
+   "type": "clue_open",
+   "data": {
+    "clue_id": "margin",
+    "kind": "margin",
+    "signal": "bearish",
+    "cost": 1,
+    "budget_left": 0
+   }
+  },
+  {
+   "seq": 16,
+   "session_id": "sample-cautious",
+   "level_id": "S02",
+   "t_ms": 42000,
+   "at": "2026-10-31T10:00:16.000Z",
+   "type": "decision",
+   "data": {
+    "side": "short",
+    "size": 0.5,
+    "confidence": 4,
+    "stop": 0.05,
+    "clues_opened": [
+     "vol",
+     "nb",
+     "margin"
+    ],
+    "think_ms": 42000
+   }
+  },
+  {
+   "seq": 17,
+   "session_id": "sample-cautious",
+   "level_id": "S02",
+   "t_ms": 44500,
+   "at": "2026-10-31T10:00:17.000Z",
+   "type": "hold_step",
+   "data": {
+    "step": 1,
+    "pnl_before": 0.025,
+    "action": "hold",
+    "position_after": -0.5
+   }
+  },
+  {
+   "seq": 18,
+   "session_id": "sample-cautious",
+   "level_id": "S02",
+   "t_ms": 46500,
+   "at": "2026-10-31T10:00:18.000Z",
+   "type": "hold_step",
+   "data": {
+    "step": 2,
+    "pnl_before": 0.05,
+    "action": "hold",
+    "position_after": -0.5
+   }
+  },
+  {
+   "seq": 19,
+   "session_id": "sample-cautious",
+   "level_id": "S02",
+   "t_ms": 48500,
+   "at": "2026-10-31T10:00:19.000Z",
+   "type": "hold_step",
+   "data": {
+    "step": 3,
+    "pnl_before": 0.075,
+    "action": "hold",
+    "position_after": -0.5
+   }
+  },
+  {
+   "seq": 20,
+   "session_id": "sample-cautious",
+   "level_id": "S02",
+   "t_ms": 50000,
+   "at": "2026-10-31T10:00:20.000Z",
+   "type": "level_end",
+   "data": {
+    "pnl": 0.075,
+    "final_position": -0.5
+   }
+  },
+  {
+   "seq": 21,
+   "session_id": "sample-cautious",
+   "level_id": "S02",
+   "t_ms": 51000,
+   "at": "2026-10-31T10:00:21.000Z",
+   "type": "reveal_view",
+   "data": {
+    "dwell_ms": 6000
+   }
+  },
+  {
+   "seq": 22,
+   "session_id": "sample-cautious",
+   "level_id": "S03",
+   "t_ms": 0,
+   "at": "2026-10-31T10:00:22.000Z",
+   "type": "level_start",
+   "data": {
+    "budget": 3,
+    "is_supplementary": false
+   }
+  },
+  {
+   "seq": 23,
+   "session_id": "sample-cautious",
+   "level_id": "S03",
+   "t_ms": 11667,
+   "at": "2026-10-31T10:00:23.000Z",
+   "type": "clue_open",
+   "data": {
+    "clue_id": "bt",
+    "kind": "backtest",
+    "signal": "bullish",
+    "cost": 2,
+    "budget_left": 1
+   }
+  },
+  {
+   "seq": 24,
+   "session_id": "sample-cautious",
+   "level_id": "S03",
+   "t_ms": 23333,
+   "at": "2026-10-31T10:00:24.000Z",
+   "type": "clue_open",
+   "data": {
+    "clue_id": "idx",
+    "kind": "index",
+    "signal": "bearish",
+    "cost": 1,
+    "budget_left": 0
+   }
+  },
+  {
+   "seq": 25,
+   "session_id": "sample-cautious",
+   "level_id": "S03",
+   "t_ms": 35000,
+   "at": "2026-10-31T10:00:25.000Z",
+   "type": "decision",
+   "data": {
+    "side": "long",
+    "size": 0.2,
+    "confidence": 2,
+    "stop": 0.05,
+    "clues_opened": [
+     "bt",
+     "idx"
+    ],
+    "think_ms": 35000
+   }
+  },
+  {
+   "seq": 26,
+   "session_id": "sample-cautious",
+   "level_id": "S03",
+   "t_ms": 37500,
+   "at": "2026-10-31T10:00:26.000Z",
+   "type": "hold_step",
+   "data": {
+    "step": 1,
+    "pnl_before": 0.002,
+    "action": "hold",
+    "position_after": 0.2
+   }
+  },
+  {
+   "seq": 27,
+   "session_id": "sample-cautious",
+   "level_id": "S03",
+   "t_ms": 39500,
+   "at": "2026-10-31T10:00:27.000Z",
+   "type": "hold_step",
+   "data": {
+    "step": 2,
+    "pnl_before": 0.006,
+    "action": "hold",
+    "position_after": 0.2
+   }
+  },
+  {
+   "seq": 28,
+   "session_id": "sample-cautious",
+   "level_id": "S03",
+   "t_ms": 41500,
+   "at": "2026-10-31T10:00:28.000Z",
+   "type": "hold_step",
+   "data": {
+    "step": 3,
+    "pnl_before": 0.009,
+    "action": "hold",
+    "position_after": 0.2
+   }
+  },
+  {
+   "seq": 29,
+   "session_id": "sample-cautious",
+   "level_id": "S03",
+   "t_ms": 43000,
+   "at": "2026-10-31T10:00:29.000Z",
+   "type": "level_end",
+   "data": {
+    "pnl": 0.009,
+    "final_position": 0.2
+   }
+  },
+  {
+   "seq": 30,
+   "session_id": "sample-cautious",
+   "level_id": "S03",
+   "t_ms": 44000,
+   "at": "2026-10-31T10:00:30.000Z",
+   "type": "reveal_view",
+   "data": {
+    "dwell_ms": 6000
+   }
+  },
+  {
+   "seq": 31,
+   "session_id": "sample-cautious",
+   "level_id": "S04",
+   "t_ms": 0,
+   "at": "2026-10-31T10:00:31.000Z",
+   "type": "level_start",
+   "data": {
+    "budget": 3,
+    "is_supplementary": false
+   }
+  },
+  {
+   "seq": 32,
+   "session_id": "sample-cautious",
+   "level_id": "S04",
+   "t_ms": 15000,
+   "at": "2026-10-31T10:00:32.000Z",
+   "type": "clue_open",
+   "data": {
+    "clue_id": "vol",
+    "kind": "volume",
+    "signal": "bullish",
+    "cost": 1,
+    "budget_left": 2
+   }
+  },
+  {
+   "seq": 33,
+   "session_id": "sample-cautious",
+   "level_id": "S04",
+   "t_ms": 30000,
+   "at": "2026-10-31T10:00:33.000Z",
+   "type": "clue_open",
+   "data": {
+    "clue_id": "bt",
+    "kind": "backtest",
+    "signal": "bullish",
+    "cost": 2,
+    "budget_left": 0
+   }
+  },
+  {
+   "seq": 34,
+   "session_id": "sample-cautious",
+   "level_id": "S04",
+   "t_ms": 45000,
+   "at": "2026-10-31T10:00:34.000Z",
+   "type": "decision",
+   "data": {
+    "side": "long",
+    "size": 0.5,
+    "confidence": 3,
+    "stop": 0.1,
+    "clues_opened": [
+     "vol",
+     "bt"
+    ],
+    "think_ms": 45000
+   }
+  },
+  {
+   "seq": 35,
+   "session_id": "sample-cautious",
+   "level_id": "S04",
+   "t_ms": 47500,
+   "at": "2026-10-31T10:00:35.000Z",
+   "type": "hold_step",
+   "data": {
+    "step": 1,
+    "pnl_before": -0.015,
+    "action": "reduce",
+    "position_after": 0.2
+   }
+  },
+  {
+   "seq": 36,
+   "session_id": "sample-cautious",
+   "level_id": "S04",
+   "t_ms": 49500,
+   "at": "2026-10-31T10:00:36.000Z",
+   "type": "hold_step",
+   "data": {
+    "step": 2,
+    "pnl_before": 0.004,
+    "action": "hold",
+    "position_after": 0.2
+   }
+  },
+  {
+   "seq": 37,
+   "session_id": "sample-cautious",
+   "level_id": "S04",
+   "t_ms": 51500,
+   "at": "2026-10-31T10:00:37.000Z",
+   "type": "hold_step",
+   "data": {
+    "step": 3,
+    "pnl_before": 0.02,
+    "action": "hold",
+    "position_after": 0.2
+   }
+  },
+  {
+   "seq": 38,
+   "session_id": "sample-cautious",
+   "level_id": "S04",
+   "t_ms": 53000,
+   "at": "2026-10-31T10:00:38.000Z",
+   "type": "level_end",
+   "data": {
+    "pnl": 0.02,
+    "final_position": 0.2
+   }
+  },
+  {
+   "seq": 39,
+   "session_id": "sample-cautious",
+   "level_id": "S04",
+   "t_ms": 54000,
+   "at": "2026-10-31T10:00:39.000Z",
+   "type": "reveal_view",
+   "data": {
+    "dwell_ms": 6000
+   }
+  },
+  {
+   "seq": 40,
+   "session_id": "sample-cautious",
+   "level_id": "S05",
+   "t_ms": 0,
+   "at": "2026-10-31T10:00:40.000Z",
+   "type": "level_start",
+   "data": {
+    "budget": 3,
+    "is_supplementary": true
+   }
+  },
+  {
+   "seq": 41,
+   "session_id": "sample-cautious",
+   "level_id": "S05",
+   "t_ms": 13333,
+   "at": "2026-10-31T10:00:41.000Z",
+   "type": "clue_open",
+   "data": {
+    "clue_id": "vol",
+    "kind": "volume",
+    "signal": "bearish",
+    "cost": 1,
+    "budget_left": 2
+   }
+  },
+  {
+   "seq": 42,
+   "session_id": "sample-cautious",
+   "level_id": "S05",
+   "t_ms": 26667,
+   "at": "2026-10-31T10:00:42.000Z",
+   "type": "clue_open",
+   "data": {
+    "clue_id": "bt",
+    "kind": "backtest",
+    "signal": "bearish",
+    "cost": 2,
+    "budget_left": 0
+   }
+  },
+  {
+   "seq": 43,
+   "session_id": "sample-cautious",
+   "level_id": "S05",
+   "t_ms": 40000,
+   "at": "2026-10-31T10:00:43.000Z",
+   "type": "decision",
+   "data": {
+    "side": "short",
+    "size": 0.2,
+    "confidence": 4,
+    "stop": 0.05,
+    "clues_opened": [
+     "vol",
+     "bt"
+    ],
+    "think_ms": 40000
+   }
+  },
+  {
+   "seq": 44,
+   "session_id": "sample-cautious",
+   "level_id": "S05",
+   "t_ms": 42500,
+   "at": "2026-10-31T10:00:44.000Z",
+   "type": "hold_step",
+   "data": {
+    "step": 1,
+    "pnl_before": 0.006,
+    "action": "hold",
+    "position_after": -0.2
+   }
+  },
+  {
+   "seq": 45,
+   "session_id": "sample-cautious",
+   "level_id": "S05",
+   "t_ms": 44500,
+   "at": "2026-10-31T10:00:45.000Z",
+   "type": "hold_step",
+   "data": {
+    "step": 2,
+    "pnl_before": 0.012,
+    "action": "hold",
+    "position_after": -0.2
+   }
+  },
+  {
+   "seq": 46,
+   "session_id": "sample-cautious",
+   "level_id": "S05",
+   "t_ms": 46500,
+   "at": "2026-10-31T10:00:46.000Z",
+   "type": "hold_step",
+   "data": {
+    "step": 3,
+    "pnl_before": 0.018,
+    "action": "hold",
+    "position_after": -0.2
+   }
+  },
+  {
+   "seq": 47,
+   "session_id": "sample-cautious",
+   "level_id": "S05",
+   "t_ms": 48000,
+   "at": "2026-10-31T10:00:47.000Z",
+   "type": "level_end",
+   "data": {
+    "pnl": 0.018,
+    "final_position": -0.2
+   }
+  },
+  {
+   "seq": 48,
+   "session_id": "sample-cautious",
+   "level_id": "S05",
+   "t_ms": 49000,
+   "at": "2026-10-31T10:00:48.000Z",
+   "type": "reveal_view",
+   "data": {
+    "dwell_ms": 6000
+   }
+  }
+ ]
+}

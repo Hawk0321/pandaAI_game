@@ -1,3 +1,9 @@
+/**
+ * 沟通协议 v1 的 TypeScript 类型，与 docs/protocol.md 第 2–5 节逐行一致（D 维护）。
+ * 协议第 5 节的三个函数在各自模块实现：PlayLevel 见 src/play/index.ts，
+ * analyze / pickNextLevel 见 src/profile/index.ts。改这里之前先改 docs/protocol.md。
+ */
+
 /** 一根 K 线。t 是相对序号：决定时刻那根是 0，之前为负数，之后为正数。不放真实日期。 */
 export interface Bar { t: number; o: number; h: number; l: number; c: number; v: number }
 
