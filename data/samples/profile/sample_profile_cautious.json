@@ -374,60 +374,21 @@
    ],
    "recommendations": [
     {
-     "id": "task-style_match",
-     "type": "task",
-     "title": "找出最像你的交易规则",
+     "id": "product-factor-center",
+     "type": "product",
+     "title": "在因子中心把研究做成因子",
      "resource": {
-      "name": "风格对照",
-      "provider": "本作品",
-      "is_sample": false,
-      "desc": "把你的直觉和三种经典策略逐关对照，看哪条规则最像你"
-     },
-     "reason": "证据使用判断为\"会先找关键线索，决定和证据一致\"（置信度高），你的决定有迹可循。趋势 vs 反转判断为\"偏逆势反转：涨多了空、跌多了买\"（置信度中），例如第 2 关决定前 20 天上涨 15.0%，选择做空（逆势）。把你的每关方向和三种经典策略对照，找出可以写成规则的那一条。",
-     "based_on": [
-      {
-       "dimension_id": "evidence_use",
-       "judgement": "会先找关键线索，决定和证据一致",
-       "evidence": [
-        "第 1 关翻开了全部关键线索「成交量」「同期大盘」",
-        "第 1 关翻开的线索整体看涨，决定做多与线索一致"
-       ]
-      },
-      {
-       "dimension_id": "style",
-       "judgement": "偏逆势反转：涨多了空、跌多了买",
-       "evidence": [
-        "第 2 关决定前 20 天上涨 15.0%，选择做空（逆势）",
-        "第 4 关决定前 20 天下跌 14.0%，选择做多（逆势）"
-       ]
-      }
-     ],
-     "next_step": {
-      "label": "开始练习（2 步）",
-      "kind": "in_app_task",
-      "task": {
-       "id": "style_match",
-       "level_ids": [
-        "S01",
-        "S02",
-        "S03",
-        "S04"
-       ]
-      }
-     }
-    },
-    {
-     "id": "res-qube",
-     "type": "strategy",
-     "title": "把你的研究习惯变成可回测的策略",
-     "resource": {
-      "name": "PandaAI Qube",
+      "name": "量化因子中心",
       "provider": "PandaAI",
-      "url": "https://www.pandaaiquant.com/agent_quant/",
-      "desc": "一句话把交易想法变成可回测的策略，首页有双均线、海龟突破 + ATR 止损等模板",
+      "url": "https://www.pandaaiquant.com/quantfactor-center",
+      "desc": "因子搜索、对比和诊断，带 AI 因子助手；免费版有 20 个因子的因子池",
+      "tags": [
+       "因子",
+       "免费版"
+      ],
       "is_sample": false
      },
-     "reason": "证据使用判断为\"会先找关键线索，决定和证据一致\"（置信度高），研究深度判断为\"偏研究型：先把研究点用足再决定\"（置信度高）。你已经习惯先看证据再决定，下一步是把判断写成规则，用历史数据回测。",
+     "reason": "证据使用判断为\"会先找关键线索，决定和证据一致\"（置信度高），研究深度判断为\"偏研究型：先把研究点用足再决定\"（置信度高）。你习惯先看证据再决定，因子中心可以把\"看什么\"变成可检验的因子，免费版就能用。",
      "based_on": [
       {
        "dimension_id": "evidence_use",
@@ -447,23 +408,26 @@
       }
      ],
      "next_step": {
-      "label": "打开 Qube",
-      "kind": "external",
-      "url": "https://www.pandaaiquant.com/agent_quant/"
+      "label": "去试试",
+      "url": "https://www.pandaaiquant.com/quantfactor-center"
      }
     },
     {
-     "id": "res-factor-contest",
+     "id": "event-factor-contest",
      "type": "event",
      "title": "去因子大赛试试身手",
      "resource": {
       "name": "第四届因子大赛",
       "provider": "PandaAI",
       "url": "https://www.pandaaiquant.com/factorhub/fourthFactorCompetition/",
-      "desc": "永续赛制、随到随赛的因子研究比赛",
+      "desc": "永续赛制、随时参赛的因子研究比赛",
+      "tags": [
+       "因子",
+       "进行中"
+      ],
       "is_sample": false
      },
-     "reason": "三项能力都表现不错（证据使用、判断校准、风险控制）。因子大赛随到随赛，适合把研究能力放到真实数据上检验。",
+     "reason": "三项能力都表现不错（证据使用、判断校准、风险控制）。因子大赛随时可以参加，适合把研究能力放到真实数据上检验。",
      "based_on": [
       {
        "dimension_id": "evidence_use",
@@ -491,9 +455,78 @@
       }
      ],
      "next_step": {
-      "label": "去看大赛",
-      "kind": "external",
+      "label": "去看活动",
       "url": "https://www.pandaaiquant.com/factorhub/fourthFactorCompetition/"
+     }
+    },
+    {
+     "id": "tool-overfit",
+     "type": "tool",
+     "title": "规则写出来后，先查过拟合",
+     "resource": {
+      "name": "skill-backtest-overfit",
+      "provider": "QuantSkills",
+      "url": "https://github.com/quantskills/skill-backtest-overfit",
+      "desc": "检测回测过拟合：Deflated Sharpe、PBO",
+      "tags": [
+       "回测",
+       "防过拟合"
+      ],
+      "is_sample": false
+     },
+     "reason": "证据使用判断为\"会先找关键线索，决定和证据一致\"（置信度高），研究深度判断为\"偏研究型：先把研究点用足再决定\"（置信度高）。下一步把判断写成规则时，最容易踩的坑是回测过拟合。",
+     "based_on": [
+      {
+       "dimension_id": "evidence_use",
+       "judgement": "会先找关键线索，决定和证据一致",
+       "evidence": [
+        "第 1 关翻开了全部关键线索「成交量」「同期大盘」",
+        "第 1 关翻开的线索整体看涨，决定做多与线索一致"
+       ]
+      },
+      {
+       "dimension_id": "research_depth",
+       "judgement": "偏研究型：先把研究点用足再决定",
+       "evidence": [
+        "第 1 关3 个研究点用了 3 个，思考 38 秒后决定",
+        "第 2 关3 个研究点用了 3 个，思考 42 秒后决定"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "查看工具",
+      "url": "https://github.com/quantskills/skill-backtest-overfit"
+     }
+    },
+    {
+     "id": "strategy-qbti",
+     "type": "strategy",
+     "title": "先找到适合你的策略方向",
+     "resource": {
+      "name": "skill-qbti",
+      "provider": "QuantSkills",
+      "url": "https://github.com/quantskills/skill-qbti",
+      "desc": "QBTI 平凡人策略：五组问答把投资性格翻译成因子方向和策略参数",
+      "tags": [
+       "性格→策略",
+       "入门"
+      ],
+      "is_sample": false
+     },
+     "reason": "趋势 vs 反转判断为\"偏逆势反转：涨多了空、跌多了买\"（置信度中），倾向还不够强，暂不据此定策略。QBTI 用五组问答把投资性格翻译成策略参数，可以和这份画像对照着看。",
+     "based_on": [
+      {
+       "dimension_id": "style",
+       "judgement": "偏逆势反转：涨多了空、跌多了买",
+       "evidence": [
+        "第 2 关决定前 20 天上涨 15.0%，选择做空（逆势）",
+        "第 4 关决定前 20 天下跌 14.0%，选择做多（逆势）"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "查看策略",
+      "url": "https://github.com/quantskills/skill-qbti"
      }
     }
    ]

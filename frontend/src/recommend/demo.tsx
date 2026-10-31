@@ -4,10 +4,9 @@ import { createRoot } from 'react-dom/client';
 import type { LevelPlay, LevelReveal } from '../shared/protocol';
 import { analyze } from '../profile/index';
 import { buildEvents, type LevelScript } from '../profile/testkit';
-import { RecommendationPanel, setLevelBase } from './RecommendationPanel';
+import { RecommendationPanel } from './RecommendationPanel';
 import '../styles.css';
 
-setLevelBase('/');
 const who = new URLSearchParams(location.search).get('player') ?? 'impulsive';
 const ids = ['L01', 'L02', 'L03', 'L04'];
 const get = async <T,>(f: string) => (await fetch(`/levels/${f}`)).json() as Promise<T>;
@@ -28,5 +27,5 @@ const profile = await analyze({ session_id: `demo-${who}`, round: 1, events, lev
 Object.assign(window, { demoProfile: profile });
 createRoot(document.getElementById('root')!).render(<StrictMode><main className="app-shell">
   <p className="notice">开发自测：真实关卡 + 模拟玩家（{who}），人物卡 {profile.persona.emoji} {profile.persona.name}</p>
-  <RecommendationPanel profile={profile} events={events} />
+  <RecommendationPanel profile={profile} />
 </main></StrictMode>);

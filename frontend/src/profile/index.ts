@@ -71,7 +71,7 @@ export async function analyze(input: AnalyzeInput): Promise<Profile> {
     profile.changes = diffProfiles(input.previous, profile);
     if (profile.changes.length === 0) profile.summary += '补充关卡没有改变任何判断，原有结论得到维持。';
   }
-  profile.recommendations = recommend(profile, input);
+  profile.recommendations = recommend(profile);
   return profile;
 }
 

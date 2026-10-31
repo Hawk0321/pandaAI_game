@@ -1,74 +1,74 @@
-# 推荐规则说明（画像 → 推荐 → 下一步）
+# 推荐规则说明（画像 → 推荐卡片 → PandaAI / QuantSkills）
 
-> 写给评委和队友：画像出来之后，我们推荐什么、为什么推荐、点下去能做什么。
-> 代码在 `frontend/src/recommend/`，阈值在 `recommend.ts` 的 `R`，资源目录在 `catalog.ts`。全部是规则计算，不用大模型。
+> 写给评委和队友：画像出来之后，我们推荐什么、为什么推荐、点下去去哪里。
+> 代码在 `frontend/src/recommend/`，阈值在 `recommend.ts` 的 `R`，资源在 `catalog.ts`。全部是规则计算，不用大模型。
+> 可推荐资源的完整盘点见 [pandaai-resources.md](pandaai-resources.md)。
 
 ## 1. 思路
 
+推荐的目的是把玩家引到 PandaAI 的产品和 QuantSkills 的开源技能包，让"在游戏里看出的习惯"接上"真实的量化工具"。
+
 ```
 画像的 6 个维度（判断 + 分数 + 置信度 + 证据）
-   → 按规则挑出"最该练的能力"和"最匹配的偏好"
-   → 2 个练习任务（本作品内置，当场能玩）+ 最多 2 个外部资源（PandaAI / QuantSkills）
-   → 每条写清：依据哪项判断、引用哪条行为证据、为什么推荐、下一步点哪里
+   → 按规则挑出最匹配的策略、最该补的短板、最合适的产品/活动/课程
+   → 最多 4 张卡片，每类最多一张，至少一张 PandaAI 产品卡
+   → 每张写清：依据哪项判断、引用哪条行为证据、为什么推荐、按钮跳到哪里
 ```
 
-- **做深的一类是"练习任务"**：4 个在 H5 里当场能玩的 3 步任务，用的是 Panda Data 真实历史行情，和画像维度一一对应。
-- **外部资源是配套**：PandaAI 的产品和活动、QuantSkills 的开源技能包。链接都在 2026-10-31 核实过，标 `is_sample: false`。
-- **能力弱项优先**：先补能力短板（证据使用、判断校准、风险控制），再按偏好推荐策略方向。
-- **证据不足也推荐**：判断校准没有证据（例如一直观望）时，推荐不用下单的"信心校准小测"，先补上这块证据。
+| 卡片类型 | 作用 | 资源来源 |
+|---|---|---|
+| 策略 | 把玩家的交易风格写成可回测的规则 | QuantSkills 策略技能包 |
+| 工具 | 补能力短板（止损、行为偏差、复盘、防过拟合） | QuantSkills 工具技能包 |
+| 产品 | 每份画像必有一张，引到 PandaAI 平台 | Qube、量化因子中心 |
+| 活动 | 适合当下水平的比赛 | 全国期货模拟赛、因子大赛 |
+| 学习 | 研究或证据使用偏弱时，给系统学习入口 | 量变学院课程、新手入门文档 |
 
-## 2. 四个练习任务
+链接都在 2026-10-31 核实过，标 `is_sample: false`。
 
-| 任务 | 对应维度 | 触发条件 | 3 步内容 | 用哪段行情 |
-|---|---|---|---|---|
-| 止损演练 | 风险控制 | 风险控制分 ≤ 0.45 | 选一档止损（3/5/10%）→ 回放决定后 15 天真实走势 → 对比"不设止损 / 3% / 5% / 10%"的结果和途中最大浮亏 | 玩过的关里"重仓没设止损、方向又做反了"的那关，没有就选波动最大的 |
-| 关键线索复盘 | 证据使用 | 证据使用分 ≤ 0.45 且有漏看关键线索的关 | 线索全部翻开 → 选出你认为最关键的两张 → 对照关键线索和真实结局 | 漏看关键线索最多的关 |
-| 信心校准小测 | 判断校准 | 判断校准分 ≤ 0.45，或证据不足（分数为空） | 3 段没玩过的行情，每段选涨跌并给信心 → 揭晓 → 汇总平均信心和命中率 | 题库里没玩过的关：先看 play，作答后才请求 reveal |
-| 风格对照 | 证据使用强 / 趋势偏好明确 | 证据使用分 ≥ 0.65，或趋势偏好置信度不低 | 逐关对照你和双均线、海龟突破、均值回归的方向 → 找出最像你的规则，链到对应模板 | 玩过的关 |
+## 2. 触发规则
 
-信息隔离：复盘类任务只用已经揭晓过的关；信心小测只用没玩过的关，并且先展示决定前的 K 线，作答之后才请求后续走势。
+阈值：能力分 ≤ 0.45 算短板，≥ 0.65 算不错；偏好分 ≥ 0.65 或 ≤ 0.35，且置信度不低、没有冲突，算倾向明确；风险偏好 ≤ 0.2 算几乎不入场。
 
-信心小测和画像的判断校准用同一个口径（信心 1–5 视为 50%–90% 把握，平均信心比命中率高 15 个百分点以上算"信心偏高"）。
-
-## 3. 外部资源与触发规则
-
-| 资源 | 类型 | 触发条件 | 推荐理由 |
+| 卡片 | 类型 | 触发条件 | 优先级 |
 |---|---|---|---|
-| [skill-b11-auto-stop-loss-take-profit](https://github.com/quantskills/skill-b11-auto-stop-loss-take-profit)（QuantSkills） | 工具 | 风险控制弱 | 把"事前定好最大亏损"写成自动规则 |
-| [skill-trading-behavior-diagnostics](https://github.com/quantskills/skill-trading-behavior-diagnostics)（QuantSkills） | 工具 | 判断校准弱 | 从交易记录识别过度自信等偏差 |
-| [skill-trade-review](https://github.com/quantskills/skill-trade-review)（QuantSkills） | 工具 | 证据使用弱且研究深度低 | 逐笔复盘下单前看了什么 |
-| [全国期货模拟赛](https://www.pandaaiquant.com/contest/)（PandaAI） | 活动 | 风险偏好 ≤ 0.2（几乎都在观望） | 模拟盘零成本，把"看懂了"变成"做一次" |
-| [Qube](https://www.pandaaiquant.com/agent_quant/) 双均线 / 海龟模板（PandaAI） | 策略 | 趋势偏好 ≥ 0.65，置信度不低且无冲突 | 把"顺势"写成规则直接回测 |
-| [skill-oversold-rebound](https://github.com/quantskills/skill-oversold-rebound)（QuantSkills） | 策略 | 趋势偏好 ≤ 0.35，置信度不低且无冲突 | 把"跌多了买"量化后检验 |
-| [Qube](https://www.pandaaiquant.com/agent_quant/)（PandaAI） | 策略 | 证据使用和研究深度都 ≥ 0.65 | 把研究习惯写成可回测的策略 |
-| [skill-backtest-overfit](https://github.com/quantskills/skill-backtest-overfit)（QuantSkills） | 工具 | 同上 | 规则写出来后检查过拟合 |
-| [skill-pandadata-api](https://github.com/quantskills/skill-pandadata-api)（QuantSkills） | 数据 | 研究深度 ≤ 0.45 | 游戏线索都来自 Panda Data，学会自己查 |
-| [第四届因子大赛](https://www.pandaaiquant.com/factorhub/fourthFactorCompetition/)（PandaAI） | 活动 | 三项能力都 ≥ 0.65 | 把研究能力放到真实数据上检验 |
+| [skill-ma-crossover-signal](https://github.com/quantskills/skill-ma-crossover-signal) 均线金叉死叉 | 策略 | 趋势偏好明确 | 70 |
+| [skill-oversold-rebound](https://github.com/quantskills/skill-oversold-rebound) 超跌反弹 | 策略 | 反转偏好明确 | 70 |
+| [skill-qbti](https://github.com/quantskills/skill-qbti) 性格 → 策略问答 | 策略 | 风格不明显（兜底） | 40 |
+| [skill-b11-auto-stop-loss-take-profit](https://github.com/quantskills/skill-b11-auto-stop-loss-take-profit) | 工具 | 风险控制短板 | 100 − 分数×100 |
+| [skill-trade-review](https://github.com/quantskills/skill-trade-review) | 工具 | 证据使用短板 | 95 − 分数×100 |
+| [skill-trading-behavior-diagnostics](https://github.com/quantskills/skill-trading-behavior-diagnostics) | 工具 | 判断校准短板 | 92 − 分数×100 |
+| [skill-backtest-overfit](https://github.com/quantskills/skill-backtest-overfit) | 工具 | 证据使用和研究深度都不错 | 50 |
+| [skill-market-daily-review](https://github.com/quantskills/skill-market-daily-review) 收盘复盘 | 工具 | 研究深度偏低 | 45 |
+| [量化因子中心](https://www.pandaaiquant.com/quantfactor-center) | 产品 | 证据使用和研究深度都不错 | 60 |
+| [Qube](https://www.pandaaiquant.com/agent_quant/) | 产品 | 其余情况（兜底）；趋势型提示双均线/海龟模板 | 55 |
+| [全国期货模拟赛](https://www.pandaaiquant.com/contest/) | 活动 | 几乎不入场 | 80 |
+| [第四届因子大赛](https://www.pandaaiquant.com/factorhub/fourthFactorCompetition/) | 活动 | 三项能力都不错 | 58 |
+| [量变学院课程](https://www.pandaaiquant.com/learninghub/newcourse) | 学习 | 研究深度或证据使用偏弱 | 48 |
+| [新手入门文档](https://www.pandaaiquant.com/docs) | 学习 | 判断校准证据不足 | 35 |
 
-## 4. 排序与条数
+## 3. 排序与条数
 
-- 每个候选有优先级：能力越弱优先级越高（例如止损演练 = 100 − 风险控制分 × 100）。
-- 取优先级最高的 2 个练习任务 + 2 个外部资源，同一链接只出现一次。
-- 一个练习任务都不满足时，用信心校准小测兜底，保证每份画像都有一个能当场体验的下一步。
-- 每条推荐的 `based_on` 列出依据的维度、当时的判断原文和最多 2 条支持该判断的证据原文；页面"依据"里可以展开查看。
+- 每类只留优先级最高的一张；产品卡必留；其余按优先级取前 3。
+- 最终按优先级排序展示，所以第一张总是这份画像最突出的问题或特点。
+- 每张卡的 `based_on` 列出依据的维度、判断原文和最多 2 条证据原文；页面"依据"里可以展开。
+- 卡片底部注明"推荐只基于本局游戏行为，不构成投资建议"。
 
-## 5. 三条演示路径
+## 4. 三条演示路径
 
 用 `data/samples/profile/` 的 3 组模拟玩家（模拟关卡）：
 
-| 模拟玩家 | 人物卡 | 推荐 |
+| 模拟玩家 | 人物卡 | 推荐卡片（按顺序） |
 |---|---|---|
-| 冲动重仓型 | 🐂 冲锋蛮牛 | 止损演练（挑满仓做多后大跌的那关）、关键线索复盘、止损技能包、行为偏差诊断 |
-| 谨慎研究型 | 🦉 夜猫研究员 | 风格对照、Qube（把研究写成策略）、因子大赛 |
-| 只看不做型 | 🦥 树懒观察员 | 信心校准小测（补上校准证据）、关键线索复盘、全国期货模拟赛 |
+| 冲动重仓型 | 🐂 冲锋蛮牛 | 止损技能包 → 均线策略 → Qube（趋势模板）→ 量化课程 |
+| 谨慎研究型 | 🦉 夜猫研究员 | 量化因子中心 → 因子大赛 → 防过拟合 → QBTI |
+| 只看不做型 | 🦥 树懒观察员 | 全国期货模拟赛 → Qube → 逐笔复盘 → 量化课程 |
 
-现场改一个关键选择：冲动型改成每关半仓、设 5% 止损、浮亏就平仓后，止损演练和止损技能包都不再出现；证据使用没变，所以关键线索复盘仍然保留。（测试 `recommend.test.ts` 覆盖。）
+现场改一个关键选择：冲动型改成每关半仓、设 5% 止损、浮亏就平仓后，止损技能包不再出现。（测试 `recommend.test.ts` 覆盖。）
 
-用真实关卡自测：`npm run dev` 后打开 `/src/recommend/demo.html?player=impulsive`（或 `cautious`、`watcher`），用真实关卡 L01–L04 + 模拟行为生成画像和推荐，可以把 4 个任务都点一遍。
+用真实关卡自测：`npm run dev` 后打开 `/src/recommend/demo.html?player=impulsive`（或 `cautious`、`watcher`）。
 
-## 6. 已知局限
+## 5. 已知局限
 
-- 资源目录是人工整理的，没有接入 PandaAI 的推荐接口；外部链接以 2026-10-31 的页面为准。
-- QuantSkills 技能包需要在 AI 编程助手里加载，H5 里只能跳到仓库页。
-- 练习任务的结果不回写画像（不产生新的事件），只作为下一步体验；以后可以把小测结果作为补充证据。
+- 资源目录是人工整理的，没有接入 PandaAI 的推荐接口；链接以 2026-10-31 的页面为准。
+- QuantSkills 技能包需要在 AI 编程助手（Claude Code、Codex 等）里加载，H5 里只能跳到仓库页。
 - 阈值根据游戏设计定，没有用真实用户数据校准。

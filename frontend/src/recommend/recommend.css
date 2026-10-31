@@ -1,23 +1,13 @@
 .recommend-panel h2 { margin-bottom: 8px; }
-.rec-list { list-style: none; padding: 0; margin: 18px 0 0; }
-.rec-card { border: 1px solid var(--border); border-radius: 14px; background: var(--surface-raised); padding: 18px; margin-bottom: 14px; min-width: 0; }
-.rec-heading { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
-.rec-heading h3 { margin: 0; }
+.rec-list { list-style: none; padding: 0; margin: 18px 0 8px; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.rec-card { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 14px; background: var(--surface-raised); padding: 18px; min-width: 0; }
+.rec-card h3 { margin: 4px 0 8px; }
+.rec-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .rec-type { font-size: 12px; color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 2px 9px; }
+.rec-provider { font-size: 12px; color: var(--text-muted); }
+.rec-resource { font-size: 13px; color: var(--text-secondary); margin: 0 0 8px; overflow-wrap: anywhere; }
+.rec-tags { list-style: none; padding: 0; margin: 0 0 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+.rec-tags li { font-size: 12px; background: var(--surface); border-radius: 6px; padding: 2px 8px; color: var(--text-secondary); }
 .rec-card details { font-size: 13px; margin: 6px 0 10px; }
-.rec-link { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; }
+.rec-link { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; margin-top: auto; }
 .small-text { font-size: 12px; }
-.task-body { border-top: 1px solid var(--border); margin-top: 16px; padding-top: 14px; min-width: 0; }
-.task-step { color: #e8f2ef; font-weight: 600; margin: 14px 0 8px; }
-.task-takeaway { border-left: 3px solid var(--accent); padding-left: 12px; }
-.choice-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
-.choice-row button[aria-pressed="true"], .clue-card[aria-pressed="true"] { background: #24433f; border-color: var(--accent); }
-.clue-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin: 10px 0 14px; }
-.clue-card { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; text-align: left; background: var(--surface); color: #e8f2ef; border: 1px solid var(--border); white-space: normal; height: auto; }
-.clue-card span { font-size: 13px; color: var(--text-secondary); font-weight: 400; }
-.clue-card em { font-size: 12px; color: var(--accent); font-style: normal; }
-.table-scroll { overflow-x: auto; max-width: 100%; }
-.task-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 8px 0; }
-.task-table th, .task-table td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--border); white-space: nowrap; }
-.task-table th { color: var(--text-muted); font-weight: 400; }
-.row-picked, .task-table td.row-picked { color: var(--accent); font-weight: 600; }
