@@ -166,9 +166,12 @@ export interface Engine {
  * 规则（“死逻辑 + 伪随机”）：
  *  1. rawId = 只按风格标签推断的人格（即 inferPersona 的结果）。
  *  2. 每个结局有一张“兼容人格表”（personaRules.ts）：这个结局下哪些人格说得通。
- *  3. rawId 在兼容表里 → 直接采用，source = 'tally'。
- *  4. 不在（与结局矛盾）→ 在兼容表里用本局种子做伪随机加权选择，source = 'seeded'；
- *     权重偏向本局标签次数更多的人格。同一局永远得到同一结果。
+ *  3. rawId 在兼容表里 → 候选就是 rawId；不在（与结局矛盾）→ 在兼容表里用本局种子做
+ *     伪随机加权选一个候选。权重偏向本局标签次数更多的人格。
+ *  4. 压低热门人格：候选人格若是热门（见 engine.ts 的 PERSONA_KEEP_RATE，例如 fox、hedgehog），
+ *     就以“1 - 保留率”的概率用本局种子换成同结局兼容的别的人格。
+ *  5. 最终 id === rawId → source = 'tally'；否则 source = 'seeded'（含压低热门造成的换牌，
+ *     此时 rawId 可能仍在兼容表里）。同一局永远得到同一结果。
  *  所以：最终 id 永远属于该结局的兼容表。
  */
 export interface ResolvedPersona {

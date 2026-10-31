@@ -15,7 +15,7 @@
  * 不出现“股友”“营业部”等只属于某个场景的词（见 ROLE_STYLE_WORD 的说法）。
  */
 import { TAG_BY_PERSONA, TAG_PHRASE } from './referral';
-import type { ResolvedPersona, RoleId } from './types';
+import type { PersonaId, ResolvedPersona, RoleId } from './types';
 
 /** “这类 X”的说法，按角色换，只用中性词。 */
 const ROLE_STYLE_WORD: Readonly<Record<RoleId, string>> = {
@@ -29,24 +29,50 @@ function percent(count: number, total: number): number | null {
   return total > 0 ? Math.round((count / total) * 100) : null;
 }
 
-/** seeded 文案：说结局和人格的关系，次数只在 > 0 时才提。 */
-function seededLine(resolved: ResolvedPersona, personaName: string, endingTitle: string, role: RoleId, phrase: string): string {
-  const base = `“${endingTitle}”这样的结局，常见于${personaName}这类${ROLE_STYLE_WORD[role]}；你这局的选择比较分散，我们按结局的气质给你配了这张卡。`;
-  return resolved.count > 0 ? `${base}你有 ${resolved.count} 次选择偏${phrase}。` : base;
+/**
+ * seeded 文案：区分两种情况：
+ *  1. rawId 与结局不兼容（例如爆仓却推出稳健老龟）→ “结局的气质配了这张卡”
+ *  2. rawId 与结局兼容但被压低热门换掉（例如 fox/hedgehog）→ “你的选择偏 X，但这种风格这局被平衡了”
+ */
+function seededLine(
+  resolved: ResolvedPersona,
+  personaName: string,
+  endingTitle: string,
+  role: RoleId,
+  phrase: string,
+  compatIds: readonly PersonaId[],
+): string {
+  const isHotRebalance = compatIds.includes(resolved.rawId); // rawId 在兼容表里却被换掉，是热门人格被压低
+  if (isHotRebalance) {
+    const rawTag = TAG_BY_PERSONA[resolved.rawId];
+    const rawPhrase = TAG_PHRASE[rawTag];
+    const base = `你这局的选择更偏${rawPhrase}，不过这个风格这局被平衡了一下，所以给你配了${personaName}这张卡。`;
+    return resolved.count > 0 ? `${base}你有 ${resolved.count} 次选择偏${phrase}。` : base;
+  } else {
+    const base = `”${endingTitle}”这样的结局，常见于${personaName}这类${ROLE_STYLE_WORD[role]}；你这局的选择比较分散，我们按结局的气质给你配了这张卡。`;
+    return resolved.count > 0 ? `${base}你有 ${resolved.count} 次选择偏${phrase}。` : base;
+  }
 }
 
 /**
  * “为什么是你”一句话。
  * @param resolved engine.resolvePersona 的结果
- * @param personaName 最终人格名，如“冲锋蛮牛”
- * @param endingTitle 结局标题，如“清盘通知”
- * @param role 当前角色，只影响“打法 / 玩法 / 操盘思路”这类中性词
+ * @param personaName 最终人格名，如”冲锋蛮牛”
+ * @param endingTitle 结局标题，如”清盘通知”
+ * @param role 当前角色，只影响”打法 / 玩法 / 操盘思路”这类中性词
+ * @param compatIds 该结局兼容的人格 ids，用来区分热门人格被压低换掉的情况
  */
-export function buildWhyLine(resolved: ResolvedPersona, personaName: string, endingTitle: string, role: RoleId): string {
+export function buildWhyLine(
+  resolved: ResolvedPersona,
+  personaName: string,
+  endingTitle: string,
+  role: RoleId,
+  compatIds: readonly PersonaId[],
+): string {
   const phrase = TAG_PHRASE[TAG_BY_PERSONA[resolved.id]];
   const { source, count, total, isTop, isTied } = resolved;
 
-  if (source === 'seeded') return seededLine(resolved, personaName, endingTitle, role, phrase);
+  if (source === 'seeded') return seededLine(resolved, personaName, endingTitle, role, phrase, compatIds);
 
   if (count <= 0) return '这局里你的选择没有明显的偏向，所以更像是各种风格轮着来。';
   if (isTied) return `你这局有好几种风格不相上下（各 ${count} 次），其中偏${phrase}的和这个结局最搭。`;

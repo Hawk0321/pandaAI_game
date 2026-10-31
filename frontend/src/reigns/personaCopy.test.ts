@@ -27,7 +27,7 @@ describe('buildWhyLine', () => {
   describe('文案分支表', () => {
     it('tally + 唯一最高 + count>=3: 次数和占比', () => {
       const resolved = makeResolved('bull', 'bull', 'tally', 5, 20, true, false);
-      const line = buildWhyLine(resolved, '冲锋蛮牛', '爆仓离场', 'stock');
+      const line = buildWhyLine(resolved, '冲锋蛮牛', '爆仓离场', 'stock', ['fox', 'bull', 'hedgehog', 'owl', 'shark', 'turtle', 'dolphin', 'crab', 'sloth']);
       expect(line).toContain('5 次');
       expect(line).toContain('25%');
       expect(line).toContain('偏冲动');
@@ -37,7 +37,7 @@ describe('buildWhyLine', () => {
 
     it('tally + 并列最高: 不写占比', () => {
       const resolved = makeResolved('owl', 'owl', 'tally', 7, 21, true, true);
-      const line = buildWhyLine(resolved, '夜猫研究员', '活到收盘', 'fund');
+      const line = buildWhyLine(resolved, '夜猫研究员', '活到收盘', 'fund', ['fox', 'bull', 'hedgehog', 'owl', 'shark', 'turtle', 'dolphin', 'crab', 'sloth']);
       expect(line).toContain('好几种风格不相上下');
       expect(line).toContain('各 7 次');
       expect(line).toContain('偏重研究');
@@ -46,7 +46,7 @@ describe('buildWhyLine', () => {
 
     it('tally + 0<count<3: 不写占比', () => {
       const resolved = makeResolved('turtle', 'turtle', 'tally', 2, 10, true, false);
-      const line = buildWhyLine(resolved, '稳健老龟', '清盘通知', 'crypto');
+      const line = buildWhyLine(resolved, '稳健老龟', '清盘通知', 'crypto', ['fox', 'bull', 'hedgehog', 'owl', 'shark', 'turtle', 'dolphin', 'crab', 'sloth']);
       expect(line).toContain('选择比较分散');
       expect(line).toContain('2 次');
       expect(line).toContain('偏谨慎');
@@ -55,36 +55,59 @@ describe('buildWhyLine', () => {
 
     it('tally + 不是最高(兜底): 不写占比', () => {
       const resolved = makeResolved('owl', 'owl', 'tally', 4, 20, false, false);
-      const line = buildWhyLine(resolved, '夜猫研究员', '活到收盘', 'stock');
+      const line = buildWhyLine(resolved, '夜猫研究员', '活到收盘', 'stock', ['fox', 'bull', 'hedgehog', 'owl', 'shark', 'turtle', 'dolphin', 'crab', 'sloth']);
       expect(line).toContain('4 次');
       expect(line).not.toContain('%');
     });
 
     it('tally + count=0(标签全空): 不写任何数字', () => {
       const resolved = makeResolved('fox', 'fox', 'tally', 0, 0, false, false);
-      const line = buildWhyLine(resolved, '灵活狐狸', '活到收盘', 'fund');
+      const line = buildWhyLine(resolved, '灵活狐狸', '活到收盘', 'fund', ['fox', 'bull', 'hedgehog', 'owl', 'shark', 'turtle', 'dolphin', 'crab', 'sloth']);
       expect(line).not.toMatch(/\d/);
     });
 
-    it('seeded + count>0: 补充次数', () => {
+    it('seeded (rawId 不在兼容表) + count>0: 结局气质配卡，补充次数', () => {
       const resolved = makeResolved('shark', 'dolphin', 'seeded', 3, 15, false, false);
-      const line = buildWhyLine(resolved, '深海猎鲨', '明星基金经理的倒计时', 'fund');
-      expect(line).toContain('“明星基金经理的倒计时”这样的结局');
+      // dolphin 不在兼容表里，是因为与结局矛盾才换的
+      const line = buildWhyLine(resolved, '深海猎鲨', '明星基金经理的倒计时', 'fund', ['shark', 'hedgehog', 'turtle']);
+      expect(line).toContain('”明星基金经理的倒计时”这样的结局');
       expect(line).toContain('常见于深海猎鲨这类');
       expect(line).toContain('选择比较分散');
       expect(line).toContain('按结局的气质给你配了这张卡');
       expect(line).toContain('你有 3 次选择偏重仓集中');
     });
 
-    it('seeded + count=0: 不提次数，不写 0', () => {
+    it('seeded (rawId 不在兼容表) + count=0: 结局气质配卡，不提次数', () => {
       const resolved = makeResolved('hedgehog', 'owl', 'seeded', 0, 12, false, false);
-      const line = buildWhyLine(resolved, '死扛刺猬', '套牢信徒', 'stock');
-      expect(line).toContain('“套牢信徒”这样的结局');
+      const line = buildWhyLine(resolved, '死扛刺猬', '套牢信徒', 'stock', ['hedgehog', 'bull', 'fox']);
+      expect(line).toContain('”套牢信徒”这样的结局');
       expect(line).toContain('常见于死扛刺猬这类');
       expect(line).toContain('选择比较分散');
       expect(line).not.toContain('0 次');
       expect(line).not.toContain('0%');
       expect(line).not.toMatch(/\d+ 次/);
+    });
+
+    it('seeded (rawId 在兼容表，被压低换掉) + count>0: “选择偏 X，风格被平衡” + 次数', () => {
+      const resolved = makeResolved('shark', 'fox', 'seeded', 3, 15, false, false);
+      // fox 在兼容表里但被压低换成了 shark
+      const line = buildWhyLine(resolved, '深海猎鲨', '活到收盘', 'fund', ['shark', 'fox', 'hedgehog', 'turtle']);
+      expect(line).toContain('你这局的选择更偏灵活变通');
+      expect(line).toContain('这个风格这局被平衡了一下');
+      expect(line).toContain('给你配了深海猎鲨这张卡');
+      expect(line).toContain('你有 3 次选择偏重仓集中');
+      expect(line).not.toContain('结局的气质');
+    });
+
+    it('seeded (rawId 在兼容表，被压低换掉) + count=0: “选择偏 X，风格被平衡”，不提次数', () => {
+      const resolved = makeResolved('bull', 'hedgehog', 'seeded', 0, 12, false, false);
+      const line = buildWhyLine(resolved, '冲锋蛮牛', '清盘通知', 'crypto', ['bull', 'hedgehog', 'fox', 'dolphin']);
+      expect(line).toContain('你这局的选择更偏死扛');
+      expect(line).toContain('这个风格这局被平衡了一下');
+      expect(line).toContain('给你配了冲锋蛮牛这张卡');
+      expect(line).not.toContain('0 次');
+      expect(line).not.toMatch(/\d+ 次/);
+      expect(line).not.toContain('结局的气质');
     });
   });
 
@@ -99,7 +122,7 @@ describe('buildWhyLine', () => {
     for (const { resolved, persona, ending } of cases) {
       for (const role of ROLES) {
         it(`${persona} / ${ending} / ${role}`, () => {
-          const line = buildWhyLine(resolved, persona, ending, role);
+          const line = buildWhyLine(resolved, persona, ending, role, ['fox', 'bull', 'hedgehog', 'owl', 'shark', 'turtle', 'dolphin', 'crab', 'sloth']);
           for (const word of BANNED) expect(line).not.toContain(word);
         });
       }
@@ -116,7 +139,7 @@ describe('buildWhyLine', () => {
     for (const { resolved, persona, ending } of cases) {
       for (const role of ['fund', 'crypto'] as const) {
         it(`${role} / ${persona} / ${ending}`, () => {
-          const line = buildWhyLine(resolved, persona, ending, role);
+          const line = buildWhyLine(resolved, persona, ending, role, ['fox', 'bull', 'hedgehog', 'owl', 'shark', 'turtle', 'dolphin', 'crab', 'sloth']);
           for (const word of ROLE_BANNED[role]) expect(line).not.toContain(word);
         });
       }
@@ -127,7 +150,7 @@ describe('buildWhyLine', () => {
     for (const persona of PERSONAS) {
       it(persona, () => {
         const resolved = makeResolved(persona, 'fox', 'seeded', 0, 15, false, false);
-        const line = buildWhyLine(resolved, `人物卡-${persona}`, '测试结局', 'stock');
+        const line = buildWhyLine(resolved, `人物卡-${persona}`, '测试结局', 'stock', ['fox', 'bull', 'hedgehog', 'owl', 'shark', 'turtle', 'dolphin', 'crab', 'sloth']);
         expect(line).not.toContain('0 次');
         expect(line).not.toContain('0%');
       });

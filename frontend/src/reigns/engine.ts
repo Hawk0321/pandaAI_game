@@ -184,18 +184,26 @@ function mostRecentTag(
 
 /**
  * 由风格标签累计推出人物卡：取次数最多的标签。
- * 并列时取 log 中最近出现的那个标签（需同时传 log 和 cards）；查不到则按 STYLE_TAGS 顺序取第一个。
- * tally 全 0 返回 'fox'（灵活狐狸）。
+ * 并列时用种子在并列的标签里随机选（保证同一局不变）；tally 全 0 返回 'fox'（灵活狐狸）。
  */
 export function inferPersona(
   tally: StyleTally,
   log?: readonly ChoiceLog[],
   cards?: readonly Card[],
+  seed?: number,
 ): PersonaId {
   const max = Math.max(...STYLE_TAGS.map((tag) => tally[tag]));
   if (max <= 0) return 'fox';
   const top = STYLE_TAGS.filter((tag) => tally[tag] === max);
-  const pick = top.length > 1 && log !== undefined && cards !== undefined ? mostRecentTag(top, log, cards) : null;
+  if (top.length === 1) return TAG_TO_PERSONA[top[0]];
+  // 并列：用种子在并列的标签里随机选，没有种子就用"最近标签"打破（向后兼容）
+  if (seed !== undefined) {
+    const rand = mulberry32((seed >>> 0) ^ 0xabcdef01);
+    rand(); // 丢掉第一个数
+    const idx = Math.floor(rand() * top.length);
+    return TAG_TO_PERSONA[top[idx]];
+  }
+  const pick = log !== undefined && cards !== undefined ? mostRecentTag(top, log, cards) : null;
   return TAG_TO_PERSONA[pick ?? top[0]];
 }
 
@@ -213,7 +221,7 @@ function hashString(text: string): number {
   return h >>> 0;
 }
 
-/** 在兼容表里按 1 + 标签次数 加权，用“种子 + 结局 id”的伪随机选一个。 */
+/** 在兼容表里按 1 + 标签次数加权，用“种子 + 结局 id”的伪随机选一个。 */
 function pickSeeded(
   compatible: readonly PersonaId[],
   tally: StyleTally,
@@ -234,6 +242,43 @@ function pickSeeded(
 }
 
 /**
+ * 压低热门人格：这些人格在随机游玩下占比偏高（卡牌池里 adaptive、stubborn 标签偏多），
+ * 命中时以“1 - 保留率”的概率被换成同结局兼容的别的人格，换谁用本局种子决定，同一局稳定。
+ * 保留率由 4500 局随机游玩校准：fox 0.55、hedgehog 0.74，其余不动；
+ * 校准后 9 个人格占比约 6%-15%（原来 fox 25%）。换牌后按 seeded 处理，文案不会谎称是选择次数。
+ */
+export const PERSONA_KEEP_RATE: Readonly<Partial<Record<PersonaId, number>>> = {
+  fox: 0.55,
+  hedgehog: 0.74,
+};
+
+function rebalancePersona(
+  base: PersonaId,
+  compatible: readonly PersonaId[],
+  tally: StyleTally,
+  seed: number,
+  endingId: string,
+): PersonaId {
+  const keep = PERSONA_KEEP_RATE[base] ?? 1;
+  if (keep >= 1) return base;
+  const mixed = (Math.imul(seed >>> 0, 0x85ebca6b) ^ hashString(endingId) ^ 0x5bd1e995) >>> 0;
+  const rand = mulberry32(mixed);
+  rand(); // 丢掉第一个数
+  if (rand() < keep) return base;
+  const others = compatible.filter((id) => id !== base);
+  if (others.length === 0) return base;
+  // 换谁：按 1 + 标签次数加权，再乘各人格自己的保留率，避免又把热门人格抽回来
+  const weights = others.map((id) => (1 + tally[PERSONA_TO_TAG[id]]) * (PERSONA_KEEP_RATE[id] ?? 1));
+  const total = weights.reduce((sum, w) => sum + w, 0);
+  let roll = rand() * total;
+  for (let i = 0; i < others.length; i += 1) {
+    roll -= weights[i];
+    if (roll < 0) return others[i];
+  }
+  return others[others.length - 1];
+}
+
+/**
  * 结局页用的最终交易人格（规则见 types.ts 的 ResolvedPersona）：
  * 标签推断的人格在结局兼容表里就直接用，否则在兼容表里按种子做加权伪随机。纯函数、同一局结果不变。
  */
@@ -242,9 +287,13 @@ export function resolvePersona(state: GameState, cards: readonly Card[]): Resolv
     throw new Error('resolvePersona: 游戏还没结束（state.ending 为空）');
   }
   const compatible = COMPATIBLE_PERSONAS(state.ending.id);
-  const rawId = inferPersona(state.tally, state.log, cards);
-  const fromTally = compatible.includes(rawId);
-  const id = fromTally ? rawId : pickSeeded(compatible, state.tally, state.seed, state.ending.id);
+  const rawId = inferPersona(state.tally, state.log, cards, state.seed);
+  const picked = compatible.includes(rawId)
+    ? rawId
+    : pickSeeded(compatible, state.tally, state.seed, state.ending.id);
+  const id = rebalancePersona(picked, compatible, state.tally, state.seed, state.ending.id);
+  // 只要最终人格不是“标签直接推出的那个”，就算 seeded（含压低热门人格造成的换牌）
+  const fromTally = id === rawId;
 
   const counts = STYLE_TAGS.map((tag) => state.tally[tag]);
   const max = Math.max(...counts);

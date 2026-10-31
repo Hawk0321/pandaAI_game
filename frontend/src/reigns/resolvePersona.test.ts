@@ -4,7 +4,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { ALL_CARDS } from './allCards';
-import { choose, createGame, getEndings, inferPersona, resolvePersona } from './engine';
+import { choose, createGame, getEndings, inferPersona, resolvePersona, PERSONA_KEEP_RATE } from './engine';
 import { COMPATIBLE_PERSONAS } from './personaRules';
 import { ROLE_IDS } from './roles';
 import { STYLE_TAGS } from './types';
@@ -115,12 +115,14 @@ function checkInvariants(state: GameState, r: ResolvedPersona): void {
     expect(state.tally[PERSONA_TO_TAG[r.rawId]], ctx).toBe(max);
   }
 
+  // 契约：最终 id === rawId ↔ source='tally'；否则 'seeded'
+  // （含两种情况：rawId 与结局矛盾被换掉；rawId 本来兼容但属于热门人格被压低换掉）
   if (r.source === 'tally') {
     expect(r.id, ctx).toBe(r.rawId);
     expect(ok, ctx).toContain(r.rawId);
   } else {
     expect(r.source, ctx).toBe('seeded');
-    expect(ok, ctx).not.toContain(r.rawId);
+    expect(r.id, ctx).not.toBe(r.rawId);
   }
 
   const exp = expectedCounts(state.tally, r.id);
@@ -225,7 +227,9 @@ describe('手工构造状态（所有结局 x 对应角色）', () => {
         expect(r.total, e.id).toBe(0);
         expect(r.count, e.id).toBe(0);
         expect(r.isTop, e.id).toBe(false);
-        expect(r.source, e.id).toBe(compat(e.id).includes('fox') ? 'tally' : 'seeded');
+        // fox 既是全空默认值也是热门人格：被压低时会换成别的人格，所以只在不被压低时断言 tally
+        if (!compat(e.id).includes('fox')) expect(r.source, e.id).toBe('seeded');
+        if (r.source === 'tally') expect(r.id, e.id).toBe('fox');
       }
     }
   });
@@ -237,10 +241,18 @@ describe('手工构造状态（所有结局 x 对应角色）', () => {
         const state = manual(rolesFor(e)[0], e, { [tag]: 5 });
         const r = resolvePersona(state, ALL_CARDS);
         const ctx = `${e.id}/${persona}`;
-        expect(r.source, ctx).toBe('tally');
-        expect(r.id, ctx).toBe(persona);
         expect(r.rawId, ctx).toBe(persona);
-        expect(r).toMatchObject({ count: 5, total: 5, isTop: true, isTied: false });
+        checkInvariants(state, r);
+        if ((PERSONA_KEEP_RATE[persona] ?? 1) >= 1) {
+          // 非热门人格不会被压低，必须原样采用
+          expect(r.source, ctx).toBe('tally');
+          expect(r.id, ctx).toBe(persona);
+          expect(r).toMatchObject({ count: 5, total: 5, isTop: true, isTied: false });
+        } else {
+          // 热门人格（fox、hedgehog）可能被压低换掉：要么原样采用，要么换成兼容表内别的人格
+          expect(compat(e.id), ctx).toContain(r.id);
+          if (r.source === 'tally') expect(r.id, ctx).toBe(persona);
+        }
       }
     }
   });
@@ -267,17 +279,16 @@ describe('手工构造状态（所有结局 x 对应角色）', () => {
     expect(checked).toBeGreaterThan(0); // 兼容表里确实存在“排除某些人格”的结局
   });
 
-  it('并列最大：两个标签各 3 次，最终人格若是其中之一则 isTop 与 isTied 均为 true', () => {
+  it('并列最大：两个标签各 3 次，最终人格在兼容表内、rawId 是其中之一、isTop 与 isTied 均 true', () => {
     for (const e of endings) {
       const [a, b] = compat(e.id);
       const state = manual(rolesFor(e)[0], e, { [PERSONA_TO_TAG[a]]: 3, [PERSONA_TO_TAG[b]]: 3 });
       const r = resolvePersona(state, ALL_CARDS);
       const ctx = e.id;
-      // a、b 都兼容，所以不管并列时怎么破平，rawId 必定在 {a,b}，source 必为 tally
-      expect([a, b], ctx).toContain(r.rawId);
-      expect(r.source, ctx).toBe('tally');
-      expect([a, b], ctx).toContain(r.id);
-      expect(r).toMatchObject({ count: 3, total: 6, isTop: true, isTied: true });
+      expect([a, b], ctx).toContain(r.rawId); // rawId 由并列打破决定，必定在 {a,b}
+      expect(compat(e.id), ctx).toContain(r.id); // 最终 id 必在兼容表
+      // 如果 r.id 等于最高标签对应的人格之一，count=3, total=6, isTop=true, isTied=true
+      if ([a, b].includes(r.id)) expect(r).toMatchObject({ count: 3, total: 6, isTop: true, isTied: true });
     }
   });
 

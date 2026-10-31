@@ -10,6 +10,7 @@ import { PERSONA_ARTWORKS } from '../shell/personaArtwork';
 import '../shell/persona-card.css';
 import { ALL_CARDS } from './allCards';
 import { resolvePersona } from './engine';
+import { COMPATIBLE_PERSONAS } from './personaRules';
 import { buildEvidenceChips, buildWhyLine } from './personaCopy';
 import type { GameState } from './types';
 
@@ -41,7 +42,11 @@ export function PersonaReveal({ state }: PersonaRevealProps) {
   const personaId = resolved.id;
   const persona = PERSONA_CARDS[personaId];
   const endingTitle = state.ending?.title ?? '';
-  const whyText = useMemo(() => buildWhyLine(resolved, persona.name, endingTitle, state.role), [resolved, persona.name, endingTitle, state.role]);
+  const compatIds = useMemo(() => COMPATIBLE_PERSONAS(state.ending!.id), [state.ending]);
+  const whyText = useMemo(
+    () => buildWhyLine(resolved, persona.name, endingTitle, state.role, compatIds),
+    [resolved, persona.name, endingTitle, state.role, compatIds],
+  );
   const chips = useMemo(() => buildEvidenceChips(resolved), [resolved]);
   const artwork = PERSONA_ARTWORKS.find((item) => item.id === personaId);
   const reducedMotion = useReducedMotion();
