@@ -1,7 +1,7 @@
 /**
  * 沟通协议 v1 的 TypeScript 类型，与 docs/protocol.md 第 2–5 节逐行一致（D 维护）。
  * 协议第 5 节的三个函数在各自模块实现：PlayLevel 见 src/play/index.ts，
- * analyze / pickNextLevel 见 src/profile/index.ts。改这里之前先改 docs/protocol.md。
+ * analyze / pickNextLevel 见 src/profile/index.ts，recommend 见 src/recommend/recommend.ts。改这里之前先改 docs/protocol.md。
  */
 
 /** 一根 K 线。t 是相对序号：决定时刻那根是 0，之前为负数，之后为正数。不放真实日期。 */
@@ -117,10 +117,44 @@ export interface Profile {
   method: "rules" | "rules+llm";
   round: 1 | 2;          // 1 = 主关卡后，2 = 补充关卡后
   dimensions: Dimension[];          // 能力 3 个 + 偏好 3 个
-  persona: { name: string; emoji: string; tagline: string; is_fun_label: true };
+  persona: {
+    name: string; emoji: string; tagline: string; is_fun_label: true;
+    // 以下为可选的人物卡详情（D 产出，卡片说明见 docs/personas.md）
+    id?: string;                // "bull"
+    archetype?: string;         // 对应的金融学概念："过度自信"
+    traits?: string[];          // 3 个特征标签
+    strength?: string;
+    blind_spot?: string;
+    basis?: string;             // 金融依据
+    refs?: string[];            // 文献
+    why?: string;               // 本局触发依据："平均仓位 100%，平均信心 5.0/5，命中率 50%"
+    also?: { id: string; name: string; emoji: string; why: string };  // 第二匹配的人物卡
+  };
+  features?: Record<string, { value: number | null; n: number }>;  // 会话级行为特征，定义见 docs/features.md
   summary: string;                  // 两三句总评
   needs_more: { dimension_id: DimensionId; reason: string }[];
   changes?: { dimension_id: DimensionId; before: string; after: string }[];  // round 2 时相对 round 1 的变化
+  recommendations?: Recommendation[];  // 个性化推荐（D 产出），每条都能追溯到维度判断
+}
+
+/** 推荐卡片指向的真实资源：PandaAI 产品/活动/学习资源，或 QuantSkills 开源技能包。链接都核实过。 */
+export interface RecResource {
+  name: string;          // "Qube" / "skill-ma-crossover-signal"
+  provider: "PandaAI" | "QuantSkills";
+  url: string;
+  desc: string;          // 一句话说明资源是什么
+  tags: string[];        // 卡片上的小标签，如 ["趋势跟随", "可回测"]
+  is_sample: boolean;    // 示例资源为 true；真实资源为 false
+}
+
+export interface Recommendation {
+  id: string;            // 唯一，如 "strategy-ma-cross"
+  type: "strategy" | "tool" | "product" | "event" | "learn";  // 策略 / 工具 / 产品 / 活动 / 学习
+  title: string;         // 卡片标题："把顺势写成双均线策略"
+  resource: RecResource;
+  reason: string;        // 匹配理由："你在 3 关里都顺着前 20 日趋势下单……"
+  based_on: { dimension_id: DimensionId; judgement: string; evidence: string[] }[];  // 依据的维度判断和证据原文
+  next_step: { label: string; url: string };  // 按钮文字和跳转链接（新窗口打开）
 }
 
 // B 导出（frontend/src/play/index.ts）

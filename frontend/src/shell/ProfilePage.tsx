@@ -1,4 +1,5 @@
 import type { Dimension, GameEvent, Profile } from '../shared/protocol';
+import { RecommendationPanel } from '../recommend/RecommendationPanel';
 import { SkillCards } from '../skills/SkillCards';
 import type { CompletedLevel } from '../skills/model';
 import { buildSubmission } from '../skills/submission';
@@ -76,6 +77,7 @@ export function ProfilePage({ profile, events, completed, nextLevelId, onSupplem
 
     <section className="persona-card" aria-labelledby="persona-name"><div className="persona-emoji" aria-hidden="true">{profile.persona.emoji}</div><div><p className="eyebrow">{profile.persona.is_fun_label ? '你的趣味人物卡' : '人物卡'}</p><h2 id="persona-name">{profile.persona.name}</h2><p className="persona-tagline">{profile.persona.tagline}</p></div><div className="persona-summary"><p>{profile.summary.split('。')[0]}。</p><details><summary>展开完整画像解读</summary><p>{profile.summary}</p></details></div><dl className="persona-stats"><div><dt>完成关卡</dt><dd>{completed.length}<small>关</small></dd></div><div><dt>行为证据</dt><dd>{profile.dimensions.reduce((n, d) => n + d.evidence.length, 0)}<small>条</small></dd></div><div><dt>仍待观察</dt><dd>{profile.needs_more.length}<small>项</small></dd></div></dl></section>
 
+    {!fixedExample && <RecommendationPanel profile={profile} />}
     {!fixedExample && <SkillCards key={`${profile.session_id}-${profile.round}`} profile={profile} events={events} completed={completed} />}
 
     <div className="profile-columns" id="profile-dimensions">

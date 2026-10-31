@@ -395,10 +395,228 @@
     "name": "冲锋蛮牛",
     "emoji": "🐂",
     "tagline": "看到机会就冲，先上车再说",
-    "is_fun_label": true
+    "is_fun_label": true,
+    "id": "bull",
+    "archetype": "过度自信",
+    "traits": [
+     "重仓",
+     "决定快",
+     "信心满格"
+    ],
+    "strength": "执行力强，机会来时不犹豫",
+    "blind_spot": "信心常常高过实际把握，重仓放大了每一次看错",
+    "basis": "对数万个券商账户的研究发现，交易越频繁、越自信的散户，扣费后收益越差；过度自信表现为高估自己信息的准确度，并因此下更大的注。",
+    "refs": [
+     "Barber & Odean (2000), Trading Is Hazardous to Your Wealth, J. Finance",
+     "Odean (1999), Do Investors Trade Too Much?, AER",
+     "Lichtenstein, Fischhoff & Phillips (1982), Calibration of Probabilities"
+    ],
+    "why": "平均仓位 100%，平均信心 5.0/5，命中率 50%",
+    "also": {
+     "id": "hedgehog",
+     "name": "死扛刺猬",
+     "emoji": "🦔",
+     "why": "浮亏时加仓 2 次，浮亏时减仓 1 次"
+    }
    },
-   "summary": "能力上几项都还有提升空间，最需要加强的是证据使用（倾向先下结论，较少依据线索）。偏好上，偏趋势跟随、偏直觉型、偏激进；人物卡依据是\"仓位重、研究少、决定快\"。",
-   "needs_more": []
+   "features": {
+    "flat_rate": {
+     "value": 0,
+     "n": 4
+    },
+    "avg_size": {
+     "value": 1,
+     "n": 4
+    },
+    "stop_rate": {
+     "value": 0,
+     "n": 4
+    },
+    "add_on_loss": {
+     "value": 2,
+     "n": 4
+    },
+    "cut_on_loss": {
+     "value": 1,
+     "n": 4
+    },
+    "research_spend": {
+     "value": 0.25,
+     "n": 4
+    },
+    "think_sec": {
+     "value": 5.5,
+     "n": 4
+    },
+    "key_clue_hit": {
+     "value": 0,
+     "n": 4
+    },
+    "clue_agree": {
+     "value": 1,
+     "n": 3
+    },
+    "confirm_only": {
+     "value": 0,
+     "n": 4
+    },
+    "trend_follow": {
+     "value": 1,
+     "n": 3
+    },
+    "avg_confidence": {
+     "value": 5,
+     "n": 4
+    },
+    "hit_rate": {
+     "value": 0.5,
+     "n": 4
+    },
+    "overconfidence": {
+     "value": 0.4,
+     "n": 4
+    },
+    "reveal_dwell_sec": {
+     "value": 6,
+     "n": 4
+    }
+   },
+   "summary": "能力上几项都还有提升空间，最需要加强的是证据使用（倾向先下结论，较少依据线索）。偏好上，偏趋势跟随、偏直觉型、偏激进；人物卡依据是\"平均仓位 100%，平均信心 5.0/5，命中率 50%\"。",
+   "needs_more": [],
+   "recommendations": [
+    {
+     "id": "tool-stop-loss",
+     "type": "tool",
+     "title": "把止损写成规则",
+     "resource": {
+      "name": "skill-b11-auto-stop-loss-take-profit",
+      "provider": "QuantSkills",
+      "url": "https://github.com/quantskills/skill-b11-auto-stop-loss-take-profit",
+      "desc": "按入场价自动判断止盈、止损和单票仓位上限",
+      "tags": [
+       "风险控制",
+       "止损"
+      ],
+      "is_sample": false
+     },
+     "reason": "风险控制判断为\"风险敞口偏大，浮亏时不太收手\"（置信度高），例如第 1 关满仓做多却没有设止损。这个技能包按入场价自动执行止损和仓位上限，把\"事前定好最多亏多少\"变成习惯。",
+     "based_on": [
+      {
+       "dimension_id": "risk_control",
+       "judgement": "风险敞口偏大，浮亏时不太收手",
+       "evidence": [
+        "第 1 关满仓做多却没有设止损",
+        "第 2 关满仓做多却没有设止损"
+       ]
+      },
+      {
+       "dimension_id": "risk_appetite",
+       "judgement": "偏激进：常常重仓、愿意加仓",
+       "evidence": [
+        "第 1 关满仓做多，之后又加仓 1 次",
+        "第 2 关满仓做多，之后又加仓 1 次"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "查看工具",
+      "url": "https://github.com/quantskills/skill-b11-auto-stop-loss-take-profit"
+     }
+    },
+    {
+     "id": "strategy-ma-cross",
+     "type": "strategy",
+     "title": "把\"顺势\"写成均线策略",
+     "resource": {
+      "name": "skill-ma-crossover-signal",
+      "provider": "QuantSkills",
+      "url": "https://github.com/quantskills/skill-ma-crossover-signal",
+      "desc": "单标的均线金叉/死叉信号分析，把\"顺势\"写成规则",
+      "tags": [
+       "趋势跟随",
+       "均线"
+      ],
+      "is_sample": false
+     },
+     "reason": "趋势 vs 反转判断为\"偏趋势跟随：涨了追、跌了空\"（置信度高），例如第 1 关决定前 20 天上涨 12.0%，选择做多（顺势）。均线金叉死叉是最经典的趋势规则，可以检验你的直觉在更多行情里是否成立。",
+     "based_on": [
+      {
+       "dimension_id": "style",
+       "judgement": "偏趋势跟随：涨了追、跌了空",
+       "evidence": [
+        "第 1 关决定前 20 天上涨 12.0%，选择做多（顺势）",
+        "第 2 关决定前 20 天上涨 15.0%，选择做多（顺势）"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "查看策略",
+      "url": "https://github.com/quantskills/skill-ma-crossover-signal"
+     }
+    },
+    {
+     "id": "product-qube",
+     "type": "product",
+     "title": "用一句话把想法变成可回测的策略",
+     "resource": {
+      "name": "Qube",
+      "provider": "PandaAI",
+      "url": "https://www.pandaaiquant.com/agent_quant/",
+      "desc": "用自然语言生成策略并回测，支持调参和仿真盘；快速试用不用登录",
+      "tags": [
+       "免登录试用",
+       "自然语言"
+      ],
+      "is_sample": false
+     },
+     "reason": "趋势 vs 反转判断为\"偏趋势跟随：涨了追、跌了空\"（置信度高）。Qube 首页有双均线、海龟突破 + ATR 止损等趋势模板，可以直接回测，快速试用不用登录。",
+     "based_on": [
+      {
+       "dimension_id": "style",
+       "judgement": "偏趋势跟随：涨了追、跌了空",
+       "evidence": [
+        "第 1 关决定前 20 天上涨 12.0%，选择做多（顺势）",
+        "第 2 关决定前 20 天上涨 15.0%，选择做多（顺势）"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "去试试",
+      "url": "https://www.pandaaiquant.com/agent_quant/"
+     }
+    },
+    {
+     "id": "learn-course",
+     "type": "learn",
+     "title": "系统学一遍量化思维",
+     "resource": {
+      "name": "量变学院 · 量化思维入门",
+      "provider": "PandaAI",
+      "url": "https://www.pandaaiquant.com/learninghub/newcourse",
+      "desc": "PandaAI 的量化课程体系，从 L1 量化思维入门开始",
+      "tags": [
+       "课程",
+       "入门"
+      ],
+      "is_sample": false
+     },
+     "reason": "研究深度判断为\"偏直觉型：很少翻线索、决定快\"（置信度高）。量变学院的 L1 从\"为什么要用数据和规则做决定\"讲起，正好补上这一块。",
+     "based_on": [
+      {
+       "dimension_id": "research_depth",
+       "judgement": "偏直觉型：很少翻线索、决定快",
+       "evidence": [
+        "第 1 关3 个研究点用了 1 个，思考 6 秒后决定（平均每张线索 6 秒）",
+        "第 2 关3 个研究点用了 1 个，思考 5 秒后决定（平均每张线索 5 秒）"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "去学习",
+      "url": "https://www.pandaaiquant.com/learninghub/newcourse"
+     }
+    }
+   ]
   }
  ]
 }

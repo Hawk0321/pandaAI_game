@@ -5,7 +5,9 @@
 import type { AnalyzeInput, Dimension, DimensionId, LevelIndex, Profile } from '../shared/protocol';
 import { extractEvidence } from './evidence';
 import { CONF_RANK, judge, type Judged } from './judge';
+import { computeFeatures } from './features';
 import { pickPersona } from './persona';
+import { recommend } from '../recommend/recommend';
 
 export type { AnalyzeInput } from '../shared/protocol';
 
@@ -45,7 +47,8 @@ function buildSummary(dims: Judged[], personaWhy: string): string {
 export async function analyze(input: AnalyzeInput): Promise<Profile> {
   const raw = extractEvidence(input.events, input.levels);
   const judged = judge(raw);
-  const { persona, why } = pickPersona(judged);
+  const features = computeFeatures(input.events, input.levels);
+  const { persona, why } = pickPersona(features);
   const dimensions = judged.map(toDimension);
 
   const needs_more = judged
@@ -62,6 +65,7 @@ export async function analyze(input: AnalyzeInput): Promise<Profile> {
     round: input.round,
     dimensions,
     persona,
+    features: Object.fromEntries(Object.entries(features).filter(([, f]) => typeof f === 'object')) as Profile['features'],
     summary: buildSummary(judged, why),
     needs_more,
   };
@@ -70,6 +74,7 @@ export async function analyze(input: AnalyzeInput): Promise<Profile> {
     profile.changes = diffProfiles(input.previous, profile);
     if (profile.changes.length === 0) profile.summary += '补充关卡没有改变任何判断，原有结论得到维持。';
   }
+  profile.recommendations = recommend(profile);
   return profile;
 }
 
