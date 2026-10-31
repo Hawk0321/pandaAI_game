@@ -371,6 +371,131 @@
      "dimension_id": "style",
      "reason": "顺势和逆势都做过，可能是在看具体线索而不是固定风格"
     }
+   ],
+   "recommendations": [
+    {
+     "id": "task-style_match",
+     "type": "task",
+     "title": "找出最像你的交易规则",
+     "resource": {
+      "name": "风格对照",
+      "provider": "本作品",
+      "is_sample": false,
+      "desc": "把你的直觉和三种经典策略逐关对照，看哪条规则最像你"
+     },
+     "reason": "证据使用判断为\"会先找关键线索，决定和证据一致\"（置信度高），你的决定有迹可循。趋势 vs 反转判断为\"偏逆势反转：涨多了空、跌多了买\"（置信度中），例如第 2 关决定前 20 天上涨 15.0%，选择做空（逆势）。把你的每关方向和三种经典策略对照，找出可以写成规则的那一条。",
+     "based_on": [
+      {
+       "dimension_id": "evidence_use",
+       "judgement": "会先找关键线索，决定和证据一致",
+       "evidence": [
+        "第 1 关翻开了全部关键线索「成交量」「同期大盘」",
+        "第 1 关翻开的线索整体看涨，决定做多与线索一致"
+       ]
+      },
+      {
+       "dimension_id": "style",
+       "judgement": "偏逆势反转：涨多了空、跌多了买",
+       "evidence": [
+        "第 2 关决定前 20 天上涨 15.0%，选择做空（逆势）",
+        "第 4 关决定前 20 天下跌 14.0%，选择做多（逆势）"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "开始练习（2 步）",
+      "kind": "in_app_task",
+      "task": {
+       "id": "style_match",
+       "level_ids": [
+        "S01",
+        "S02",
+        "S03",
+        "S04"
+       ]
+      }
+     }
+    },
+    {
+     "id": "res-qube",
+     "type": "strategy",
+     "title": "把你的研究习惯变成可回测的策略",
+     "resource": {
+      "name": "PandaAI Qube",
+      "provider": "PandaAI",
+      "url": "https://www.pandaaiquant.com/agent_quant/",
+      "desc": "一句话把交易想法变成可回测的策略，首页有双均线、海龟突破 + ATR 止损等模板",
+      "is_sample": false
+     },
+     "reason": "证据使用判断为\"会先找关键线索，决定和证据一致\"（置信度高），研究深度判断为\"偏研究型：先把研究点用足再决定\"（置信度高）。你已经习惯先看证据再决定，下一步是把判断写成规则，用历史数据回测。",
+     "based_on": [
+      {
+       "dimension_id": "evidence_use",
+       "judgement": "会先找关键线索，决定和证据一致",
+       "evidence": [
+        "第 1 关翻开了全部关键线索「成交量」「同期大盘」",
+        "第 1 关翻开的线索整体看涨，决定做多与线索一致"
+       ]
+      },
+      {
+       "dimension_id": "research_depth",
+       "judgement": "偏研究型：先把研究点用足再决定",
+       "evidence": [
+        "第 1 关3 个研究点用了 3 个，思考 38 秒后决定",
+        "第 2 关3 个研究点用了 3 个，思考 42 秒后决定"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "打开 Qube",
+      "kind": "external",
+      "url": "https://www.pandaaiquant.com/agent_quant/"
+     }
+    },
+    {
+     "id": "res-factor-contest",
+     "type": "event",
+     "title": "去因子大赛试试身手",
+     "resource": {
+      "name": "第四届因子大赛",
+      "provider": "PandaAI",
+      "url": "https://www.pandaaiquant.com/factorhub/fourthFactorCompetition/",
+      "desc": "永续赛制、随到随赛的因子研究比赛",
+      "is_sample": false
+     },
+     "reason": "三项能力都表现不错（证据使用、判断校准、风险控制）。因子大赛随到随赛，适合把研究能力放到真实数据上检验。",
+     "based_on": [
+      {
+       "dimension_id": "evidence_use",
+       "judgement": "会先找关键线索，决定和证据一致",
+       "evidence": [
+        "第 1 关翻开了全部关键线索「成交量」「同期大盘」",
+        "第 1 关翻开的线索整体看涨，决定做多与线索一致"
+       ]
+      },
+      {
+       "dimension_id": "calibration",
+       "judgement": "信心和对错比较匹配",
+       "evidence": [
+        "第 1 关信心 4/5，做多，之后上涨：信心高且方向判断正确",
+        "第 2 关信心 4/5，做空，之后下跌：信心高且方向判断正确"
+       ]
+      },
+      {
+       "dimension_id": "risk_control",
+       "judgement": "会用止损和仓位管住风险",
+       "evidence": [
+        "第 1 关半仓做多时设了 5.0% 止损",
+        "第 2 关半仓做空时设了 5.0% 止损"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "去看大赛",
+      "kind": "external",
+      "url": "https://www.pandaaiquant.com/factorhub/fourthFactorCompetition/"
+     }
+    }
    ]
   }
  ]

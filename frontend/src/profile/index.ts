@@ -6,6 +6,7 @@ import type { AnalyzeInput, Dimension, DimensionId, LevelIndex, Profile } from '
 import { extractEvidence } from './evidence';
 import { CONF_RANK, judge, type Judged } from './judge';
 import { pickPersona } from './persona';
+import { recommend } from '../recommend/recommend';
 
 export type { AnalyzeInput } from '../shared/protocol';
 
@@ -70,6 +71,7 @@ export async function analyze(input: AnalyzeInput): Promise<Profile> {
     profile.changes = diffProfiles(input.previous, profile);
     if (profile.changes.length === 0) profile.summary += '补充关卡没有改变任何判断，原有结论得到维持。';
   }
+  profile.recommendations = recommend(profile, input);
   return profile;
 }
 

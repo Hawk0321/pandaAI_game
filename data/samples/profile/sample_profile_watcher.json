@@ -367,6 +367,121 @@
      "dimension_id": "style",
      "reason": "还没有在明显上涨或下跌的行情里下过方向，看不出偏好"
     }
+   ],
+   "recommendations": [
+    {
+     "id": "task-calibration_quiz",
+     "type": "task",
+     "title": "用信心小测补上判断校准",
+     "resource": {
+      "name": "信心校准小测",
+      "provider": "本作品",
+      "is_sample": false,
+      "desc": "不用下单，只练\"判断 + 信心\"，结束时算出你的信心是否靠谱"
+     },
+     "reason": "判断校准判断为\"证据不足，暂不下结论\"（置信度低）：还没有做出可检验的方向判断（观望或横盘），无法评估信心准不准。你几乎都在观望，这个小测不用下单，只需判断涨跌并给信心，几分钟就能补上这块证据。",
+     "based_on": [
+      {
+       "dimension_id": "calibration",
+       "judgement": "证据不足，暂不下结论",
+       "evidence": [
+        "第 1 关选择观望，这关无法检验信心是否准确",
+        "第 2 关选择观望，这关无法检验信心是否准确"
+       ]
+      },
+      {
+       "dimension_id": "risk_appetite",
+       "judgement": "偏保守：轻仓或观望为主",
+       "evidence": [
+        "第 1 关选择观望不入场",
+        "第 2 关选择观望不入场"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "开始练习（3 步）",
+      "kind": "in_app_task",
+      "task": {
+       "id": "calibration_quiz",
+       "level_ids": [],
+       "exclude_ids": [
+        "S01",
+        "S02",
+        "S03",
+        "S04"
+       ]
+      }
+     }
+    },
+    {
+     "id": "task-key_clue_drill",
+     "type": "task",
+     "title": "复盘漏看的关键线索",
+     "resource": {
+      "name": "关键线索复盘",
+      "provider": "本作品",
+      "is_sample": false,
+      "desc": "回到你漏看关键线索的那关，重新判断哪张线索最有用"
+     },
+     "reason": "证据使用判断为\"会看线索，但关键线索常有遗漏\"（置信度中），例如第 3 关没有翻开任何关键线索（本关关键是「区间回测」）。回到那一关把线索全部翻开，练习先找\"最有判断价值\"的那张。",
+     "based_on": [
+      {
+       "dimension_id": "evidence_use",
+       "judgement": "会看线索，但关键线索常有遗漏",
+       "evidence": [
+        "第 3 关没有翻开任何关键线索（本关关键是「区间回测」）",
+        "第 4 关没有翻开任何关键线索（本关关键是「成交量」「超跌回测」）"
+       ]
+      },
+      {
+       "dimension_id": "research_depth",
+       "judgement": "偏研究型：先把研究点用足再决定",
+       "evidence": [
+        "第 1 关3 个研究点用了 3 个，思考 30 秒后决定",
+        "第 2 关3 个研究点用了 3 个，思考 28 秒后决定"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "开始练习（3 步）",
+      "kind": "in_app_task",
+      "task": {
+       "id": "key_clue_drill",
+       "level_ids": [
+        "S04",
+        "S02"
+       ]
+      }
+     }
+    },
+    {
+     "id": "res-futures-contest",
+     "type": "event",
+     "title": "在模拟盘上迈出第一步",
+     "resource": {
+      "name": "全国期货模拟赛",
+      "provider": "PandaAI",
+      "url": "https://www.pandaaiquant.com/contest/",
+      "desc": "用模拟盘下单，手动、策略、AI 辅助同场竞技，不用真金白银",
+      "is_sample": false
+     },
+     "reason": "风险偏好判断为\"偏保守：轻仓或观望为主\"（置信度高），例如第 1 关选择观望不入场。模拟赛不用真金白银，适合先用小仓位把\"看懂了\"变成\"做一次\"。",
+     "based_on": [
+      {
+       "dimension_id": "risk_appetite",
+       "judgement": "偏保守：轻仓或观望为主",
+       "evidence": [
+        "第 1 关选择观望不入场",
+        "第 2 关选择观望不入场"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "去看模拟赛",
+      "kind": "external",
+      "url": "https://www.pandaaiquant.com/contest/"
+     }
+    }
    ]
   },
   {
@@ -812,6 +927,72 @@
      "dimension_id": "style",
      "before": "证据不足，暂不下结论（置信度低）",
      "after": "偏逆势反转：涨多了空、跌多了买（置信度低）"
+    }
+   ],
+   "recommendations": [
+    {
+     "id": "task-calibration_quiz",
+     "type": "task",
+     "title": "用信心小测再认识一下自己",
+     "resource": {
+      "name": "信心校准小测",
+      "provider": "本作品",
+      "is_sample": false,
+      "desc": "不用下单，只练\"判断 + 信心\"，结束时算出你的信心是否靠谱"
+     },
+     "reason": "各项能力没有明显短板。这个小测用没玩过的真实行情检验你的信心是否靠谱，也能让画像更有把握。",
+     "based_on": [
+      {
+       "dimension_id": "calibration",
+       "judgement": "信心和对错比较匹配",
+       "evidence": [
+        "补充关信心 3/5，做空，之后下跌：方向对了，但信心给得偏低"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "开始练习（3 步）",
+      "kind": "in_app_task",
+      "task": {
+       "id": "calibration_quiz",
+       "level_ids": [],
+       "exclude_ids": [
+        "S01",
+        "S02",
+        "S03",
+        "S04",
+        "S05"
+       ]
+      }
+     }
+    },
+    {
+     "id": "res-futures-contest",
+     "type": "event",
+     "title": "在模拟盘上迈出第一步",
+     "resource": {
+      "name": "全国期货模拟赛",
+      "provider": "PandaAI",
+      "url": "https://www.pandaaiquant.com/contest/",
+      "desc": "用模拟盘下单，手动、策略、AI 辅助同场竞技，不用真金白银",
+      "is_sample": false
+     },
+     "reason": "风险偏好判断为\"偏保守：轻仓或观望为主\"（置信度高），例如第 1 关选择观望不入场。模拟赛不用真金白银，适合先用小仓位把\"看懂了\"变成\"做一次\"。",
+     "based_on": [
+      {
+       "dimension_id": "risk_appetite",
+       "judgement": "偏保守：轻仓或观望为主",
+       "evidence": [
+        "第 1 关选择观望不入场",
+        "第 2 关选择观望不入场"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "去看模拟赛",
+      "kind": "external",
+      "url": "https://www.pandaaiquant.com/contest/"
+     }
     }
    ]
   }

@@ -121,6 +121,33 @@ export interface Profile {
   summary: string;                  // 两三句总评
   needs_more: { dimension_id: DimensionId; reason: string }[];
   changes?: { dimension_id: DimensionId; before: string; after: string }[];  // round 2 时相对 round 1 的变化
+  recommendations?: Recommendation[];  // 个性化推荐（D 产出），每条都能追溯到维度判断
+}
+
+/** 推荐的资源：真实存在的 PandaAI / QuantSkills 资源带 url；本作品内置的练习任务 provider 为 "本作品"。 */
+export interface RecResource {
+  name: string;          // "skill-b11-auto-stop-loss-take-profit" / "止损演练"
+  provider: "PandaAI" | "QuantSkills" | "本作品";
+  url?: string;          // 外部资源链接
+  desc: string;          // 一句话说明资源是什么
+  is_sample: boolean;    // 示例资源为 true；真实资源为 false
+}
+
+export type TaskId = "stop_drill" | "key_clue_drill" | "calibration_quiz" | "style_match";
+
+export interface Recommendation {
+  id: string;            // 唯一，如 "task-stop-drill"
+  type: "task" | "tool" | "strategy" | "data" | "event";  // 练习任务 / 工具 / 策略方向 / 数据 / 活动
+  title: string;         // "做一次止损演练"
+  resource: RecResource;
+  reason: string;        // 匹配理由："你在 2 关里满仓不设止损……所以推荐"
+  based_on: { dimension_id: DimensionId; judgement: string; evidence: string[] }[];  // 依据的维度判断和证据原文
+  next_step: {
+    label: string;       // 按钮文字："开始 3 步演练"
+    kind: "in_app_task" | "external";
+    task?: { id: TaskId; level_ids: string[]; exclude_ids?: string[] };  // level_ids 为空时由任务自己从题库挑，排除 exclude_ids（已玩过的关）
+    url?: string;
+  };
 }
 
 // B 导出（frontend/src/play/index.ts）

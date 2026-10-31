@@ -398,7 +398,146 @@
     "is_fun_label": true
    },
    "summary": "能力上几项都还有提升空间，最需要加强的是风险控制（风险敞口偏大，浮亏时不太收手）。偏好上，偏趋势跟随、偏直觉型、偏激进；人物卡依据是\"仓位重、研究少、决定快\"。",
-   "needs_more": []
+   "needs_more": [],
+   "recommendations": [
+    {
+     "id": "task-stop_drill",
+     "type": "task",
+     "title": "做一次止损演练",
+     "resource": {
+      "name": "止损演练",
+      "provider": "本作品",
+      "is_sample": false,
+      "desc": "回到你玩过的一关真实行情，比较不同止损档位的结果"
+     },
+     "reason": "风险控制判断为\"风险敞口偏大，浮亏时不太收手\"（置信度高），例如第 1 关满仓做多却没有设止损。在你玩过的真实行情上比一比设不设止损，比讲道理更直观。",
+     "based_on": [
+      {
+       "dimension_id": "risk_control",
+       "judgement": "风险敞口偏大，浮亏时不太收手",
+       "evidence": [
+        "第 1 关满仓做多却没有设止损",
+        "第 2 关满仓做多却没有设止损"
+       ]
+      },
+      {
+       "dimension_id": "risk_appetite",
+       "judgement": "偏激进：常常重仓、愿意加仓",
+       "evidence": [
+        "第 1 关满仓做多，之后又加仓 1 次",
+        "第 2 关满仓做多，之后又加仓 1 次"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "开始练习（3 步）",
+      "kind": "in_app_task",
+      "task": {
+       "id": "stop_drill",
+       "level_ids": [
+        "S02"
+       ]
+      }
+     }
+    },
+    {
+     "id": "task-key_clue_drill",
+     "type": "task",
+     "title": "复盘漏看的关键线索",
+     "resource": {
+      "name": "关键线索复盘",
+      "provider": "本作品",
+      "is_sample": false,
+      "desc": "回到你漏看关键线索的那关，重新判断哪张线索最有用"
+     },
+     "reason": "证据使用判断为\"倾向先下结论，较少依据线索\"（置信度高），例如第 1 关没有翻开任何关键线索（本关关键是「成交量」「同期大盘」）。回到那一关把线索全部翻开，练习先找\"最有判断价值\"的那张。",
+     "based_on": [
+      {
+       "dimension_id": "evidence_use",
+       "judgement": "倾向先下结论，较少依据线索",
+       "evidence": [
+        "第 1 关没有翻开任何关键线索（本关关键是「成交量」「同期大盘」）",
+        "第 2 关没有翻开任何关键线索（本关关键是「成交量」「北向资金」）"
+       ]
+      },
+      {
+       "dimension_id": "research_depth",
+       "judgement": "偏直觉型：很少翻线索、决定快",
+       "evidence": [
+        "第 1 关3 个研究点用了 1 个，思考 6 秒后决定",
+        "第 2 关3 个研究点用了 1 个，思考 5 秒后决定"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "开始练习（3 步）",
+      "kind": "in_app_task",
+      "task": {
+       "id": "key_clue_drill",
+       "level_ids": [
+        "S01",
+        "S02"
+       ]
+      }
+     }
+    },
+    {
+     "id": "res-stop-skill",
+     "type": "tool",
+     "title": "把止损写成规则",
+     "resource": {
+      "name": "skill-b11-auto-stop-loss-take-profit",
+      "provider": "QuantSkills",
+      "url": "https://github.com/quantskills/skill-b11-auto-stop-loss-take-profit",
+      "desc": "按入场价自动判断止盈、止损和单票仓位上限的技能包",
+      "is_sample": false
+     },
+     "reason": "风险控制判断为\"风险敞口偏大，浮亏时不太收手\"（置信度高）。这个技能包按入场价自动执行止损和仓位上限，能把\"事前定好最大亏损\"变成习惯。",
+     "based_on": [
+      {
+       "dimension_id": "risk_control",
+       "judgement": "风险敞口偏大，浮亏时不太收手",
+       "evidence": [
+        "第 1 关满仓做多却没有设止损",
+        "第 2 关满仓做多却没有设止损"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "查看技能包",
+      "kind": "external",
+      "url": "https://github.com/quantskills/skill-b11-auto-stop-loss-take-profit"
+     }
+    },
+    {
+     "id": "res-behavior-skill",
+     "type": "tool",
+     "title": "诊断过度自信等行为偏差",
+     "resource": {
+      "name": "skill-trading-behavior-diagnostics",
+      "provider": "QuantSkills",
+      "url": "https://github.com/quantskills/skill-trading-behavior-diagnostics",
+      "desc": "解析交易记录、识别过度自信等常见行为偏差",
+      "is_sample": false
+     },
+     "reason": "判断校准判断为\"信心和实际对错不匹配\"（置信度中），例如第 2 关信心 5/5，做多，之后下跌：信心很高，但方向判断错了。它从交易记录里识别过度自信等偏差，适合拿真实或模拟盘记录继续检查。",
+     "based_on": [
+      {
+       "dimension_id": "calibration",
+       "judgement": "信心和实际对错不匹配",
+       "evidence": [
+        "第 2 关信心 5/5，做多，之后下跌：信心很高，但方向判断错了",
+        "第 4 关信心 5/5，做空，之后上涨：信心很高，但方向判断错了"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "查看技能包",
+      "kind": "external",
+      "url": "https://github.com/quantskills/skill-trading-behavior-diagnostics"
+     }
+    }
+   ]
   }
  ]
 }
