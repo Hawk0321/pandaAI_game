@@ -36,3 +36,36 @@
   .play-clues > .clue-card > .clue-inner, .play-level .market-chart g.candle-up, .play-level .market-chart g.candle-down { transition: none; }
   .play-level .chart-decision, .play-level .chart-decision-label, .play-level .chart-future-zone, .reveal-progress::before { animation: none; }
 }
+
+/* ---- 线索卡背面：人话结论 + 方向标 + 小图 ---- */
+/* 没翻开的卡只按正面高度排版（背面叠在后面），翻开后再按背面内容撑高，避免一排卡被最高的那张撑出大片空白。 */
+.play-clues { align-items: start; }
+.play-clues > .clue-card:not(.is-open) .clue-front { position: relative; inset: auto; }
+.play-clues > .clue-card:not(.is-open) .clue-back { position: absolute; inset: 0; min-height: 0; overflow: hidden; }
+.play-clues > .clue-card.is-open .clue-front { position: absolute; inset: 0; }
+.play-clues > .clue-card.is-open .clue-back { position: relative; }
+.clue-back { gap: 9px; }
+.clue-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px 8px; width: 100%; }
+.clue-head strong { white-space: nowrap; }
+.clue-head strong { font-size: 13px; }
+.clue-lean { font-style: normal; font-size: 11px; font-weight: 650; padding: 2px 8px; border-radius: 999px; border: 1px solid currentColor; white-space: nowrap; }
+.clue-lean.lean-up { color: var(--up); }
+.clue-lean.lean-down { color: var(--down); }
+.clue-lean.lean-flat { color: var(--text-muted); }
+.clue-verdict { font-size: 13px; line-height: 1.7; color: var(--ivory, #f1ece0); }
+.clue-chart { display: block; width: 100%; height: 38px; overflow: visible; }
+.clue-chart polyline { stroke: var(--gold, #f2c261); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.clue-chart rect { fill: #f2c26150; }
+.clue-chart rect.is-recent { fill: var(--gold, #f2c261); }
+.clue-meter { display: block; width: 100%; }
+.clue-meter-track { position: relative; display: block; height: 8px; border-radius: 99px; background: var(--ink-3, #1d2336); overflow: hidden; }
+.clue-meter-track i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, var(--gold-deep, #c99a3d), var(--gold, #f2c261)); border-radius: 99px; }
+.clue-meter-track b { position: absolute; left: 50%; top: -1px; bottom: -1px; width: 1px; background: #f1ece099; }
+.clue-range i { inset: -2px auto -2px; width: 3px; border-radius: 2px; background: var(--gold, #f2c261); transform: translateX(-50%); }
+.clue-range::after { content: ''; position: absolute; left: 80%; top: 0; bottom: 0; width: 1px; background: #f1ece0aa; }
+.clue-meter small { display: block; margin-top: 5px; font-size: 11px; color: var(--text-muted, #8e8f9a); }
+.clue-caveat { font-size: 11px; line-height: 1.6; color: var(--text-muted, #8e8f9a); }
+.clue-back .clue-raw { margin-top: auto; padding-top: 7px; border-top: 1px dashed var(--line, #272d42); font-size: 10px; line-height: 1.6; color: #6a6e7d; width: 100%; }
+.clue-card.is-open .clue-back > span.clue-raw { color: #6a6e7d; font-size: 10px; }
+.clue-card.is-open .clue-back > span.clue-caveat { color: var(--text-muted, #8e8f9a); font-size: 11px; }
+.clue-card.is-open .clue-back > span.clue-verdict { color: var(--ivory, #f1ece0); font-size: 13px; }
