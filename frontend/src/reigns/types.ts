@@ -94,6 +94,11 @@ export interface Card {
    * 共享卡的正文要用中性说法（“你”“持仓”“消息”），不要出现只属于某个角色的词。
    */
   readonly roles?: readonly RoleId[];
+  /**
+   * 点名 PandaAI 产品或活动的事件卡。洗牌时按 engine.ts 的 PANDAAI_WEIGHT 加权，更容易排到前面，
+   * 让玩家在一局里更大概率遇到。
+   */
+  readonly pandaai?: true;
   /** 标注为示例内容。 */
   readonly is_sample: true;
 }

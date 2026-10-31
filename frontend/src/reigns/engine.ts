@@ -36,6 +36,21 @@ function shuffle<T>(items: readonly T[], rand: () => number): T[] {
   return out;
 }
 
+/**
+ * PandaAI 事件卡的洗牌权重：越大越容易排到牌堆前面（一局里更早、更大概率遇到）。
+ * 1 = 和普通卡一样。用加权随机排序（Efraimidis–Spirakis：key = u^(1/w)，按 key 从大到小）。
+ */
+export const PANDAAI_WEIGHT = 4;
+
+/** 把卡牌洗成 id 队列。牌库里没有 pandaai 卡时退回普通 Fisher–Yates，保持原有顺序语义。 */
+function shuffleIds(cards: readonly Card[], rand: () => number): string[] {
+  if (!cards.some((card) => card.pandaai)) return shuffle(cards.map((card) => card.id), rand);
+  return cards
+    .map((card) => ({ id: card.id, key: Math.pow(rand(), 1 / (card.pandaai ? PANDAAI_WEIGHT : 1)) }))
+    .sort((a, b) => b.key - a.key)
+    .map((entry) => entry.id);
+}
+
 /** 只保留该角色能抽到的卡：roles 省略（共享）或包含该角色。 */
 function cardsForRole(cards: readonly Card[], role: RoleId): readonly Card[] {
   return cards.filter((card) => card.roles === undefined || card.roles.includes(role));
@@ -143,10 +158,7 @@ function drawNext(
   const byId = new Map(cards.map((card) => [card.id, card] as const));
   let queue = deck.filter((id) => byId.has(id));
   if (queue.length === 0) {
-    queue = shuffle(
-      cards.map((card) => card.id),
-      mulberry32(seed),
-    );
+    queue = shuffleIds(cards, mulberry32(seed));
     if (queue.length > 1 && queue[0] === currentId) {
       queue = [...queue.slice(1, 2), queue[0], ...queue.slice(2)];
     }
@@ -162,10 +174,7 @@ export function createGame(allCards: readonly Card[], seed?: number, role: RoleI
   }
   const gameSeed = seed ?? Math.floor(Math.random() * 4294967296);
   const rand = mulberry32(gameSeed);
-  const ids = shuffle(
-    cards.map((card) => card.id),
-    rand,
-  );
+  const ids = shuffleIds(cards, rand);
   const { card, deck } = drawNext(ids, cards, null, 0);
   return {
     role,

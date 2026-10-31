@@ -15,7 +15,7 @@
 .reigns-root * { box-sizing: border-box; }
 .reigns-header { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
 .reigns-title { margin: 0; font-size: 18px; display: flex; align-items: center; gap: 9px; }
-.reigns-brand-mark { display: grid; place-items: center; width: 28px; height: 28px; color: #10141f; background: var(--scene-accent); font-size: 17px; font-weight: 900; clip-path: polygon(15% 0,85% 0,100% 15%,100% 85%,85% 100%,15% 100%,0 85%,0 15%); }
+.reigns-brand-mark { display: block; flex: none; width: 28px; height: 28px; object-fit: cover; image-rendering: pixelated; background: var(--scene-accent); clip-path: polygon(15% 0,85% 0,100% 15%,100% 85%,85% 100%,15% 100%,0 85%,0 15%); }
 .reigns-turn { margin: 0; font-size: 13px; color: var(--rg-muted); }
 .reigns-mute { flex: none; align-self: center; min-width: 40px; min-height: 40px; padding: 0; font-size: 18px; line-height: 1; color: var(--rg-text); background: transparent; border: 1px solid var(--rg-line); border-radius: 10px; cursor: pointer; }
 .reigns-mute:hover { border-color: var(--rg-gold); }
