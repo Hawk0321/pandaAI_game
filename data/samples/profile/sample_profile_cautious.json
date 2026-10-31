@@ -363,9 +363,93 @@
     "name": "夜猫研究员",
     "emoji": "🦉",
     "tagline": "线索翻遍才出手，证据说话",
-    "is_fun_label": true
+    "is_fun_label": true,
+    "id": "owl",
+    "archetype": "证据驱动 · 慢思考",
+    "traits": [
+     "研究点用足",
+     "先看关键线索",
+     "跟着证据走"
+    ],
+    "strength": "决定有依据，不容易被单一信号带偏",
+    "blind_spot": "研究得越多越容易觉得\"已经想清楚了\"，仍需检验规则是否只是巧合",
+    "basis": "双系统理论区分快速直觉（系统 1）与慢速推理（系统 2）；预测研究发现，愿意主动找反方证据、按新信息更新判断的人预测更准。确认偏误则是只找支持自己观点的证据。",
+    "refs": [
+     "Kahneman (2011), Thinking, Fast and Slow",
+     "Nickerson (1998), Confirmation Bias, Review of General Psychology",
+     "Tetlock & Gardner (2015), Superforecasting"
+    ],
+    "why": "研究点使用 100%，关键线索命中 100%",
+    "also": {
+     "id": "turtle",
+     "name": "稳健老龟",
+     "emoji": "🐢",
+     "why": "入场时设止损 100%，平均仓位 43%"
+    }
    },
-   "summary": "能力上表现稳定，证据使用最突出（会先找关键线索，决定和证据一致）。偏好上，偏研究型、仓位适中；人物卡依据是\"研究点用足、紧跟关键线索\"。趋势 vs 反转还看不准，结论仅供参考。",
+   "features": {
+    "flat_rate": {
+     "value": 0,
+     "n": 4
+    },
+    "avg_size": {
+     "value": 0.425,
+     "n": 4
+    },
+    "stop_rate": {
+     "value": 1,
+     "n": 4
+    },
+    "add_on_loss": {
+     "value": 0,
+     "n": 4
+    },
+    "cut_on_loss": {
+     "value": 1,
+     "n": 4
+    },
+    "research_spend": {
+     "value": 1,
+     "n": 4
+    },
+    "think_sec": {
+     "value": 40,
+     "n": 4
+    },
+    "key_clue_hit": {
+     "value": 1,
+     "n": 4
+    },
+    "clue_agree": {
+     "value": 1,
+     "n": 3
+    },
+    "confirm_only": {
+     "value": 0,
+     "n": 4
+    },
+    "trend_follow": {
+     "value": 0.3333333333333333,
+     "n": 3
+    },
+    "avg_confidence": {
+     "value": 3.25,
+     "n": 4
+    },
+    "hit_rate": {
+     "value": 1,
+     "n": 4
+    },
+    "overconfidence": {
+     "value": -0.2749999999999999,
+     "n": 4
+    },
+    "reveal_dwell_sec": {
+     "value": 6,
+     "n": 4
+    }
+   },
+   "summary": "能力上表现稳定，证据使用最突出（会先找关键线索，决定和证据一致）。偏好上，偏研究型、仓位适中；人物卡依据是\"研究点使用 100%，关键线索命中 100%\"。趋势 vs 反转还看不准，结论仅供参考。",
    "needs_more": [
     {
      "dimension_id": "style",

@@ -395,9 +395,93 @@
     "name": "冲锋蛮牛",
     "emoji": "🐂",
     "tagline": "看到机会就冲，先上车再说",
-    "is_fun_label": true
+    "is_fun_label": true,
+    "id": "bull",
+    "archetype": "过度自信",
+    "traits": [
+     "重仓",
+     "决定快",
+     "信心满格"
+    ],
+    "strength": "执行力强，机会来时不犹豫",
+    "blind_spot": "信心常常高过实际把握，重仓放大了每一次看错",
+    "basis": "对数万个券商账户的研究发现，交易越频繁、越自信的散户，扣费后收益越差；过度自信表现为高估自己信息的准确度，并因此下更大的注。",
+    "refs": [
+     "Barber & Odean (2000), Trading Is Hazardous to Your Wealth, J. Finance",
+     "Odean (1999), Do Investors Trade Too Much?, AER",
+     "Lichtenstein, Fischhoff & Phillips (1982), Calibration of Probabilities"
+    ],
+    "why": "平均仓位 100%，平均信心 5.0/5，命中率 50%",
+    "also": {
+     "id": "hedgehog",
+     "name": "死扛刺猬",
+     "emoji": "🦔",
+     "why": "浮亏时加仓 2 次，浮亏时减仓 1 次"
+    }
    },
-   "summary": "能力上几项都还有提升空间，最需要加强的是风险控制（风险敞口偏大，浮亏时不太收手）。偏好上，偏趋势跟随、偏直觉型、偏激进；人物卡依据是\"仓位重、研究少、决定快\"。",
+   "features": {
+    "flat_rate": {
+     "value": 0,
+     "n": 4
+    },
+    "avg_size": {
+     "value": 1,
+     "n": 4
+    },
+    "stop_rate": {
+     "value": 0,
+     "n": 4
+    },
+    "add_on_loss": {
+     "value": 2,
+     "n": 4
+    },
+    "cut_on_loss": {
+     "value": 1,
+     "n": 4
+    },
+    "research_spend": {
+     "value": 0.25,
+     "n": 4
+    },
+    "think_sec": {
+     "value": 5.5,
+     "n": 4
+    },
+    "key_clue_hit": {
+     "value": 0,
+     "n": 4
+    },
+    "clue_agree": {
+     "value": 1,
+     "n": 3
+    },
+    "confirm_only": {
+     "value": 0,
+     "n": 4
+    },
+    "trend_follow": {
+     "value": 1,
+     "n": 3
+    },
+    "avg_confidence": {
+     "value": 5,
+     "n": 4
+    },
+    "hit_rate": {
+     "value": 0.5,
+     "n": 4
+    },
+    "overconfidence": {
+     "value": 0.4,
+     "n": 4
+    },
+    "reveal_dwell_sec": {
+     "value": 6,
+     "n": 4
+    }
+   },
+   "summary": "能力上几项都还有提升空间，最需要加强的是风险控制（风险敞口偏大，浮亏时不太收手）。偏好上，偏趋势跟随、偏直觉型、偏激进；人物卡依据是\"平均仓位 100%，平均信心 5.0/5，命中率 50%\"。",
    "needs_more": [],
    "recommendations": [
     {

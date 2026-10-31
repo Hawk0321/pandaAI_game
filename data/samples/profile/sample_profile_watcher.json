@@ -347,9 +347,87 @@
     "name": "树懒观察员",
     "emoji": "🦥",
     "tagline": "看得多、动得少，按兵不动也是一种选择",
-    "is_fun_label": true
+    "is_fun_label": true,
+    "id": "sloth",
+    "archetype": "损失厌恶 · 维持现状偏差",
+    "traits": [
+     "爱观望",
+     "怕亏损",
+     "重研究轻行动"
+    ],
+    "strength": "不会因为冲动而亏钱，耐心是稀缺品质",
+    "blind_spot": "把\"不确定\"当成\"不行动\"的理由，也就没机会验证自己的判断",
+    "basis": "前景理论发现，同样金额的损失带来的痛苦约是收益快乐的两倍，人因此倾向回避可能亏钱的选择；面对模糊信息时，人还会偏好\"什么都不改\"的默认选项。",
+    "refs": [
+     "Kahneman & Tversky (1979), Prospect Theory, Econometrica",
+     "Samuelson & Zeckhauser (1988), Status Quo Bias in Decision Making, J. Risk & Uncertainty",
+     "Ellsberg (1961), Risk, Ambiguity, and the Savage Axioms, QJE"
+    ],
+    "why": "4 关里观望 100%"
    },
-   "summary": "能力上，证据使用会看线索，但关键线索常有遗漏。偏好上，偏研究型、偏保守；人物卡依据是\"大多数关卡观望或极轻仓\"。证据使用、判断校准、风险控制、趋势 vs 反转还看不准，结论仅供参考。",
+   "features": {
+    "flat_rate": {
+     "value": 1,
+     "n": 4
+    },
+    "avg_size": {
+     "value": 0,
+     "n": 4
+    },
+    "stop_rate": {
+     "value": null,
+     "n": 0
+    },
+    "add_on_loss": {
+     "value": 0,
+     "n": 4
+    },
+    "cut_on_loss": {
+     "value": 0,
+     "n": 4
+    },
+    "research_spend": {
+     "value": 1,
+     "n": 4
+    },
+    "think_sec": {
+     "value": 29,
+     "n": 4
+    },
+    "key_clue_hit": {
+     "value": 0.375,
+     "n": 4
+    },
+    "clue_agree": {
+     "value": null,
+     "n": 0
+    },
+    "confirm_only": {
+     "value": 0,
+     "n": 0
+    },
+    "trend_follow": {
+     "value": null,
+     "n": 0
+    },
+    "avg_confidence": {
+     "value": null,
+     "n": 0
+    },
+    "hit_rate": {
+     "value": null,
+     "n": 0
+    },
+    "overconfidence": {
+     "value": null,
+     "n": 0
+    },
+    "reveal_dwell_sec": {
+     "value": 6,
+     "n": 4
+    }
+   },
+   "summary": "能力上，证据使用会看线索，但关键线索常有遗漏。偏好上，偏研究型、偏保守；人物卡依据是\"4 关里观望 100%\"。证据使用、判断校准、风险控制、趋势 vs 反转还看不准，结论仅供参考。",
    "needs_more": [
     {
      "dimension_id": "evidence_use",
@@ -910,9 +988,93 @@
     "name": "树懒观察员",
     "emoji": "🦥",
     "tagline": "看得多、动得少，按兵不动也是一种选择",
-    "is_fun_label": true
+    "is_fun_label": true,
+    "id": "sloth",
+    "archetype": "损失厌恶 · 维持现状偏差",
+    "traits": [
+     "爱观望",
+     "怕亏损",
+     "重研究轻行动"
+    ],
+    "strength": "不会因为冲动而亏钱，耐心是稀缺品质",
+    "blind_spot": "把\"不确定\"当成\"不行动\"的理由，也就没机会验证自己的判断",
+    "basis": "前景理论发现，同样金额的损失带来的痛苦约是收益快乐的两倍，人因此倾向回避可能亏钱的选择；面对模糊信息时，人还会偏好\"什么都不改\"的默认选项。",
+    "refs": [
+     "Kahneman & Tversky (1979), Prospect Theory, Econometrica",
+     "Samuelson & Zeckhauser (1988), Status Quo Bias in Decision Making, J. Risk & Uncertainty",
+     "Ellsberg (1961), Risk, Ambiguity, and the Savage Axioms, QJE"
+    ],
+    "why": "5 关里观望 80%",
+    "also": {
+     "id": "turtle",
+     "name": "稳健老龟",
+     "emoji": "🐢",
+     "why": "入场时设止损 100%，平均仓位 4%"
+    }
    },
-   "summary": "能力上，判断校准相对最好（信心和对错比较匹配），证据使用最需要加强（会看线索，但关键线索常有遗漏）。偏好上，偏研究型、偏保守；人物卡依据是\"大多数关卡观望或极轻仓\"。证据使用、判断校准、风险控制、趋势 vs 反转还看不准，结论仅供参考。",
+   "features": {
+    "flat_rate": {
+     "value": 0.8,
+     "n": 5
+    },
+    "avg_size": {
+     "value": 0.04,
+     "n": 5
+    },
+    "stop_rate": {
+     "value": 1,
+     "n": 1
+    },
+    "add_on_loss": {
+     "value": 0,
+     "n": 5
+    },
+    "cut_on_loss": {
+     "value": 0,
+     "n": 5
+    },
+    "research_spend": {
+     "value": 1,
+     "n": 5
+    },
+    "think_sec": {
+     "value": 30,
+     "n": 5
+    },
+    "key_clue_hit": {
+     "value": 0.5,
+     "n": 5
+    },
+    "clue_agree": {
+     "value": 1,
+     "n": 1
+    },
+    "confirm_only": {
+     "value": 0,
+     "n": 1
+    },
+    "trend_follow": {
+     "value": 0,
+     "n": 1
+    },
+    "avg_confidence": {
+     "value": 3,
+     "n": 1
+    },
+    "hit_rate": {
+     "value": 1,
+     "n": 1
+    },
+    "overconfidence": {
+     "value": null,
+     "n": 1
+    },
+    "reveal_dwell_sec": {
+     "value": 6,
+     "n": 5
+    }
+   },
+   "summary": "能力上，判断校准相对最好（信心和对错比较匹配），证据使用最需要加强（会看线索，但关键线索常有遗漏）。偏好上，偏研究型、偏保守；人物卡依据是\"5 关里观望 80%\"。证据使用、判断校准、风险控制、趋势 vs 反转还看不准，结论仅供参考。",
    "needs_more": [
     {
      "dimension_id": "evidence_use",

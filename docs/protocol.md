@@ -183,7 +183,20 @@ export interface Profile {
   method: "rules" | "rules+llm";
   round: 1 | 2;          // 1 = 主关卡后，2 = 补充关卡后
   dimensions: Dimension[];          // 能力 3 个 + 偏好 3 个
-  persona: { name: string; emoji: string; tagline: string; is_fun_label: true };
+  persona: {
+    name: string; emoji: string; tagline: string; is_fun_label: true;
+    // 以下为可选的人物卡详情（D 产出，卡片说明见 docs/personas.md）
+    id?: string;                // "bull"
+    archetype?: string;         // 对应的金融学概念："过度自信"
+    traits?: string[];          // 3 个特征标签
+    strength?: string;
+    blind_spot?: string;
+    basis?: string;             // 金融依据
+    refs?: string[];            // 文献
+    why?: string;               // 本局触发依据："平均仓位 100%，平均信心 5.0/5，命中率 50%"
+    also?: { id: string; name: string; emoji: string; why: string };  // 第二匹配的人物卡
+  };
+  features?: Record<string, { value: number | null; n: number }>;  // 会话级行为特征，定义见 docs/features.md
   summary: string;                  // 两三句总评
   needs_more: { dimension_id: DimensionId; reason: string }[];
   changes?: { dimension_id: DimensionId; before: string; after: string }[];  // round 2 时相对 round 1 的变化
