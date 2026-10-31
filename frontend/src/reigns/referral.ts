@@ -13,9 +13,10 @@ import { PERSONA_STRATEGY } from '../recommend/recommend';
 import type { RecResource } from '../shared/protocol';
 import { ROLES } from './roles';
 import { STAT_KEYS, STAT_LABELS } from './types';
-import type { Ending, PersonaId, RoleId, StatKey, Stats, StyleTag, StyleTally } from './types';
+import type { Card, ChoiceLog, Ending, PersonaId, RoleId, StatKey, Stats, StyleTag, StyleTally } from './types';
 
-export type ReferralType = 'strategy' | 'tool' | 'product';
+/** encounter：本局遇到过的 PandaAI 事件 → 事件里点名的真实产品（见 buildEncounterReferral）。 */
+export type ReferralType = 'strategy' | 'tool' | 'product' | 'encounter';
 
 export interface Referral {
   readonly type: ReferralType;
@@ -118,16 +119,19 @@ const ROLE_VOICE: Readonly<Record<RoleId, Readonly<Record<ReferralType, string>>
     strategy: '放到持有人的视角里，这是一份可以向他们交代的依据。',
     tool: '对持有人来说，事前写好的底线比事后解释更有说服力。',
     product: '想法先放进回测里过一遍，也是给持有人的一份投研底稿。',
+    encounter: '游戏里遇到的工具现实里也有，先拿它试一份底稿，再决定要不要用到产品里。',
   },
   crypto: {
     strategy: '放到链上的节奏里，先有规则再看行情，心里更稳。',
     tool: '链上 24 小时不打烊，事前设好的规则不会疲劳。',
     product: '群里再热闹，也可以先把想法放进回测里过一遍。',
+    encounter: '游戏里听说的东西现实里也能摸到，自己试一遍比群里转发更踏实。',
   },
   stock: {
     strategy: '放到自己盯盘的日子里，有规则就少一点临场情绪。',
     tool: '一个人扛盈亏，规则能在情绪上头时帮你把关。',
     product: '把自己的想法放进回测里，看看复盘时站不站得住。',
+    encounter: '游戏里遇到的工具现实里也能试，先在回测和模拟里练，比听群里说更踏实。',
   },
 };
 
@@ -192,4 +196,59 @@ export function buildReferrals(personaId: PersonaId, ending: Ending, stats: Stat
   const third = make('product', useFactor ? '把研究劲头用在因子上' : '把想法交给 Qube 回测', productReason, productRes);
 
   return [first, second, third];
+}
+
+/**
+ * 第 4 张卡：本局遇到过的 PandaAI 事件 → 事件里点名的真实产品。
+ * res 依次尝试，选第一个没被前三张卡占用的；都被占用就用社区兜底。
+ * 新增 pandaai 卡时必须在这里补一条（encounterReferral.test.ts 会检查）。
+ */
+interface Encounter {
+  /** 卡面上点名的东西，用在标题和理由里。 */
+  readonly mention: string;
+  readonly res: readonly CatalogId[];
+  /** 选中主资源（res[0]）时的补充说明，用于活动已结束、入口不同等情况。 */
+  readonly note?: string;
+}
+
+export const ENCOUNTERS: Readonly<Record<string, Encounter>> = {
+  'fund-quant-factor-center': { mention: '量化因子中心', res: ['factorCenter', 'factorOnline'] },
+  'fund-quant-evo': { mention: 'EVO', res: ['evo', 'community'], note: 'EVO 需要登录，Lite 会员起可用，可以先读这份使用说明。' },
+  'fund-quant-factor-contest': { mention: '因子大赛', res: ['factorContest', 'factorOnline'] },
+  'crypto-quant-llm-battle': { mention: 'LLM 对抗赛', res: ['qube', 'community'], note: 'LLM 对抗赛已经结束，想自己试试让大模型写策略，可以从 Qube 开始。' },
+  'crypto-quant-diagnostics': { mention: '交易行为诊断', res: ['behavior', 'tradeReview'] },
+  'crypto-quant-qube-learn': { mention: 'Qube', res: ['qube', 'overfit'] },
+  'stock-quant-ma': { mention: '双均线模板', res: ['qube', 'maCross'], note: '双均线模板就在 Qube 首页，可以直接拿来回测。' },
+  'stock-quant-turtle': { mention: '海龟突破模板', res: ['qube', 'stopLoss'], note: '海龟突破 + ATR 止损模板就在 Qube 首页，可以直接拿来回测。' },
+  'stock-quant-qube': { mention: 'Qube', res: ['qube', 'overfit'] },
+  'stock-quant-simnow': { mention: '全国期货模拟赛', res: ['futuresContest', 'course'], note: 'SimNow 仿真要在专业版客户端里登录，模拟赛不用真金白银，门槛更低。' },
+};
+
+const ENCOUNTER_FALLBACK: CatalogId = 'community';
+
+/**
+ * 从本局选择记录里找最近一张 PandaAI 事件卡，推荐它点名的产品。没遇到过就返回 null（结局页只显示三张卡）。
+ * @param usedUrls 前三张卡已经用掉的链接，避免重复。
+ */
+export function buildEncounterReferral(
+  log: readonly ChoiceLog[],
+  cards: readonly Card[],
+  usedUrls: ReadonlySet<string>,
+  role: RoleId | null = null,
+): Referral | null {
+  const byId = new Map(cards.map((card) => [card.id, card] as const));
+  for (let i = log.length - 1; i >= 0; i -= 1) {
+    const card = byId.get(log[i].cardId);
+    const plan = card?.pandaai ? ENCOUNTERS[card.id] : undefined;
+    if (!card || !plan) continue;
+    const resId = [...plan.res, ENCOUNTER_FALLBACK].find((id) => !usedUrls.has(CATALOG[id].url));
+    if (!resId) continue;
+    const isMain = resId === plan.res[0];
+    const tail = isMain
+      ? plan.note ?? `卡里说的${plan.mention}是真实的 PandaAI 产品，可以亲手试一下。`
+      : `${plan.mention}相关的入口上面已经推荐过，这里换一个相近的。`;
+    const reason = `这局第 ${i + 1} 关，${card.speaker}提到了${plan.mention}，你选了“${card[log[i].side].label}”。${tail}${role ? ROLE_VOICE[role].encounter : ''}`;
+    return make('encounter', `第 ${i + 1} 关遇到的${plan.mention}`, reason, CATALOG[resId]);
+  }
+  return null;
 }
