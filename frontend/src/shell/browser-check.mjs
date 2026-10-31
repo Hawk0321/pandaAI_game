@@ -161,8 +161,10 @@ async function screenshotViewport(filename) {
   await fs.writeFile(target, Buffer.from(result.data, 'base64'));
   screenshots.push(target);
 }
+// main 的 ui.css 有 html { scroll-behavior: smooth }：默认的 scrollIntoView 会平滑滚动，80ms 后位置还没停，
+// 鼠标按下时按钮已经移走。这里统一用 behavior:'instant'，点击坐标才可靠。
 async function mouseClick(selector) {
-  await evaluate(`document.querySelector(${JSON.stringify(selector)}).scrollIntoView({block:'center',inline:'center'})`);
+  await evaluate(`document.querySelector(${JSON.stringify(selector)}).scrollIntoView({block:'center',inline:'center',behavior:'instant'})`);
   await delay(80);
   const point = await evaluate(`(()=>{const rect=document.querySelector(${JSON.stringify(selector)}).getBoundingClientRect();return {x:rect.left+rect.width/2,y:rect.top+rect.height/2}})()`);
   await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', ...point });
@@ -243,7 +245,7 @@ async function expectMotionFrozen(selector, label, hidden = false) {
 }
 
 async function showMainArt() {
-  await evaluate(`document.querySelector(${JSON.stringify(mainArtSurface)}).scrollIntoView({block:'center',inline:'center'})`);
+  await evaluate(`document.querySelector(${JSON.stringify(mainArtSurface)}).scrollIntoView({block:'center',inline:'center',behavior:'instant'})`);
   await settleCard();
 }
 
@@ -377,7 +379,8 @@ async function personaCardChecks(profile, interactions = false) {
   assert.equal(motion.animation, 'none');
   assert.equal(motion.rotor, '0s');
   assert.equal(motion.art, '0s');
-  assert.equal(await evaluate("document.querySelector('.persona-card-controls .persona-motion-toggle').disabled"), true, 'system reduced motion disables the play control');
+  // 媒体查询变化通过 change 事件异步进入 React 状态，先等按钮更新再断言，避免和渲染赛跑。
+  await waitFor("document.querySelector('.persona-card-controls .persona-motion-toggle')?.disabled === true", 'system reduced motion disables the play control');
   await expectMotionFrozen(mainArtSurface, 'system reduced motion', true);
   await evaluate("document.querySelector('.persona-flip-button').focus()");
   await keyPress(' ');
@@ -515,7 +518,17 @@ async function downloadSubmission(profile) {
 }
 const revealRequests = start => requests.slice(start).filter(url => new URL(url).pathname.endsWith('.reveal.json'));
 
+// 方向、仓位、信心、止损四项都是必选（#15 之前就如此）：调用方只选了方向（甚至一项都没选，比如补充关卡）时，这里把还没选的项补成最保守的默认值再提交。
+async function fillRequiredDecision() {
+  const pressed = label => evaluate(`[...document.querySelectorAll('.decision-grid fieldset')].some(f=>f.querySelector('legend').textContent.startsWith(${JSON.stringify(label)})&&f.querySelector('button[aria-pressed=true]'))`);
+  const needs = label => evaluate(`[...document.querySelectorAll('.decision-grid fieldset')].some(f=>f.querySelector('legend').textContent.startsWith(${JSON.stringify(label)})&&f.querySelector('legend').textContent.includes('必选'))`);
+  if (await needs('方向')) await click('观望');
+  if (await needs('信心')) await click('3');
+  if (await needs('止损')) await click('不设止损');
+  if (await needs('仓位') && !(await pressed('仓位'))) await click('轻仓 20%');
+}
 async function finishPlay() {
+  await fillRequiredDecision();
   await click('提交决定，揭晓走势');
   for (let step = 1; step <= 3; step++) {
     await waitFor(`document.querySelector('.play-actions h3')?.textContent === '持有第 ${step}/3 步'`, `holding step ${step}`);
