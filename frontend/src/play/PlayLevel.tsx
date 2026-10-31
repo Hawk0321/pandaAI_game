@@ -4,6 +4,8 @@ import { MarketChart } from '../shell/MarketChart';
 import { checkStop, emptyAccount, pnl, targetPosition, trade } from './trading';
 import type { Action } from './trading';
 import { prefersReducedMotion, scheduleReveal } from './reveal';
+import { ClueBack } from './ClueFace';
+import { clueName, clueTeaser } from './clueView';
 import './play.css';
 
 export function PlayLevel(props: PlayLevelProps): JSX.Element {
@@ -123,8 +125,8 @@ function Round({ level, isSupplementary, loadReveal, emit, onDone }: PlayLevelPr
         const isLocked = !isOpen && clue.cost > budget;
         return <button type="button" key={clue.id} className={`clue-card${isOpen ? ' is-open' : ''}${isLocked ? ' is-locked' : ''}`} aria-expanded={isOpen} disabled={isOpen || isLocked} onClick={() => open(clue.id)}>
           <span className="clue-inner">
-            <span className="clue-face clue-front" aria-hidden={isOpen}><strong>{clue.title} · {clue.cost} 点</strong><span>{isLocked ? `研究点不足（还剩 ${budget} 点），翻不开` : '点击翻开线索'}</span></span>
-            <span className="clue-face clue-back" aria-hidden={!isOpen}><strong>{clue.title} · {clue.cost} 点</strong><span>{clue.text}</span></span>
+            <span className="clue-face clue-front" aria-hidden={isOpen}><strong>{clueName(clue)} · {clue.cost} 点</strong><span>{isLocked ? `研究点不足（还剩 ${budget} 点），翻不开` : clueTeaser(clue)}</span></span>
+            <span className="clue-face clue-back" aria-hidden={!isOpen}><ClueBack clue={clue} /></span>
           </span>
         </button>;
       })}</div>
