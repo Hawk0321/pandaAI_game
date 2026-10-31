@@ -8,18 +8,10 @@ import { PERSONA_CARDS } from '../profile/persona';
 import { PersonaArt } from '../shell/PersonaArt';
 import { PERSONA_ARTWORKS } from '../shell/personaArtwork';
 import '../shell/persona-card.css';
-import { inferPersona } from './engine';
-import { TAG_BY_PERSONA, TAG_PHRASE } from './referral';
-import type { PersonaId, StyleTally } from './types';
-
-/** “为什么是你”：用本局的标签次数和占比说话，不下定性结论。 */
-export function whyLine(personaId: PersonaId, tally: StyleTally): string {
-  const tag = TAG_BY_PERSONA[personaId];
-  const n = tally[tag] ?? 0;
-  const total = Object.values(tally).reduce((sum, x) => sum + x, 0);
-  if (n === 0 || total === 0) return '这局里你的选择没有明显的偏向，所以更像是各种风格轮着来。';
-  return `这局里你有 ${n} 次选择偏${TAG_PHRASE[tag]}，占全部带风格倾向选择的 ${Math.round((n / total) * 100)}%。`;
-}
+import { ALL_CARDS } from './allCards';
+import { resolvePersona } from './engine';
+import { buildEvidenceChips, buildWhyLine } from './personaCopy';
+import type { GameState } from './types';
 
 const REDUCED_QUERY = '(prefers-reduced-motion: reduce)';
 
@@ -40,13 +32,17 @@ function useReducedMotion(): boolean {
 }
 
 export interface PersonaRevealProps {
-  /** 本局风格标签累计，用来推断人物卡。 */
-  readonly tally: StyleTally;
+  /** 已结束的对局（state.ending 非空）；人格由 resolvePersona 结合结局给出。 */
+  readonly state: GameState;
 }
 
-export function PersonaReveal({ tally }: PersonaRevealProps) {
-  const personaId = useMemo(() => inferPersona(tally), [tally]);
+export function PersonaReveal({ state }: PersonaRevealProps) {
+  const resolved = useMemo(() => resolvePersona(state, ALL_CARDS), [state]);
+  const personaId = resolved.id;
   const persona = PERSONA_CARDS[personaId];
+  const endingTitle = state.ending?.title ?? '';
+  const whyText = useMemo(() => buildWhyLine(resolved, persona.name, endingTitle, state.role), [resolved, persona.name, endingTitle, state.role]);
+  const chips = useMemo(() => buildEvidenceChips(resolved), [resolved]);
   const artwork = PERSONA_ARTWORKS.find((item) => item.id === personaId);
   const reducedMotion = useReducedMotion();
   const [motionRequested, setMotionRequested] = useState(true);
@@ -78,7 +74,12 @@ export function PersonaReveal({ tally }: PersonaRevealProps) {
       <ul className="reigns-traits" aria-label="特征标签">
         {persona.traits.map((t) => <li key={t} className="reigns-trait">{t}</li>)}
       </ul>
-      <p className="reigns-why"><strong>为什么是你：</strong>{whyLine(personaId, tally)}</p>
+      <p className="reigns-why"><strong>为什么是你：</strong>{whyText}</p>
+      {chips.length > 0 && (
+        <ul className="reigns-chips" aria-label="依据">
+          {chips.map((chip) => <li key={chip.kind} className={`reigns-chip reigns-chip-${chip.kind}`}>{chip.label}</li>)}
+        </ul>
+      )}
       <details className="reigns-sides">
         <summary className="reigns-sides-summary">看看长处和需要留意的地方</summary>
         <div className="reigns-sides-body">

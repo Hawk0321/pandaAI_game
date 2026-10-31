@@ -1,12 +1,14 @@
 // 结局页：结局 → 本局摘要 → 动态人物卡 → 再来一局 → 引流卡 → 页脚，另有可折叠的“结局图鉴”。
 // 人物卡层级沿用 docs/personas.md（见 PersonaReveal）；引流规则见 referral.ts。人物卡是趣味表达，不是投资建议。
 import { useEffect, useMemo, useRef } from 'react';
-import { inferPersona, getEndings } from './engine';
+import { resolvePersona } from './engine';
+import { ALL_CARDS } from './allCards';
+import { ENDING_THRESHOLDS, getEndings } from './endings';
 import { PersonaReveal } from './PersonaReveal';
 import { buildReferrals } from './referral';
 import { ROLES } from './roles';
 import { STAT_KEYS } from './types';
-import type { GameState } from './types';
+import type { Ending, GameState, StatKey } from './types';
 import type { CSSProperties } from 'react';
 
 export interface EndingScreenProps {
@@ -23,13 +25,30 @@ const TYPE_LABEL = { strategy: '策略', tool: '工具', product: '产品' } as 
 /** 分段淡入：delay 为秒，减少动态效果时由样式直接关闭动画。 */
 const rise = (delay: number): CSSProperties => ({ '--rg-delay': `${delay}s` } as CSSProperties);
 
-/** 数值的文字提示，不只靠颜色：0 / 100 是触底 / 爆满，其余两端是偏低 / 偏高。 */
-function extremeLabel(value: number): string | null {
+/**
+ * 数值的文字提示，不只靠颜色：0 / 100 是触底 / 爆满，其余两端是偏低 / 偏高。
+ * 阈值与 endings.ts 的 ENDING_THRESHOLDS 对齐：风控的“偏低”按 riskLow（25）算，
+ * 否则“保证金薄如蝉翼”这类结局旁边，风控 22 却没有任何提示，数字和结局对不上。
+ */
+function extremeLabel(key: StatKey, value: number): string | null {
+  const lowEdge = key === 'risk' ? ENDING_THRESHOLDS.riskLow : ENDING_THRESHOLDS.low;
   if (value <= 0) return '触底';
   if (value >= 100) return '爆满';
-  if (value <= 20) return '偏低';
-  if (value >= 80) return '偏高';
+  if (value <= lowEdge) return '偏低';
+  if (value >= ENDING_THRESHOLDS.high) return '偏高';
   return null;
+}
+
+/**
+ * 本条数值的最终提示。普通结局对应的那一条一定和结局同向（low 触底 / high 爆满）；
+ * 中途特殊结局和存活结局是在没有任何一条到 0 / 100 时判定的（endings.ts 先查普通结局），
+ * 所以这两类结局的页面上不会出现“触底 / 爆满”。
+ */
+function statFlag(key: StatKey, value: number, ending: Ending): string | null {
+  if (ending.stat === key && (ending.kind === 'low' || ending.kind === 'high')) {
+    return ending.kind === 'low' ? '触底' : '爆满';
+  }
+  return extremeLabel(key, value);
 }
 
 export function EndingScreen({ state, onRestart, onReplay }: EndingScreenProps) {
@@ -38,8 +57,9 @@ export function EndingScreen({ state, onRestart, onReplay }: EndingScreenProps) 
   const headingRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => { headingRef.current?.focus({ preventScroll: false }); }, []);
 
-  const personaId = useMemo(() => inferPersona(tally), [tally]);
-  const referrals = useMemo(() => (ending ? buildReferrals(personaId, ending, stats, tally, role) : []), [personaId, ending, stats, tally, role]);
+  // 引流卡和人物卡用同一个最终人格，文案里的次数才不会和人物卡打架。
+  const personaId = useMemo(() => (ending ? resolvePersona(state, ALL_CARDS).id : null), [state, ending]);
+  const referrals = useMemo(() => (ending && personaId ? buildReferrals(personaId, ending, stats, tally, role) : []), [personaId, ending, stats, tally, role]);
   const codex = useMemo(() => getEndings(role), [role]);
   if (!ending) return null;
 
@@ -63,7 +83,7 @@ export function EndingScreen({ state, onRestart, onReplay }: EndingScreenProps) 
         <ul className="reigns-summary-stats">
           {STAT_KEYS.map((key) => {
             const value = stats[key];
-            const flag = extremeLabel(value);
+            const flag = statFlag(key, value, ending);
             return (
               <li key={key} className="reigns-summary-stat">
                 <span className="reigns-summary-row">
@@ -83,7 +103,7 @@ export function EndingScreen({ state, onRestart, onReplay }: EndingScreenProps) 
       </section>
 
       <div className="reigns-rise" style={rise(0.2)}>
-        <PersonaReveal tally={tally} />
+        <PersonaReveal state={state} />
       </div>
 
       <div className="reigns-again reigns-rise" style={rise(0.3)}>

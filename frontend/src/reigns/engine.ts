@@ -1,6 +1,9 @@
 import { ENDINGS, GENERIC_ENDINGS, ROLE_SPECIAL_ENDINGS, findEnding, getEndings } from './endings';
 import { STAT_KEYS, STYLE_TAGS } from './types';
-import type { Card, ChoiceLog, Effects, GameState, PersonaId, RoleId, Side, StatKey, Stats, StyleTag, StyleTally } from './types';
+import { COMPATIBLE_PERSONAS } from './personaRules';
+import type {
+  Card, ChoiceLog, Effects, GameState, PersonaId, ResolvedPersona, RoleId, Side, StatKey, Stats, StyleTag, StyleTally,
+} from './types';
 
 /** 结局表从 endings.ts 原样转出：ENDINGS[role][stat][low|high]、getEndings(role) 等。 */
 export { ENDINGS, GENERIC_ENDINGS, ROLE_SPECIAL_ENDINGS, getEndings };
@@ -95,7 +98,8 @@ export function createGame(allCards: readonly Card[], seed?: number, role: RoleI
   if (cards.length === 0) {
     throw new Error(`createGame: 角色 ${role} 没有可用的卡牌`);
   }
-  const rand = mulberry32(seed ?? Math.floor(Math.random() * 4294967296));
+  const gameSeed = seed ?? Math.floor(Math.random() * 4294967296);
+  const rand = mulberry32(gameSeed);
   const ids = shuffle(
     cards.map((card) => card.id),
     rand,
@@ -103,6 +107,7 @@ export function createGame(allCards: readonly Card[], seed?: number, role: RoleI
   const { card, deck } = drawNext(ids, cards, null, 0);
   return {
     role,
+    seed: gameSeed,
     stats: { capital: INITIAL_STAT, risk: INITIAL_STAT, confidence: INITIAL_STAT, reputation: INITIAL_STAT },
     turn: 0,
     current: card,
@@ -130,7 +135,7 @@ export function choose(state: GameState, side: Side, allCards: readonly Card[]):
 
   const ending = findEnding({ role: state.role, stats, turn, log, tally }, cards);
   if (ending !== null) {
-    return { role: state.role, stats, turn, current: null, deck: state.deck, ending, tally, log, lastAftermath };
+    return { role: state.role, seed: state.seed, stats, turn, current: null, deck: state.deck, ending, tally, log, lastAftermath };
   }
 
   const { card, deck } = drawNext(
@@ -139,7 +144,7 @@ export function choose(state: GameState, side: Side, allCards: readonly Card[]):
     state.current.id,
     reshuffleSeed({ ...state, stats, turn }, cards.length),
   );
-  return { role: state.role, stats, turn, current: card, deck, ending: null, tally, log, lastAftermath };
+  return { role: state.role, seed: state.seed, stats, turn, current: card, deck, ending: null, tally, log, lastAftermath };
 }
 
 export function previewEffects(state: GameState, side: Side): readonly StatKey[] {
@@ -192,4 +197,67 @@ export function inferPersona(
   const top = STYLE_TAGS.filter((tag) => tally[tag] === max);
   const pick = top.length > 1 && log !== undefined && cards !== undefined ? mostRecentTag(top, log, cards) : null;
   return TAG_TO_PERSONA[pick ?? top[0]];
+}
+
+/** 人物卡 id → 风格标签（TAG_TO_PERSONA 的反向表，避免重复手写映射）。 */
+const PERSONA_TO_TAG: Readonly<Record<PersonaId, StyleTag>> = Object.fromEntries(
+  (Object.entries(TAG_TO_PERSONA) as [StyleTag, PersonaId][]).map(([tag, persona]) => [persona, tag]),
+) as Record<PersonaId, StyleTag>;
+
+/** FNV-1a 字符串哈希，用来把结局 id 混进种子。 */
+function hashString(text: string): number {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < text.length; i += 1) {
+    h = Math.imul(h ^ text.charCodeAt(i), 0x01000193);
+  }
+  return h >>> 0;
+}
+
+/** 在兼容表里按 1 + 标签次数 加权，用“种子 + 结局 id”的伪随机选一个。 */
+function pickSeeded(
+  compatible: readonly PersonaId[],
+  tally: StyleTally,
+  seed: number,
+  endingId: string,
+): PersonaId {
+  const mixed = (Math.imul(seed >>> 0, 0x9e3779b1) ^ hashString(endingId)) >>> 0;
+  const rand = mulberry32(mixed);
+  rand(); // 丢掉第一个数，让相近的种子更快散开
+  const weights = compatible.map((id) => 1 + tally[PERSONA_TO_TAG[id]]);
+  const total = weights.reduce((sum, w) => sum + w, 0);
+  let roll = rand() * total;
+  for (let i = 0; i < compatible.length; i += 1) {
+    roll -= weights[i];
+    if (roll < 0) return compatible[i];
+  }
+  return compatible[compatible.length - 1];
+}
+
+/**
+ * 结局页用的最终交易人格（规则见 types.ts 的 ResolvedPersona）：
+ * 标签推断的人格在结局兼容表里就直接用，否则在兼容表里按种子做加权伪随机。纯函数、同一局结果不变。
+ */
+export function resolvePersona(state: GameState, cards: readonly Card[]): ResolvedPersona {
+  if (state.ending === null) {
+    throw new Error('resolvePersona: 游戏还没结束（state.ending 为空）');
+  }
+  const compatible = COMPATIBLE_PERSONAS(state.ending.id);
+  const rawId = inferPersona(state.tally, state.log, cards);
+  const fromTally = compatible.includes(rawId);
+  const id = fromTally ? rawId : pickSeeded(compatible, state.tally, state.seed, state.ending.id);
+
+  const counts = STYLE_TAGS.map((tag) => state.tally[tag]);
+  const max = Math.max(...counts);
+  const count = state.tally[PERSONA_TO_TAG[id]];
+  const isTop = count > 0 && count === max;
+  const isTied = isTop && counts.filter((n) => n === max).length > 1;
+  return {
+    id,
+    rawId,
+    source: fromTally ? 'tally' : 'seeded',
+    count,
+    total: counts.reduce((sum, n) => sum + n, 0),
+    isTop,
+    isTied,
+  };
 }

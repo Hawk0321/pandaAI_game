@@ -117,6 +117,11 @@ export interface ChoiceLog {
 export interface GameState {
   /** 当前扮演的角色。 */
   readonly role: RoleId;
+  /**
+   * 本局种子（整数）。createGame 传入的 seed；没传就在创建时随机生成一个并存在这里。
+   * 结局页的“伪随机选人格”用它做种子，所以同一局重复渲染、刷新结局页结果必须一致。
+   */
+  readonly seed: number;
   readonly stats: Stats;
   /** 已经做过的决定数（回合数）。 */
   readonly turn: number;
@@ -151,6 +156,34 @@ export interface Engine {
   choose(state: GameState, side: Side, cards: readonly Card[]): GameState;
   previewEffects(state: GameState, side: Side): readonly StatKey[];
   inferPersona(tally: StyleTally): PersonaId;
+  /** 结局页用：state.ending 必须非空，否则抛错。纯函数、确定性。 */
+  resolvePersona(state: GameState, cards: readonly Card[]): ResolvedPersona;
+}
+
+/**
+ * 结局页最终展示的交易人格，由 resolvePersona(state, cards) 给出。
+ *
+ * 规则（“死逻辑 + 伪随机”）：
+ *  1. rawId = 只按风格标签推断的人格（即 inferPersona 的结果）。
+ *  2. 每个结局有一张“兼容人格表”（personaRules.ts）：这个结局下哪些人格说得通。
+ *  3. rawId 在兼容表里 → 直接采用，source = 'tally'。
+ *  4. 不在（与结局矛盾）→ 在兼容表里用本局种子做伪随机加权选择，source = 'seeded'；
+ *     权重偏向本局标签次数更多的人格。同一局永远得到同一结果。
+ *  所以：最终 id 永远属于该结局的兼容表。
+ */
+export interface ResolvedPersona {
+  readonly id: PersonaId;
+  /** 仅按标签推断的人格，可能与结局矛盾。界面一般不展示，仅用于文案判断。 */
+  readonly rawId: PersonaId;
+  readonly source: 'tally' | 'seeded';
+  /** 最终人格对应风格标签在本局出现的次数（真实计数，可以为 0）。 */
+  readonly count: number;
+  /** 本局全部风格标签总数。 */
+  readonly total: number;
+  /** 最终人格对应标签是否为本局次数最多（含并列）且 count > 0。 */
+  readonly isTop: boolean;
+  /** 最终人格对应标签是否与别的标签并列最高。 */
+  readonly isTied: boolean;
 }
 
 /** 人物卡 id，和 frontend/src/profile/persona.ts 的 PersonaId 一致。 */

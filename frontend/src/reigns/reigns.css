@@ -123,6 +123,9 @@
 .reigns-traits { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
 .reigns-trait { padding: 2px 10px; font-size: 12px; color: var(--rg-persona); border: 1px solid var(--rg-persona); border-radius: 999px; }
 .reigns-why { margin: 4px 0 0; font-size: 14px; line-height: 1.55; color: var(--rg-text); }
+.reigns-chips { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.reigns-chip { padding: 2px 10px; font-size: 11px; color: var(--rg-persona); border: 1px solid var(--rg-persona); border-radius: 999px; opacity: .85; }
+.reigns-chip-note { opacity: 1; font-weight: 600; }
 .reigns-sides { width: 100%; margin-top: 2px; text-align: left; }
 .reigns-sides-summary { min-height: 44px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: var(--rg-persona); cursor: pointer; border-radius: 8px; }
 .reigns-sides-summary:focus-visible { outline: 2px solid var(--gold-soft, #f7d98f); outline-offset: 2px; }

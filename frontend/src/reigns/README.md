@@ -35,7 +35,28 @@ npx tsc --noEmit            # 类型检查
 
 ## 动态人物卡
 
-`PersonaReveal.tsx` 用 `inferPersona(tally)` 得到 9 张人物卡之一，所有角色都展示。插画来自 main 分支 shell 模块（#17）：9 张静态 webp，由 `shell/PersonaArt.tsx` 用 WebGL 着色器实时做呼吸、摇摆和光点，没有 gif 或视频。
+`PersonaReveal.tsx` 用 `resolvePersona(state, cards)` 得到最终展示的人格，所有角色都展示。
+
+**人格与结局的适配规则**（`personaRules.ts` + `engine.resolvePersona`）：
+1. 按本局风格标签累计推断的人格（`inferPersona`），如果与结局兼容，就直接采用（source='tally'）。
+2. 如果不兼容（例如标签推断是"冲锋蛮牛"，结局却是"清盘通知"），就在该结局的兼容人格表里用本局种子伪随机选一个（source='seeded'），权重偏向本局标签次数更多的人格。同一局永远得到同一结果。
+
+**"为什么是你"文案与依据胶囊**（`personaCopy.ts`，`buildWhyLine` / `buildEvidenceChips`，死逻辑、不随机）：
+
+| 情况 | 文案 | 胶囊 |
+|---|---|---|
+| tally，唯一最高且次数 >= 3 | “有 N 次选择偏X，占全部带风格倾向选择的 P%” | 次数、占比、主要线索 |
+| tally，并列最高 | “好几种风格不相上下（各 N 次）”，不写占比 | 次数、并列最高 |
+| tally，次数 1–2 或不是最高 | “选择比较分散，偏X的有 N 次”，不写占比 | 次数（最高时加主要线索） |
+| tally，次数 0（标签全空） | “选择没有明显的偏向”，不写数字 | 无 |
+| seeded，次数 > 0 | 讲结局与人格的关系，补一句“你有 N 次选择偏X”，不写占比 | 只有次数 |
+| seeded，次数 0 | 只讲结局与人格的关系，不写 0 次、0% | 无 |
+
+引流卡（`referral.ts`）用的也是同一个最终人格，所以卡片里引用的次数和人物卡一致。结局页数值摘要的“触底 / 爆满”只出现在真正到 0 / 100 的数值上；中途特殊结局和存活结局页面上不会出现。
+
+全部文案不下定性结论、不给投资建议、不出现"买入/卖出/稳赚"；各角色用中性词，不出现"股友""营业部"等只属于某个场景的词。
+
+插画来自 main 分支 shell 模块（#17）：9 张静态 webp，由 `shell/PersonaArt.tsx` 用 WebGL 着色器实时做呼吸、摇摆和光点，没有 gif 或视频。
 
 - 通过 `PERSONA_ARTWORKS`（`shell/personaArtwork.ts`）按人物卡 id 找插画，主色 `accent` 用作卡片描边和强调色；找不到插画时回退到 emoji。
 - `prefers-reduced-motion` 或 WebGL 不可用时，`PersonaArt` 自动显示静态图；卡片上另有“暂停动态 / 播放动态”按钮。
@@ -52,6 +73,7 @@ npx tsc --noEmit            # 类型检查
 | `ReignsGame.tsx` | 状态机（选角 → 游戏 → 结局）、拖动/按钮/方向键、“后来……”一行、奇遇小标签 |
 | `RoleSelect.tsx` | 选角页 |
 | `PersonaReveal.tsx` | 动态交易人格卡 |
+| `personaCopy.ts` | “为什么是你”文案与依据胶囊（`buildWhyLine` / `buildEvidenceChips`） |
 | `EndingScreen.tsx` | 结局页：结局 → 本局摘要 → 人物卡 → 再来一局 / 同角色再来 → 引流卡 → 结局图鉴 |
 | `referral.ts` | `buildReferrals()`：人物卡 + 结局 + 数值 + 风格标签 → 3 张引流卡 |
 | `reigns.css` | 样式，类名统一 `reigns-` 前缀 |
