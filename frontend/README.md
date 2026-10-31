@@ -33,11 +33,13 @@ npm run preview
 - 画像页仅展示 `analyze()` 返回的内容：人物卡、能力/偏好两栏、置信度、证据、冲突、不确定项、补充理由和第二轮 `changes`。真实画像的事件编号可展开本局动作；固定示例的编号不误关联本局同序号事件。
 - 导出仅下载 Profile JSON，不附加原始事件日志；没有把原始行为公开分享的入口。
 
-### 插画交易人格卡（2026-10-31）
+### 动态交易人格卡（2026-10-31）
 
-画像页新增八种动物人格插画、揭卡/翻面、图鉴预览和人物卡图片下载。角色名称、tagline、能力数值及卡背概览均读取 D 的 Profile；图鉴只是插画预览，不修改本局画像、不新增稀有度或人物等级。未知人物名保留原值并使用明确标记的通用插画。保存 PNG 只接收 `Profile.persona` 和插画，不包含会话 ID、原始事件、证据列表或私密行为记录；原 Profile JSON 导出继续保留。
+画像页新增九种动物人格插画、揭卡/翻面、图鉴预览和人物卡图片下载，包括「死扛刺猬」。九个 id 和名称以 #16 的 `frontend/src/profile/persona.ts` 为准（读取 `nate/recommend` 上的 `PERSONA_CARDS`，对应 #16 提交 `2f69246aff774c63c684d87626b046021358b6f5`）。既有图鉴编号保持稳定，刺猬为 09。角色名称、tagline、能力数值及卡背概览均读取 D 的 Profile；图鉴只是插画预览，不修改本局画像、不新增稀有度或人物等级。未知人物名保留原值并使用明确标记的通用插画。保存 PNG 只接收 `Profile.persona` 和插画，不包含会话 ID、原始事件、证据列表或私密行为记录；原 Profile JSON 导出继续保留。按用户要求，本轮不 rebase，也不提前修改或搬入 #16 的判定规则；等待用户通知后再集成上游，所以刺猬目前可在图鉴中预览，实际抽到哪个角色仍取决于当前 D 模块。
 
-原始插画保存在 `src/shell/assets/persona-{bull,owl,shark,turtle,crab,dolphin,fox,sloth}.webp`，每张 1024×1024、约 225–304 KB，共约 2.1 MB。网页卡片和图鉴预览使用 640×640 的 `-card.webp` 移动版本（每张约 59–64 KB，8 张共约 496 KB）；图鉴列表另用 200×200 的 `-thumb.webp` 缩略图（8 张共约 100 KB），按需懒加载。可见人物卡、用户点开的预览和保存按钮请求使用高优先级，避免后台图片占用交互带宽。原始插画保留在仓库，不必在每次预览时下载。8 张原创插画由 OpenAI 内置 image_gen 生成，统一使用深翡翠绿、古铜光和手绘桌游风格；仅做尺寸与 WebP 编码优化，没有引入外部角色 IP、付费图库或新运行依赖。图片文字由页面/Canvas 绘制，避免生成图片中的错字；减少动态偏好会关闭开卡和翻面过渡。
+原始插画保存在 `src/shell/assets/persona-{bull,owl,shark,turtle,crab,dolphin,fox,sloth,hedgehog}.webp`，每张 1024×1024、约 225–304 KB，共约 2.4 MB。网页卡片和图鉴预览使用 640×640 的 `-card.webp` 移动版本（每张不超过 64,000 字节，9 张共 559,770 字节）；图鉴列表另用 200×200 的 `-thumb.webp` 缩略图（9 张共 111,378 字节），按需懒加载。可见人物卡、用户点开的预览和保存按钮请求使用高优先级，避免后台图片占用交互带宽。原始插画保留在仓库，不必在每次预览时下载。9 张原创插画由 OpenAI 内置 image_gen 生成，统一使用深翡翠绿、古铜光和手绘桌游风格；素材仅做尺寸与 WebP 编码优化，没有引入外部角色 IP、付费图库或新运行依赖。刺猬原图 266,494 字节，移动版 63,992 字节、缩略图 11,894 字节。图片文字由页面/Canvas 绘制，避免生成图片中的错字。
+
+`PersonaArt.tsx` 使用浏览器 WebGL 在同一张轻量插画上实时绘制：按九个角色的位置分别设置身体呼吸、头部轻摆、尾巴/披风/钳子等局部位移和环境微光，画面外缘保留固定安全带。动画没有额外视频或动图下载，也不调用外部 AI 服务。最多播放当前可见的一张：翻背、打开图鉴、离屏、切到后台时停帧；图鉴只播放选中的预览。提供共用暂停/播放按钮，系统 `prefers-reduced-motion` 关闭角色动画及开卡/翻面过渡；首次 GPU 初始化也遵守这个设置。绘制上限约 24 fps、640px、设备像素比 1.5。WebGL 不支持、资源分配失败或上下文丢失时显示原静态插画。PNG 导出始终使用原静态素材。
 
 <details>
 <summary>生成提示词与素材记录</summary>
@@ -82,7 +84,8 @@ npm run preview
     "asset": "src/shell/assets/persona-owl.webp",
     "prompt": "Use case: stylized-concept. Asset type: square character illustration for a collectible trading-personality card in a mobile financial-learning game. Create one original anthropomorphic owl researcher, full character visible, expressive intelligent eyes, small round spectacles, a dark teal explorer waistcoat, studying a few unlabeled paper charts under a warm brass desk lamp. A tiny crescent moon and atmospheric observatory shapes behind it. Hand-painted premium board-game illustration, textured gouache and finely brushed details, charming and adventurous, strong appealing silhouette, polished game concept art rather than corporate clip art. Portrait-like square composition 1024 x 1024, central character fills 75% of the frame with room around ears and feet. Rich deep emerald and near-black teal backdrop, warm copper-gold highlights and restrained mint glow. Soft dramatic cinematic light. This is the Night Owl Researcher personality. NO writing, letters, numbers, logos, watermarks, UI, card border, monetary symbols, or performance claims. No existing copyrighted characters. Opaque background."
   },
-  "optimization": "PNG originals retained in Codex generated_images; project assets resized to 1024px and encoded as WebP quality 84 with bundled Sharp. No semantic content edits."
+  "hedgehog_prompt": "Create a square full-bleed fantasy storybook game illustration of a cute anthropomorphic hedgehog adventurer, the Stubborn Hedgehog trading-personality. Centered full body with a round readable silhouette, face around 40 percent height, occupying central 65 percent of frame. The hedgehog curls protectively around a battered round shield and a small leather pouch, spines raised, determined brows, gently gritted teeth, brave and comically unwilling to let go. No injury. Dark teal travel cloak and worn tan leather belt. A magical forest refuge, mossy rocks, amber lantern light, curled leaves. Exquisite hand-painted premium board-game concept art, finely brushed fur and quills, rich deep emerald shadows, antique copper and warm golden highlights, palette copper tan #C9A36B with deep brown #33291B. Warm expressive character, detailed painted materials, soft dramatic lighting, adventurous and charming. Match a cohesive collection of painted emerald-and-gold animal adventurer cards. Not flat clip art, not photorealistic. No text, numbers, logos, watermarks, UI, card border, charts, humans or fox tail. Square 1:1, opaque background.",
+  "optimization": "PNG originals retained in Codex generated_images; project originals resized to 1024px WebP quality 84. Mobile cards are 640px, quality selected to stay <=64000 bytes (hedgehog q44); thumbnails 200px. Bundled Sharp used only for resize/encoding. No semantic content edits."
 }
 ```
 
@@ -102,6 +105,8 @@ npm run test:browser
 `PANDAAI_QA_URL` 可指定预览地址；静态生产站点设置 `PANDAAI_QA_FIXTURES=0`，只验证真实数据流程，跳过 Vite 源模块拦截夹具。桌面手机模拟不替代国内手机网络实测。
 
 2026-10-31 插画卡验收：44 项单元测试和生产构建通过；本机完整回归及 Sites v4 匿名浏览器真实三条路径全部通过。新增检查覆盖八张插画及图鉴、鼠标/Enter/Space 翻面、焦点恢复、减少动态、375px/桌面布局、900×1320 PNG 下载及 Canvas 实际绘制文本隐私；图鉴预览不会改动 Profile 或日志。线上验收未注入额外优先级、未使用测试夹具、未放宽原 15 秒图片加载断言。
+
+2026-10-31 动态卡本机验收：九张图鉴均用 WebGL `readPixels` 比较实际帧，确认角色中心像素变化而画面外缘固定；暂停、翻背、离屏、模态切换、系统减少动态时停帧，预览恢复和受控上下文丢失后的静态回退通过。真实三条路线、补关、第二轮、PNG/JSON 隐私、375px/桌面和独立夹具完整回归通过。`PANDAAI_QA_CAPTURE_MOTION=1` 可附录 36 张刺猬预览画布 PNG 与时序，用于制作 3 秒动态预览，产物只存本地验收目录，不入团队仓库。
 
 ### 静态部署
 

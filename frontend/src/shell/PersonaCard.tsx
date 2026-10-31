@@ -3,14 +3,35 @@ import type { CSSProperties } from 'react';
 import type { Profile } from '../shared/protocol';
 import { PERSONA_ARTWORKS, resolvePersonaArtwork } from './personaArtwork';
 import type { PersonaArtwork } from './personaArtwork';
+import { PersonaArt } from './PersonaArt';
 import { savePersonaCard } from './savePersonaCard';
 import './persona-card.css';
 
 const confidenceNames = { low: '低置信度', medium: '中置信度', high: '高置信度' };
-// React 18 passes this standardized image hint through with lowercase spelling.
-const highImagePriority = { fetchpriority: 'high' };
+interface MotionToggleProps {
+  motionEnabled: boolean;
+  reducedMotion: boolean;
+  onToggle: () => void;
+  preview?: boolean;
+}
 
-function PersonaGallery({ currentName }: { currentName: string }) {
+function MotionToggle({ motionEnabled, reducedMotion, onToggle, preview = false }: MotionToggleProps) {
+  const label = reducedMotion ? '动态已关闭（系统设置）'
+    : motionEnabled ? (preview ? '暂停预览动态' : '暂停动态')
+      : (preview ? '播放预览动态' : '播放动态');
+  return <button type="button" className={`persona-motion-toggle${preview ? ' persona-preview-motion-toggle' : ''}`}
+    aria-pressed={motionEnabled} disabled={reducedMotion} onClick={onToggle}>{label}</button>;
+}
+
+interface PersonaGalleryProps {
+  currentName: string;
+  motionEnabled: boolean;
+  reducedMotion: boolean;
+  onToggleMotion: () => void;
+  onPreviewOpenChange: (open: boolean) => void;
+}
+
+function PersonaGallery({ currentName, motionEnabled, reducedMotion, onToggleMotion, onPreviewOpenChange }: PersonaGalleryProps) {
   const [selected, setSelected] = useState<PersonaArtwork | null>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -18,20 +39,32 @@ function PersonaGallery({ currentName }: { currentName: string }) {
     if (selected && dialog.current && !dialog.current.open) dialog.current.showModal();
     if (!selected && dialog.current?.open) dialog.current.close();
   }, [selected]);
+  useEffect(() => () => onPreviewOpenChange(false), [onPreviewOpenChange]);
+
+  function openPreview(artwork: PersonaArtwork) {
+    onPreviewOpenChange(true);
+    setSelected(artwork);
+  }
+
+  function closePreview() {
+    setSelected(null);
+    onPreviewOpenChange(false);
+  }
 
   return <section className="persona-gallery" aria-labelledby="persona-gallery-title">
     <div className="persona-gallery-heading"><h2 id="persona-gallery-title">交易人格图鉴</h2><p>看看别的角色，预览不会改变本局画像。</p></div>
-    <div className="persona-gallery-strip" aria-label="八种交易人格插画">
-      {PERSONA_ARTWORKS.map(artwork => <button type="button" className="persona-gallery-item" key={artwork.id} onClick={() => setSelected(artwork)} aria-label={`预览${artwork.name}插画`}>
+    <div className="persona-gallery-strip" aria-label={`${PERSONA_ARTWORKS.length}种交易人格插画`}>
+      {PERSONA_ARTWORKS.map(artwork => <button type="button" className="persona-gallery-item" key={artwork.id} onClick={() => openPreview(artwork)} aria-label={`预览${artwork.name}插画`}>
         <span className="persona-gallery-image"><img src={artwork.thumbnail} alt="" width="200" height="200" loading="lazy" decoding="async" /></span>
         <span>{artwork.name}</span><small>{currentName === artwork.name ? '本局角色' : `图鉴 ${artwork.number}`}</small>
       </button>)}
     </div>
-    <dialog className="persona-gallery-dialog" ref={dialog} aria-labelledby={titleId} onClose={() => setSelected(null)} onClick={event => { if (event.target === event.currentTarget) setSelected(null); }}>
+    <dialog className="persona-gallery-dialog" ref={dialog} aria-labelledby={titleId} onClose={closePreview} onClick={event => { if (event.target === event.currentTarget) closePreview(); }}>
       {selected && <div className="persona-preview-content" style={{ '--persona-accent': selected.accent } as CSSProperties}>
-        <div className="persona-preview-top"><span>图鉴 {selected.number} · 插画预览</span><button type="button" className="persona-close-preview" onClick={() => setSelected(null)}>关闭</button></div>
-        <img {...highImagePriority} src={selected.image} alt={`${selected.name}角色插画`} width="640" height="640" decoding="async" />
+        <div className="persona-preview-top"><span>图鉴 {selected.number} · 插画预览</span><button type="button" className="persona-close-preview" onClick={closePreview}>关闭</button></div>
+        <PersonaArt artwork={selected} alt={`${selected.name}角色插画`} active={motionEnabled} className="persona-preview-art" />
         <h2 id={titleId}>{selected.name}</h2><p>这是角色图鉴预览，不是你的本局画像。</p>
+        <MotionToggle motionEnabled={motionEnabled} reducedMotion={reducedMotion} onToggle={onToggleMotion} preview />
       </div>}
     </dialog>
   </section>;
@@ -42,12 +75,25 @@ export function PersonaCard({ profile }: { profile: Profile }) {
   const [flipped, setFlipped] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState('');
+  const [motionRequested, setMotionRequested] = useState(true);
+  const [reducedMotion, setReducedMotion] = useState(() => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const flipButton = useRef<HTMLButtonElement>(null);
   const cardId = useId();
   const abilities = profile.dimensions.filter(dimension => dimension.group === 'ability');
   const preferences = profile.dimensions.filter(dimension => dimension.group === 'preference');
 
   useEffect(() => { setFlipped(false); setSaveStatus(''); }, [profile.session_id, profile.round, profile.persona.name]);
+  useEffect(() => {
+    const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const updatePreference = () => setReducedMotion(preference.matches);
+    updatePreference();
+    preference.addEventListener('change', updatePreference);
+    return () => preference.removeEventListener('change', updatePreference);
+  }, []);
+
+  const motionEnabled = motionRequested && !reducedMotion;
+  const toggleMotion = () => setMotionRequested(value => !value);
 
   function turnCard(back: boolean) {
     setFlipped(back);
@@ -74,7 +120,7 @@ export function PersonaCard({ profile }: { profile: Profile }) {
             <article className="persona-card-face persona-card-front" aria-hidden={flipped}>
               <div className="persona-card-topline"><span>PANDAAI</span><span>{matched ? `图鉴 ${artwork.number}` : '通用插画'}</span></div>
               <button type="button" className="persona-art-turn" onClick={() => turnCard(true)} tabIndex={flipped ? -1 : 0} aria-label={`翻到${profile.persona.name}人物卡背面`}>
-                <img className="persona-card-art" {...highImagePriority} src={artwork.image} alt={matched ? `${profile.persona.name}角色插画` : '通用交易角色插画'} width="640" height="640" decoding="async" />
+                <PersonaArt artwork={artwork} alt={matched ? `${profile.persona.name}角色插画` : '通用交易角色插画'} active={!flipped && !previewOpen && motionEnabled} className="persona-card-art" />
                 <span className="persona-art-turn-hint">点击插画翻面 ↗</span>
               </button>
               <div className="persona-card-title"><p>本局交易人格</p><h2 id="persona-name">{profile.persona.name}</h2><p className="persona-card-tagline">{profile.persona.tagline}</p></div>
@@ -90,7 +136,7 @@ export function PersonaCard({ profile }: { profile: Profile }) {
             </article>
           </div>
         </div>
-        <div className="persona-card-controls"><button ref={flipButton} type="button" className="persona-flip-button" aria-pressed={flipped} aria-controls={cardId} onClick={() => setFlipped(value => !value)}>{flipped ? '翻回正面' : '翻面看画像'}</button><button type="button" className="persona-save-button" disabled={saving} onClick={() => void save()}>{saving ? '正在制作…' : '保存人物卡图片'}</button></div>
+        <div className="persona-card-controls"><button ref={flipButton} type="button" className="persona-flip-button" aria-pressed={flipped} aria-controls={cardId} onClick={() => setFlipped(value => !value)}>{flipped ? '翻回正面' : '翻面看画像'}</button><button type="button" className="persona-save-button" disabled={saving} onClick={() => void save()}>{saving ? '正在制作…' : '保存人物卡图片'}</button><MotionToggle motionEnabled={motionEnabled} reducedMotion={reducedMotion} onToggle={toggleMotion} /></div>
         <p className="persona-save-status" role="status" aria-live="polite">{saveStatus || '保存图片只含人物卡，不含私密行为记录。'}</p>
       </div>
       <aside className="persona-card-readout" aria-labelledby="persona-readout-title"><p className="persona-readout-kicker">选择留下的线索</p><h2 id="persona-readout-title">角色有个性，<br />判断有依据。</h2><p>这是本局的能力观察。翻到卡背看概览，往下查看具体证据。</p>
@@ -98,6 +144,7 @@ export function PersonaCard({ profile }: { profile: Profile }) {
         <p className="persona-readout-note">数字来自画像维度，不是角色等级或收益排名。</p>
       </aside>
     </div>
-    <PersonaGallery currentName={profile.persona.name} />
+    <PersonaGallery key={`${profile.session_id}:${profile.round}`} currentName={profile.persona.name} motionEnabled={motionEnabled} reducedMotion={reducedMotion}
+      onToggleMotion={toggleMotion} onPreviewOpenChange={setPreviewOpen} />
   </section>;
 }

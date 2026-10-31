@@ -3,12 +3,14 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 
 // Browser QA uses an isolated local profile. Test fixtures never change published data.
 const baseUrl = new URL(process.env.PANDAAI_QA_URL || 'http://127.0.0.1:5173/');
 const storageKey = 'pandaai:c-shell:v1';
 const artifactDir = process.env.PANDAAI_QA_ARTIFACTS || path.join(os.tmpdir(), 'pandaai-shell-browser-evidence');
 const runFixtures = process.env.PANDAAI_QA_FIXTURES !== '0';
+const captureMotionFrames = process.env.PANDAAI_QA_CAPTURE_MOTION === '1';
 const temporaryRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'pandaai-shell-browser-'));
 const downloadDir = path.join(temporaryRoot, 'downloads');
 const browserProfile = path.join(temporaryRoot, 'profile');
@@ -24,6 +26,7 @@ const fixtureFailures = [];
 const screenshots = [];
 const checks = [];
 const artworkNetwork = new Map();
+const motionEvidence = [];
 let browser;
 let page;
 let child;
@@ -178,9 +181,137 @@ async function settleCard() {
   await evaluate("Promise.all(document.querySelector('.persona-trading-card').getAnimations({subtree:true}).map(animation=>animation.finished.catch(()=>{})))");
 }
 
+const mainArtSurface = '.persona-card-front .persona-art-surface';
+const previewArtSurface = '.persona-gallery-dialog[open] .persona-preview-content .persona-art-surface';
+
+async function motionSnapshot(selector) {
+  return evaluate(`(()=>{
+    const surface=document.querySelector(${JSON.stringify(selector)});
+    if(!surface)throw new Error('Motion surface not found');
+    const canvas=surface.querySelector('canvas.persona-motion-canvas');
+    const gl=canvas?.getContext('webgl');
+    if(!gl||gl.isContextLost())throw new Error('Motion canvas has no usable WebGL context');
+    const width=gl.drawingBufferWidth,height=gl.drawingBufferHeight;
+    const pixels=new Uint8Array(width*height*4);
+    gl.readPixels(0,0,width,height,gl.RGBA,gl.UNSIGNED_BYTE,pixels);
+    let hash=2166136261,centerHash=2166136261,edgeHash=2166136261,coloredPixels=0,alpha=0;
+    const edgeBand=Math.max(1,Math.floor(Math.min(width,height)*.015));
+    for(let index=0;index<pixels.length;index+=4){
+      const pixel=index/4,x=pixel%width,y=Math.floor(pixel/width);
+      const center=x>width*.2&&x<width*.8&&y>height*.2&&y<height*.8;
+      const edge=x<edgeBand||x>=width-edgeBand||y<edgeBand||y>=height-edgeBand;
+      if(pixels[index]||pixels[index+1]||pixels[index+2])coloredPixels++;
+      alpha+=pixels[index+3];
+      for(let channel=0;channel<4;channel++){
+        hash=Math.imul(hash^pixels[index+channel],16777619);
+        if(center)centerHash=Math.imul(centerHash^pixels[index+channel],16777619);
+        if(edge)edgeHash=Math.imul(edgeHash^pixels[index+channel],16777619);
+      }
+    }
+    return {state:surface.dataset.motionState,frame:Number(surface.dataset.motionFrame),width,height,hash:hash>>>0,centerHash:centerHash>>>0,edgeHash:edgeHash>>>0,coloredPixels,alpha,hidden:canvas.hidden};
+  })()`);
+}
+
+async function expectMotionPlaying(selector, label) {
+  await waitFor(`document.querySelector(${JSON.stringify(selector)})?.dataset.motionState === 'playing' && Number(document.querySelector(${JSON.stringify(selector)}).dataset.motionFrame) > 0`, `${label}: playing renderer`);
+  const before = await motionSnapshot(selector);
+  await delay(300);
+  const after = await motionSnapshot(selector);
+  assert.ok(before.coloredPixels > before.width * before.height / 10 && before.alpha > 0, `${label}: real illustration pixels are drawn`);
+  assert.ok(after.frame > before.frame, `${label}: draw-frame counter advances`);
+  assert.notEqual(after.hash, before.hash, `${label}: actual WebGL pixels change, not only attributes`);
+  assert.notEqual(after.centerHash, before.centerHash, `${label}: character-region pixels move`);
+  assert.equal(after.edgeHash, before.edgeHash, `${label}: outer illustration edges stay fixed`);
+  motionEvidence.push({ label, expected: 'playing', before, after });
+  return after;
+}
+
+async function expectMotionFrozen(selector, label, hidden = false) {
+  await waitFor(`document.querySelector(${JSON.stringify(selector)})?.dataset.motionState === 'paused'`, `${label}: paused renderer`);
+  await delay(100);
+  const before = await motionSnapshot(selector);
+  await delay(300);
+  const after = await motionSnapshot(selector);
+  assert.equal(after.frame, before.frame, `${label}: frame counter stops`);
+  assert.equal(after.hash, before.hash, `${label}: canvas pixels remain frozen`);
+  if (hidden) {
+    assert.equal(after.hidden, true, `${label}: motion canvas is hidden`);
+    assert.equal(await evaluate(`getComputedStyle(document.querySelector(${JSON.stringify(`${selector} canvas`)})).display`), 'none', `${label}: hidden canvas is not displayed`);
+  }
+  motionEvidence.push({ label, expected: 'paused', before, after });
+  return after;
+}
+
+async function showMainArt() {
+  await evaluate(`document.querySelector(${JSON.stringify(mainArtSurface)}).scrollIntoView({block:'center',inline:'center'})`);
+  await settleCard();
+}
+
+async function previewPauseChecks() {
+  await expectMotionFrozen(mainArtSurface, 'main card while modal is open');
+  await expectMotionPlaying(previewArtSurface, 'active modal illustration');
+  await mouseClick('.persona-gallery-dialog[open] .persona-preview-motion-toggle');
+  await expectMotionFrozen(previewArtSurface, 'preview pause control');
+  await expectMotionFrozen(mainArtSurface, 'main card remains paused with preview paused');
+  await mouseClick('.persona-gallery-dialog[open] .persona-preview-motion-toggle');
+  await expectMotionPlaying(previewArtSurface, 'preview play control');
+  await expectMotionFrozen(mainArtSurface, 'main card stays paused with active preview');
+}
+
+async function modalPausesVisibleCard() {
+  await showMainArt();
+  await expectMotionPlaying(mainArtSurface, 'main card before modal');
+  // Keep the main illustration in view to distinguish modal pausing from offscreen pausing.
+  await evaluate("(()=>{const button=document.querySelector('.persona-gallery-item');button.focus({preventScroll:true});button.click();return true})()");
+  await waitFor("document.querySelector('.persona-gallery-dialog[open]')", 'controlled modal with main card in view');
+  assert.equal(await evaluate(`(()=>{const rect=document.querySelector(${JSON.stringify(mainArtSurface)}).getBoundingClientRect();return rect.bottom>0&&rect.top<innerHeight})()`), true);
+  await waitFor("document.querySelector('.persona-gallery-dialog[open] .persona-art-surface > img')?.complete && document.querySelector('.persona-gallery-dialog[open] .persona-art-surface > img').naturalWidth>0", 'controlled modal artwork loaded');
+  await previewPauseChecks();
+  await keyPress('Escape');
+  await waitFor("!document.querySelector('.persona-gallery-dialog[open]')", 'controlled modal closed');
+  await showMainArt();
+  await expectMotionPlaying(mainArtSurface, 'main card resumes after modal closes');
+}
+
+async function recordMotion(selector, artworkId) {
+  if (!captureMotionFrames) return;
+  const directory = path.join(artifactDir, 'motion-frames');
+  await fs.mkdir(directory, { recursive: true });
+  const started = performance.now();
+  const frames = [];
+  for (let index = 0; index < 36; index++) {
+    await delay(Math.max(0, index * 1000 / 12 - (performance.now() - started)));
+    const result = await evaluate(`(()=>{const surface=document.querySelector(${JSON.stringify(selector)});const canvas=surface.querySelector('canvas');return {image:canvas.toDataURL('image/png'),frame:Number(surface.dataset.motionFrame),state:surface.dataset.motionState}})()`);
+    assert.equal(result.state, 'playing', 'recording captures a playing artwork');
+    const bytes = Buffer.from(result.image.split(',')[1], 'base64');
+    const filename = `persona-${artworkId}-${String(index + 1).padStart(3, '0')}.png`;
+    await fs.writeFile(path.join(directory, filename), bytes);
+    frames.push({ filename, capturedAfterMs: Math.round(performance.now() - started), drawFrame: result.frame, sha256: createHash('sha256').update(bytes).digest('hex') });
+  }
+  assert.ok(new Set(frames.map(frame => frame.sha256)).size > 1, 'recorded PNGs contain changing pixels');
+  const manifest = path.join(directory, 'frames.json');
+  await fs.writeFile(manifest, JSON.stringify({ artworkId, targetFps: 12, targetDurationSeconds: 3, frames }, null, 2));
+  console.log(JSON.stringify({ motionRecording: manifest, frames: frames.length, distinctPixelFrames: new Set(frames.map(frame => frame.sha256)).size }));
+}
+
+async function verifyContextLossFallback() {
+  const injected = await evaluate(`(()=>{const surface=document.querySelector(${JSON.stringify(previewArtSurface)});const gl=surface.querySelector('canvas').getContext('webgl');const extension=gl?.getExtension('WEBGL_lose_context');if(!extension)return false;extension.loseContext();return true})()`);
+  assert.equal(injected, true, 'test browser exposes controlled WebGL context loss');
+  await waitFor(`document.querySelector(${JSON.stringify(previewArtSurface)}).dataset.motionState==='fallback'`, 'context-loss static fallback');
+  const before = await evaluate(`(()=>{const surface=document.querySelector(${JSON.stringify(previewArtSurface)});const canvas=surface.querySelector('canvas');const image=surface.querySelector('img');return {frame:Number(surface.dataset.motionFrame),hidden:canvas.hidden,display:getComputedStyle(canvas).display,imageLoaded:image.complete&&image.naturalWidth>0,imageVisible:getComputedStyle(image).visibility==='visible'&&Number(getComputedStyle(image).opacity)>0}})()`);
+  assert.equal(before.hidden, true);
+  assert.equal(before.display, 'none');
+  assert.equal(before.imageLoaded && before.imageVisible, true, 'fallback retains the visible static illustration');
+  await delay(300);
+  assert.equal(await evaluate(`Number(document.querySelector(${JSON.stringify(previewArtSurface)}).dataset.motionFrame)`), before.frame, 'lost context does not continue drawing');
+  motionEvidence.push({ label: 'controlled context loss', expected: 'fallback', ...before });
+  await screenshotViewport('persona-motion-context-loss-fallback.png');
+}
+
 const personaArtworks = [
   ['bull', '冲锋蛮牛'], ['owl', '夜猫研究员'], ['shark', '深海猎鲨'], ['turtle', '稳健老龟'],
   ['crab', '逆行螃蟹'], ['dolphin', '冲浪海豚'], ['fox', '灵活狐狸'], ['sloth', '树懒观察员'],
+  ['hedgehog', '死扛刺猬'],
 ];
 
 async function personaCardChecks(profile, interactions = false) {
@@ -194,6 +325,19 @@ async function personaCardChecks(profile, interactions = false) {
   if (!interactions) return;
   const before = await saved();
   await settleCard();
+  await showMainArt();
+  await expectMotionPlaying(mainArtSurface, 'main card initial animation');
+  await mouseClick('.persona-card-controls .persona-motion-toggle');
+  await showMainArt();
+  await expectMotionFrozen(mainArtSurface, 'main pause control');
+  await mouseClick('.persona-card-controls .persona-motion-toggle');
+  await showMainArt();
+  await expectMotionPlaying(mainArtSurface, 'main play control');
+  await evaluate('scrollTo(0,document.documentElement.scrollHeight)');
+  await waitFor(`document.querySelector(${JSON.stringify(mainArtSurface)}).getBoundingClientRect().bottom<=0`, 'main card moved outside the viewport');
+  await expectMotionFrozen(mainArtSurface, 'offscreen main card');
+  await showMainArt();
+  await expectMotionPlaying(mainArtSurface, 'main card resumes after scrolling into view');
   await screenshotElement('.persona-card-column', 'persona-card-front-mobile.png');
 
   await mouseClick('.persona-art-turn');
@@ -206,52 +350,68 @@ async function personaCardChecks(profile, interactions = false) {
   assert.equal(await evaluate("document.querySelector('.persona-back-return').tabIndex"), 0);
   assert.equal(await evaluate("document.querySelector('.persona-card-back-content').tabIndex"), 0, 'visible scrolling back face can receive keyboard focus');
   await settleCard();
+  await expectMotionFrozen(mainArtSurface, 'flipped card');
   await checkWidth('persona card back at 375px');
   await screenshotElement('.persona-card-column', 'persona-card-back-mobile.png');
   await evaluate("document.querySelector('.persona-flip-button').focus()");
   await keyPress('Enter');
   await waitFor("!document.querySelector('.persona-trading-card.is-flipped')", 'Enter flips to front');
   await settleCard();
+  await showMainArt();
+  await expectMotionPlaying(mainArtSurface, 'card after keyboard return to front');
   await keyPress(' ');
   await waitFor("document.querySelector('.persona-trading-card.is-flipped')", 'Space flips to back');
   await settleCard();
+  await expectMotionFrozen(mainArtSurface, 'keyboard-flipped card');
   await mouseClick('.persona-back-return');
   await waitFor("!document.querySelector('.persona-trading-card.is-flipped')", 'back button returns to front');
   assert.equal(await evaluate("document.activeElement === document.querySelector('.persona-flip-button')"), true, 'back return moves focus outside the aria-hidden back face');
   assert.equal(await evaluate("document.querySelector('.persona-card-back-content').tabIndex"), -1, 'hidden back face is excluded from keyboard navigation');
   await settleCard();
+  await showMainArt();
+  await expectMotionPlaying(mainArtSurface, 'card after back-return control');
 
   await page.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
   assert.equal(await evaluate("matchMedia('(prefers-reduced-motion:reduce)').matches"), true);
-  const motion = await evaluate("({animation:getComputedStyle(document.querySelector('.persona-trading-card')).animationName,rotor:getComputedStyle(document.querySelector('.persona-card-rotor')).transitionDuration,art:getComputedStyle(document.querySelector('.persona-card-art')).transitionDuration})");
+  const motion = await evaluate("({animation:getComputedStyle(document.querySelector('.persona-trading-card')).animationName,rotor:getComputedStyle(document.querySelector('.persona-card-rotor')).transitionDuration,art:getComputedStyle(document.querySelector('.persona-card-front .persona-art-surface')).transitionDuration})");
   assert.equal(motion.animation, 'none');
   assert.equal(motion.rotor, '0s');
   assert.equal(motion.art, '0s');
+  assert.equal(await evaluate("document.querySelector('.persona-card-controls .persona-motion-toggle').disabled"), true, 'system reduced motion disables the play control');
+  await expectMotionFrozen(mainArtSurface, 'system reduced motion', true);
   await evaluate("document.querySelector('.persona-flip-button').focus()");
   await keyPress(' ');
   await waitFor("document.querySelector('.persona-trading-card.is-flipped')", 'reduced-motion flip still works');
   await keyPress('Enter');
   await waitFor("!document.querySelector('.persona-trading-card.is-flipped')", 'reduced-motion return still works');
   await page.send('Emulation.setEmulatedMedia', { features: [] });
+  await showMainArt();
+  await expectMotionPlaying(mainArtSurface, 'card resumes after reduced-motion preference is removed');
+  await modalPausesVisibleCard();
 
-  assert.equal(await evaluate("document.querySelectorAll('.persona-gallery-item').length"), 8);
+  assert.equal(await evaluate("document.querySelectorAll('.persona-gallery-item').length"), personaArtworks.length);
   for (const [index, [id, name]] of personaArtworks.entries()) {
     const selector = `.persona-gallery-item[aria-label="预览${name}插画"]`;
     await mouseClick(selector);
     await waitFor(`document.querySelector('.persona-gallery-dialog[open] .persona-preview-content h2')?.textContent === ${JSON.stringify(name)}`, `${name} gallery dialog`);
-    await waitFor("document.querySelector('.persona-gallery-dialog[open] .persona-preview-content > img')?.complete && document.querySelector('.persona-gallery-dialog[open] .persona-preview-content > img').naturalWidth > 0", `${name} full artwork loaded`);
-    assert.equal(await evaluate(`document.querySelector('.persona-gallery-dialog[open] .persona-preview-content > img').currentSrc.includes(${JSON.stringify(`persona-${id}`)})`), true);
+    await waitFor("document.querySelector('.persona-gallery-dialog[open] .persona-art-surface > img')?.complete && document.querySelector('.persona-gallery-dialog[open] .persona-art-surface > img').naturalWidth > 0", `${name} full artwork loaded`);
+    assert.equal(await evaluate(`document.querySelector('.persona-gallery-dialog[open] .persona-art-surface > img').currentSrc.includes(${JSON.stringify(`persona-${id}`)})`), true);
+    assert.deepEqual(await evaluate("(()=>{const image=document.querySelector('.persona-gallery-dialog[open] .persona-art-surface > img');return [image.naturalWidth,image.naturalHeight]})()"), [640, 640]);
+    await expectMotionPlaying(previewArtSurface, `${name} preview animation`);
+    await expectMotionFrozen(mainArtSurface, `${name} modal pauses the main card`);
+    if (id === 'hedgehog') await recordMotion(previewArtSurface, id);
     assert.equal(await evaluate("document.querySelector('.persona-gallery-dialog[open]').contains(document.activeElement)"), true, 'modal receives keyboard focus');
     assert.equal(await evaluate("(()=>{const rect=document.querySelector('.persona-gallery-dialog[open]').getBoundingClientRect();return rect.left>=0&&rect.right<=innerWidth&&rect.top>=0&&rect.bottom<=innerHeight})()"), true, 'gallery preview fits the mobile viewport');
     await checkWidth(`${name} gallery at 375px`);
     if (index === 0) await screenshotViewport('persona-card-gallery-preview-mobile.png');
+    if (id === 'hedgehog') await verifyContextLossFallback();
     if (index === 0) await keyPress('Escape');
     else await mouseClick('.persona-gallery-dialog[open] .persona-close-preview');
     await waitFor("!document.querySelector('.persona-gallery-dialog[open]')", `${name} gallery closed`);
     assert.equal(await evaluate(`document.activeElement === document.querySelector(${JSON.stringify(selector)})`), true, 'modal restores focus to its gallery button');
   }
-  assert.equal(await evaluate("[...document.querySelectorAll('.persona-gallery-image img')].every(image=>image.complete&&image.naturalWidth>0)"), true, 'all eight thumbnails loaded');
-  assert.equal(await evaluate("new Set([...document.querySelectorAll('.persona-gallery-image img')].map(image=>image.currentSrc)).size"), 8, 'all eight roles have distinct artwork resources');
+  assert.equal(await evaluate("[...document.querySelectorAll('.persona-gallery-image img')].every(image=>image.complete&&image.naturalWidth>0)"), true, 'all nine thumbnails loaded');
+  assert.equal(await evaluate("new Set([...document.querySelectorAll('.persona-gallery-image img')].map(image=>image.currentSrc)).size"), personaArtworks.length, 'all nine roles have distinct artwork resources');
   await evaluate("document.querySelector('.persona-gallery-strip').scrollLeft=0");
   await screenshotElement('.persona-gallery', 'persona-card-gallery-mobile.png');
   assert.deepEqual((await saved()).profile, before.profile, 'gallery and flip actions do not mutate the Profile');
@@ -288,7 +448,7 @@ async function personaCardChecks(profile, interactions = false) {
   screenshots.push(preservedExport);
   assert.deepEqual((await saved()).profile, before.profile, 'saving a card does not mutate its Profile');
   assert.deepEqual((await saved()).events, before.events, 'saving a card does not append raw behavior events');
-  checks.push('persona cards: artwork matches computed persona; mouse/Enter/Space flip, aria states, reduced motion, all eight distinct gallery images, read-only previews, 375px layout', 'persona PNG: valid 900×1320 download; captured canvas text contains only public card labels/name/tagline and no session, evidence, or raw behavior');
+  checks.push('nine persona artworks: real WebGL center pixels change while outer edges stay fixed; frames and pixels freeze on pause, flip, offscreen, modal, and reduced motion', 'persona cards: artwork matches computed persona; mouse/Enter/Space flip, aria states, all nine distinct gallery images, read-only previews, 375px layout', 'persona PNG: valid 900×1320 download; captured canvas text contains only public card labels/name/tagline and no session, evidence, or raw behavior');
 }
 async function cleanReload() {
   await evaluate(`(()=>{for(const key of Object.keys(localStorage))if(key.startsWith(${JSON.stringify(storageKey)}))localStorage.removeItem(key);return true})()`);
@@ -639,6 +799,7 @@ try {
   if (runFixtures) await fullProtocolFixture();
   assert.deepEqual(exceptions, [], 'no uncaught browser runtime exceptions');
   assert.deepEqual(fixtureFailures, [], 'no request-interception errors');
+  await fs.writeFile(path.join(artifactDir, 'persona-motion-verification.json'), JSON.stringify(motionEvidence, null, 2));
   console.log(JSON.stringify({ ok: true, url: baseUrl.href, checks, screenshots, limitation: 'Desktop browser mobile emulation; domestic mobile-network verification still requires a real device.' }, null, 2));
 } catch (cause) {
   try { if (page) await screenshot('pandaai-shell-failure.png'); } catch {}
@@ -650,7 +811,10 @@ try {
   }));
   const networkArtifact = path.join(artifactDir, 'persona-network-failure.json');
   await fs.writeFile(networkArtifact, JSON.stringify(imageRequests, null, 2));
+  let motionStates = [];
+  try { if (page) motionStates = await evaluate("[...document.querySelectorAll('.persona-art-surface')].map(surface=>({state:surface.dataset.motionState,frame:surface.dataset.motionFrame,canvasHidden:surface.querySelector('canvas')?.hidden,width:surface.querySelector('canvas')?.width,height:surface.querySelector('canvas')?.height}))"); } catch {}
   console.error(JSON.stringify({ ok: false, message: cause.message, stack: cause.stack, exceptions, fixtureFailures, screenshots, networkArtifact,
+    motionStates, motionEvidence,
     artworkNetwork: imageRequests.map(({ url, status, protocol, responseAfterMs, finishedAfterMs, encodedBytes, receivedEncodedBytes, errorText, dataEvents }) => ({ url, status, protocol, responseAfterMs, finishedAfterMs, encodedBytes, receivedEncodedBytes, errorText, dataChunks: dataEvents.length })),
     browserStderr: stderr }, null, 2));
   process.exitCode = 1;
