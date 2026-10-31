@@ -18,6 +18,7 @@ export async function savePersonaCard(persona: Profile['persona'], artwork: Pers
   await document.fonts.ready;
   const image = new Image();
   image.decoding = 'async';
+  image.fetchPriority = 'high';
   const loaded = new Promise<void>((resolve, reject) => {
     image.onload = () => resolve();
     image.onerror = () => reject(new Error('人物插画暂时无法加载，请稍后再保存。'));
