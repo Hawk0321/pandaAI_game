@@ -130,3 +130,14 @@ QuantSkills（[quantskills.ai](https://quantskills.ai)，GitHub [quantskills](ht
 - ✅ **人物卡 → 策略卡**：已实现，对应表见 [personas.md](personas.md) 第 4 节。
 - **关卡 → 同款工具**：玩家在某关输了，推荐那关用到的同类工具，例如沪金关卡推 `skill-futures-deepview-analyst`、形态关推 `skill-xingtai-catcher`。
 - **对手 → Qube 模板**：揭晓页的双均线、海龟、均值回归三个对手，正好对应 Qube 首页模板，可以加"一键用这个对手的规则回测"。
+
+## 4. 人格 → Qube 策略提示词（2026-11-01）
+
+滑牌结局页在 AI 短评后新增“人格 → 策略”卡：15 种人格分别给出一种可验证的策略思路、
+一句匹配理由和一段专属回测提示词。按钮打开
+`https://www.pandaaiquant.com/agent_quant/chat?message=<URL编码提示词>`，该参数经 Qube
+前端路由源码确认可预填首条消息；玩家确认后才生成回测，不自动执行交易。
+
+提示词只描述研究规则，如双均线、ATR 止损、均值回归、ETF 风险预算和多因子样本外，
+不承诺收益，不代替投资建议。AI 不负责选择策略，策略映射在 `strategyMatch.ts` 固定展示，
+与行为人格使用同一份本地证据，玩家可复制提示词自行修改。

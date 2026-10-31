@@ -6,7 +6,8 @@
 import type { Profile } from '../shared/protocol';
 import type { Feature, Features } from './features';
 
-export type PersonaId = 'sloth' | 'bull' | 'hedgehog' | 'owl' | 'shark' | 'turtle' | 'dolphin' | 'crab' | 'fox';
+export type { PersonaId } from '../reigns/types';
+import type { PersonaId } from '../reigns/types';
 
 export interface PersonaCard {
   id: PersonaId;
@@ -24,7 +25,7 @@ export interface PersonaCard {
   mood: string;             // 给插画/动效的关键词
 }
 
-export const PERSONA_CARDS: Record<PersonaId, PersonaCard> = {
+const BASE_PERSONA_CARDS: Record<string, PersonaCard> = {
   sloth: {
     id: 'sloth', name: '树懒观察员', emoji: '🦥', archetype: '损失厌恶 · 维持现状偏差',
     tagline: '看得多、动得少，按兵不动也是一种选择',
@@ -116,6 +117,17 @@ export const PERSONA_CARDS: Record<PersonaId, PersonaCard> = {
     rule: '以上都不满足', palette: { main: '#F2B35E', soft: '#3A2A14' }, mood: '机敏、回头张望、尾巴一甩',
   },
 };
+
+export const PERSONA_CARDS: Record<PersonaId, PersonaCard> = BASE_PERSONA_CARDS as Record<PersonaId, PersonaCard>;
+const EXTRA_PERSONAS: Record<string, PersonaCard> = {
+  puffin: { id: 'puffin', name: '追浪海鹦', emoji: '🐦', archetype: '从众动量 · 情绪传染', tagline: '浪一起来，就想跟着飞', traits: ['追随热点', '受群体影响', '顺势加速'], strength: '对行情变化和群体情绪敏感，行动不拖泥带水', blind_spot: '浪头越大越容易忘记自己原本的计划', basis: '从众行为指个体在群体压力或信息瀑布下忽略私人判断；动量可以延续，也会在人潮拥挤时反转。', refs: ['Bikhchandani, Hirshleifer & Welch (1992), Informational Cascades, JPE'], rule: '至少 6 次选择，顺势 >= 4 且明显多于逆向，或有恐慌跟随', palette: { main: '#70C8C1', soft: '#153936' }, mood: '海鹦乘风追浪、背着小旗' },
+  raccoon: { id: 'raccoon', name: '逆势浣熊', emoji: '🦝', archetype: '逆向投资 · 均值回归', tagline: '别人丢下的小票，我先翻翻', traits: ['偏爱抄底', '逆着人流', '寻找低估'], strength: '愿意独立判断，不轻易被多数人的情绪带走', blind_spot: '便宜不是底部保证，逆势也需要边界', basis: '逆向策略利用市场过度反应，但均值回归并非每次都会及时出现。', refs: ['De Bondt & Thaler (1985), Does the Stock Market Overreact?, J. Finance'], rule: '至少 6 次选择，逆向 >= 4 且达到顺势 1.5 倍', palette: { main: '#D4AA79', soft: '#382D22' }, mood: '浣熊提灯在谷底捡宝贝' },
+  gecko: { id: 'gecko', name: '断线壁虎', emoji: '🦎', archetype: '止损纪律 · 风险截断', tagline: '先断掉小风险，再保留下次机会', traits: ['及时止损', '少抱侥幸', '重视边界'], strength: '能在亏损扩大前承认计划失效，保住再次尝试的空间', blind_spot: '过于频繁地退出，也可能错过正常波动后的修复', basis: '事前限定风险能防止损失演变成为拒绝认错的长期持仓。', refs: ['Kaminski & Lo (2014), When Do Stop-Loss Rules Stop Losses?, J. Financial Markets'], rule: '至少 6 次选择，谨慎止损 >= 4 且明显多于冒险，逆向 < 2', palette: { main: '#8DC792', soft: '#23372A' }, mood: '壁虎剪断缠住尾巴的线、背小盾' },
+  squirrel: { id: 'squirrel', name: '算盘松鼠', emoji: '🐿️', archetype: '审慎复盘 · 风险预算', tagline: '把小账算清，再去做大决定', traits: ['勤于复盘', '谨慎留痕', '按规则调整'], strength: '会把经验整理成可重复的规则，而不是只凭一次输赢判断自己', blind_spot: '过度纠结细节，可能让行动节奏变慢', basis: '系统化记录和样本外检查能减少记忆偏差与过拟合。', refs: ['Tetlock & Gardner (2015), Superforecasting'], rule: '至少 6 次选择，复盘 >= 4、谨慎 >= 2 且复盘不少于冒险', palette: { main: '#D7B36A', soft: '#3B301C' }, mood: '松鼠抱算盘、背小包整理票据' },
+  bat: { id: 'bat', name: '熬夜蝙蝠', emoji: '🦇', archetype: '夜间冲动 · 情绪驱动', tagline: '夜色越深，越怕错过下一段行情', traits: ['夜间追高', '害怕错过', '疲劳决策'], strength: '愿意持续跟踪市场，反应快', blind_spot: '疲惫和焦虑会放大短期信号，让决定偏离原计划', basis: '睡眠不足会影响风险评估与冲动控制；FOMO 使人更倾向追逐短期热点。', refs: ['Hirshleifer (2015), Behavioral Finance, Annual Review of Financial Economics'], rule: '至少 6 次选择，夜间或凌晨追高 >= 2', palette: { main: '#A99AD6', soft: '#2D2742' }, mood: '蝙蝠披斗篷抱小灯、飞越夜间曲线' },
+  panda: { id: 'panda', name: '钟摆熊猫', emoji: '🐼', archetype: '策略摇摆 · 后期改口', tagline: '不是没主意，是主意变得有点快', traits: ['后期改口', '左右摆动', '随反馈调整'], strength: '愿意根据新信息修正自己，不死守单一答案', blind_spot: '频繁改口会让规则失去连续性，难以判断真正有效的方法', basis: '适应性调整有价值，但受短期反馈驱动的频繁改变会降低策略一致性。', refs: ['Lo (2004), The Adaptive Markets Hypothesis, J. Portfolio Management'], rule: '至少 6 次选择，后期改口 >= 3 且占后期选择一半', palette: { main: '#B7C5B2', soft: '#28352D' }, mood: '熊猫抱钟摆、左右看两张地图' },
+};
+Object.assign(PERSONA_CARDS, EXTRA_PERSONAS);
 
 const v = (f: Feature) => f.value;
 const ge = (f: Feature, x: number) => f.value !== null && f.value >= x;

@@ -5,9 +5,9 @@ import { ROLE_IDS } from './roles';
 import { SURVIVAL_TIERS } from './survival';
 
 describe('结局插图', () => {
-  it('还没有图时返回 undefined（界面不占位）', () => {
+  it('未知结局或段位回退 undefined（界面不占位）', () => {
     expect(endingArtwork('no-such-ending', 'fund')).toBeUndefined();
-    expect(survivalBadge('tier-1')).toBeUndefined();
+    expect(survivalBadge('tier-unknown' as never)).toBeUndefined();
   });
 
   it('对所有已知结局和段位调用都不抛错，结果要么是字符串要么是 undefined', () => {
@@ -19,6 +19,8 @@ describe('结局插图', () => {
       const badge = survivalBadge(tier.id);
       expect(badge === undefined || typeof badge === 'string').toBe(true);
     }
+    for (const role of ROLE_IDS) for (const e of getEndings(role)) expect(endingArtwork(e.id, role)).toBeTruthy();
+    for (const tier of SURVIVAL_TIERS) expect(survivalBadge(tier.id)).toBeTruthy();
   });
 
   it('优先用角色换色版，其次通用版', () => {

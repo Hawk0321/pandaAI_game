@@ -9,7 +9,7 @@ import { ROLE_IDS } from './roles';
 import type { PersonaId, RoleId } from './types';
 
 const ALL_PERSONAS: readonly PersonaId[] = [
-  'sloth', 'bull', 'hedgehog', 'owl', 'shark', 'turtle', 'dolphin', 'crab', 'fox',
+  'sloth', 'bull', 'hedgehog', 'owl', 'shark', 'turtle', 'dolphin', 'crab', 'fox', 'puffin', 'raccoon', 'gecko', 'squirrel', 'bat', 'panda',
 ];
 
 const ALL_ENDING_IDS: readonly string[] = Array.from(
@@ -31,13 +31,13 @@ describe('COMPATIBLE_PERSONAS：基本形状', () => {
   for (const role of ROLE_IDS) {
     describe(`角色 ${role}`, () => {
       for (const ending of getEndings(role)) {
-        it(`${ending.id}：合法、不重复、黑名单实现`, () => {
+        it(`${ending.id}：合法、不重复、主推荐与兼容池`, () => {
           const list = compat(ending.id);
-          // 黑名单实现：白名单 = 全部 9 个 - 黑名单，黑名单可以是空（白名单就是 9 个）
+          // 主推荐与兼容池：白名单 = 全部 9 个 - 黑名单，黑名单可以是空（白名单就是 9 个）
           expect(list.length).toBeGreaterThanOrEqual(1);
-          expect(list.length).toBeLessThanOrEqual(9);
+          expect(list.length).toBeLessThanOrEqual(15);
           for (const p of list) expect(ALL_PERSONAS).toContain(p);
-          expect(new Set(list).size).toBe(list.length);
+          expect(new Set(list).size, `${ending.id}: ${list.join(',')}`).toBe(list.length);
         });
       }
     });
@@ -47,10 +47,10 @@ describe('COMPATIBLE_PERSONAS：基本形状', () => {
     for (const id of ALL_ENDING_IDS) expect(compat(id)).toEqual(compat(id));
   });
 
-  it('未知 id 返回全部 9 个人格', () => {
+  it('未知 id 返回全部 15 个人格', () => {
     for (const id of ['', 'nope', 'fund-low-nothing', 'sp-does-not-exist', 'stock-low-capital-x']) {
       const list = compat(id);
-      expect(list.length).toBe(9);
+      expect(list.length).toBe(15);
       expect(new Set(list)).toEqual(new Set(ALL_PERSONAS));
     }
   });
@@ -111,10 +111,10 @@ describe('COMPATIBLE_PERSONAS：语义护栏', () => {
     }
   }
 
-  it('sp-obsessive（偏执专家）允许全部 9 个人格', () => {
+  it('sp-obsessive（偏执专家）允许全部 15 个人格', () => {
     expect(ALL_ENDING_IDS).toContain('sp-obsessive');
     const list = compat('sp-obsessive');
-    expect(list.length).toBe(9);
+    expect(list.length).toBe(15);
     expect(new Set(list)).toEqual(new Set(ALL_PERSONAS));
   });
 });
