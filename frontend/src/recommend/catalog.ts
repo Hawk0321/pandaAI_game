@@ -18,6 +18,7 @@ export const CATALOG = {
   regime: qs('skill-market-regime-analysis', '用指数、宏观、期限结构和波动率划分市场状态，先认清环境再选策略', ['市场状态', '适应性']),
   dossier: qs('skill-a-share-stock-dossier', '一键生成 A 股个股研究档案，数据来自 Panda Data', ['深度研究', '个股']),
   kline: qs('skill-xingtai-catcher', '相似 K 线形态搜索：找历史上走势相似的股票和期货', ['K 线', '形态']),
+  factorOnline: qs('skill-pandaai-factor-online', 'PandaAI 因子大赛上手：环境体检、登录、在线挖掘因子', ['因子', '因子大赛']),
   qbti: qs('skill-qbti', 'QBTI 平凡人策略：五组问答把投资性格翻译成因子方向和策略参数', ['性格→策略', '入门']),
 
   // ---- 工具：补能力短板 ----

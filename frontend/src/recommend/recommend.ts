@@ -1,10 +1,10 @@
 /**
  * 推荐（规则）：画像 → 最多 4 张推荐卡片，指向 PandaAI 产品/活动/课程和 QuantSkills 技能包。
  * 每张卡写清依据哪项维度判断、引用哪条证据原文、为什么推荐，按钮直接跳到真实页面。
- * 每类（策略 / 工具 / 产品 / 活动 / 学习）最多一张，至少一张 PandaAI 产品卡。规则说明见 docs/recommend.md。
+ * 每类（策略 / 工具 / 产品 / 活动 / 学习）最多一张，至少一张 PandaAI 产品卡；策略卡优先按人物卡挑。规则说明见 docs/recommend.md。
  */
 import type { Dimension, DimensionId, Profile, Recommendation, RecResource } from '../shared/protocol';
-import { CATALOG } from './catalog';
+import { CATALOG, type CatalogId } from './catalog';
 
 /** 推荐阈值，docs/recommend.md 逐条解释。 */
 export const R = {
@@ -12,6 +12,17 @@ export const R = {
   strong: 0.65,        // 能力分 ≥ 0.65 视为已经不错；偏好分 ≥ 0.65 / ≤ 0.35 视为倾向明确
   watcher: 0.2,        // 风险偏好 ≤ 0.2 视为几乎不入场
   maxCards: 4,
+};
+
+/** 人物卡 → 策略卡：每张人物卡对应一个 QuantSkills 技能包，dim 是理由里引用的维度。蛮牛、刺猬先补短板，按偏好推荐。 */
+export const PERSONA_STRATEGY: Partial<Record<string, { res: CatalogId; dim: DimensionId; title: string; pitch: string }>> = {
+  sloth: { res: 'kline', dim: 'risk_appetite', title: '先在历史里找相似走势', pitch: '相似 K 线搜索能看到历史上走势相似的标的后来怎样，不用下单也能积累判断。' },
+  owl: { res: 'factorOnline', dim: 'evidence_use', title: '把找线索的本事用到因子上', pitch: '你翻线索的习惯就是因子研究的雏形，这个技能包带你在 PandaAI 上在线挖因子、参加因子大赛。' },
+  shark: { res: 'dossier', dim: 'research_depth', title: '重仓之前，先做一份个股档案', pitch: '集中下注靠的是研究深度，个股档案把基本面、行情和风险整理在一页里。' },
+  turtle: { res: 'allWeather', dim: 'risk_control', title: '把风险预算扩展到资产配置', pitch: '全天候用风险平价分配仓位，和你"先定好最多亏多少"的思路一致。' },
+  dolphin: { res: 'maCross', dim: 'style', title: '把"顺势"写成均线策略', pitch: '均线金叉死叉是最经典的趋势规则，可以检验你的直觉在更多行情里是否成立。' },
+  crab: { res: 'oversold', dim: 'style', title: '把"跌多了买"量化检验', pitch: '超跌反弹技能包把抄底拆成择时和选股条件，能检验你的逆势直觉。' },
+  fox: { res: 'regime', dim: 'style', title: '先认清市场状态，再选策略', pitch: '你会随行情换打法，市场状态划分能把"看情况"变成可复盘的规则。' },
 };
 
 interface Candidate { rec: Recommendation; priority: number }
@@ -39,15 +50,20 @@ function card(id: string, type: Recommendation['type'], title: string, res: RecR
   return { id, type, title, resource: res, reason, based_on: based.map(basis), next_step: { label, url: res.url } };
 }
 
-function candidates(dims: Dims): Candidate[] {
+function candidates(dims: Dims, persona: Profile['persona']): Candidate[] {
   const out: Candidate[] = [];
   const add = (priority: number, rec: Recommendation) => out.push({ priority, rec });
   const { evidence_use: ev, calibration: cal, risk_control: rc, style, research_depth: rd, risk_appetite: ra } = dims;
   const trend = clear(style) && style.score! >= R.strong;
   const reversal = clear(style) && style.score! <= 1 - R.strong;
 
-  // ---- 策略：按"趋势 vs 反转"偏好推荐可回测的规则 ----
-  if (trend) {
+  // ---- 策略：优先按人物卡，其次按"趋势 vs 反转"偏好推荐可回测的规则 ----
+  const ps = persona.id ? PERSONA_STRATEGY[persona.id] : undefined;
+  if (ps) {
+    const d = dims[ps.dim];
+    add(70, card(`strategy-${persona.id}`, 'strategy', ps.title, CATALOG[ps.res],
+      `这局的人物卡是${persona.emoji}${persona.name}${persona.why ? `（${persona.why}）` : ''}，${said(d)}。${ps.pitch}`, [d]));
+  } else if (trend) {
     add(70, card('strategy-ma-cross', 'strategy', '把"顺势"写成均线策略', CATALOG.maCross,
       `${said(style)}${first(style)}。均线金叉死叉是最经典的趋势规则，可以检验你的直觉在更多行情里是否成立。`, [style]));
   } else if (reversal) {
@@ -113,7 +129,7 @@ function candidates(dims: Dims): Candidate[] {
 
 export function recommend(profile: Profile): Recommendation[] {
   const dims = Object.fromEntries(profile.dimensions.map((d) => [d.id, d])) as Dims;
-  const all = candidates(dims).sort((a, b) => b.priority - a.priority);
+  const all = candidates(dims, profile.persona).sort((a, b) => b.priority - a.priority);
   // 每类只留优先级最高的一张
   const best = all.filter((c, i) => all.findIndex((x) => x.rec.type === c.rec.type) === i);
   const product = best.find((c) => c.rec.type === 'product')!;

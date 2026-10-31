@@ -363,9 +363,93 @@
     "name": "夜猫研究员",
     "emoji": "🦉",
     "tagline": "线索翻遍才出手，证据说话",
-    "is_fun_label": true
+    "is_fun_label": true,
+    "id": "owl",
+    "archetype": "证据驱动 · 慢思考",
+    "traits": [
+     "研究点用足",
+     "先看关键线索",
+     "跟着证据走"
+    ],
+    "strength": "决定有依据，不容易被单一信号带偏",
+    "blind_spot": "研究得越多越容易觉得\"已经想清楚了\"，仍需检验规则是否只是巧合",
+    "basis": "双系统理论区分快速直觉（系统 1）与慢速推理（系统 2）；预测研究发现，愿意主动找反方证据、按新信息更新判断的人预测更准。确认偏误则是只找支持自己观点的证据。",
+    "refs": [
+     "Kahneman (2011), Thinking, Fast and Slow",
+     "Nickerson (1998), Confirmation Bias, Review of General Psychology",
+     "Tetlock & Gardner (2015), Superforecasting"
+    ],
+    "why": "研究点使用 100%，关键线索命中 100%",
+    "also": {
+     "id": "turtle",
+     "name": "稳健老龟",
+     "emoji": "🐢",
+     "why": "入场时设止损 100%，平均仓位 43%"
+    }
    },
-   "summary": "能力上表现稳定，证据使用最突出（会先找关键线索，决定和证据一致）。偏好上，偏研究型、仓位适中；人物卡依据是\"研究点用足、紧跟关键线索\"。趋势 vs 反转还看不准，结论仅供参考。",
+   "features": {
+    "flat_rate": {
+     "value": 0,
+     "n": 4
+    },
+    "avg_size": {
+     "value": 0.425,
+     "n": 4
+    },
+    "stop_rate": {
+     "value": 1,
+     "n": 4
+    },
+    "add_on_loss": {
+     "value": 0,
+     "n": 4
+    },
+    "cut_on_loss": {
+     "value": 1,
+     "n": 4
+    },
+    "research_spend": {
+     "value": 1,
+     "n": 4
+    },
+    "think_sec": {
+     "value": 40,
+     "n": 4
+    },
+    "key_clue_hit": {
+     "value": 1,
+     "n": 4
+    },
+    "clue_agree": {
+     "value": 1,
+     "n": 3
+    },
+    "confirm_only": {
+     "value": 0,
+     "n": 4
+    },
+    "trend_follow": {
+     "value": 0.3333333333333333,
+     "n": 3
+    },
+    "avg_confidence": {
+     "value": 3.25,
+     "n": 4
+    },
+    "hit_rate": {
+     "value": 1,
+     "n": 4
+    },
+    "overconfidence": {
+     "value": -0.2749999999999999,
+     "n": 4
+    },
+    "reveal_dwell_sec": {
+     "value": 6,
+     "n": 4
+    }
+   },
+   "summary": "能力上表现稳定，证据使用最突出（会先找关键线索，决定和证据一致）。偏好上，偏研究型、仓位适中；人物卡依据是\"研究点使用 100%，关键线索命中 100%\"。趋势 vs 反转还看不准，结论仅供参考。",
    "needs_more": [
     {
      "dimension_id": "style",
@@ -373,6 +457,37 @@
     }
    ],
    "recommendations": [
+    {
+     "id": "strategy-owl",
+     "type": "strategy",
+     "title": "把找线索的本事用到因子上",
+     "resource": {
+      "name": "skill-pandaai-factor-online",
+      "provider": "QuantSkills",
+      "url": "https://github.com/quantskills/skill-pandaai-factor-online",
+      "desc": "PandaAI 因子大赛上手：环境体检、登录、在线挖掘因子",
+      "tags": [
+       "因子",
+       "因子大赛"
+      ],
+      "is_sample": false
+     },
+     "reason": "这局的人物卡是🦉夜猫研究员（研究点使用 100%，关键线索命中 100%），证据使用判断为\"会先找关键线索，决定和证据一致\"（置信度高）。你翻线索的习惯就是因子研究的雏形，这个技能包带你在 PandaAI 上在线挖因子、参加因子大赛。",
+     "based_on": [
+      {
+       "dimension_id": "evidence_use",
+       "judgement": "会先找关键线索，决定和证据一致",
+       "evidence": [
+        "第 1 关翻开了全部关键线索「成交量」「同期大盘」",
+        "第 1 关翻开的线索整体看涨，决定做多与线索一致"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "查看策略",
+      "url": "https://github.com/quantskills/skill-pandaai-factor-online"
+     }
+    },
     {
      "id": "product-factor-center",
      "type": "product",
@@ -496,37 +611,6 @@
      "next_step": {
       "label": "查看工具",
       "url": "https://github.com/quantskills/skill-backtest-overfit"
-     }
-    },
-    {
-     "id": "strategy-qbti",
-     "type": "strategy",
-     "title": "先找到适合你的策略方向",
-     "resource": {
-      "name": "skill-qbti",
-      "provider": "QuantSkills",
-      "url": "https://github.com/quantskills/skill-qbti",
-      "desc": "QBTI 平凡人策略：五组问答把投资性格翻译成因子方向和策略参数",
-      "tags": [
-       "性格→策略",
-       "入门"
-      ],
-      "is_sample": false
-     },
-     "reason": "趋势 vs 反转判断为\"偏逆势反转：涨多了空、跌多了买\"（置信度中），倾向还不够强，暂不据此定策略。QBTI 用五组问答把投资性格翻译成策略参数，可以和这份画像对照着看。",
-     "based_on": [
-      {
-       "dimension_id": "style",
-       "judgement": "偏逆势反转：涨多了空、跌多了买",
-       "evidence": [
-        "第 2 关决定前 20 天上涨 15.0%，选择做空（逆势）",
-        "第 4 关决定前 20 天下跌 14.0%，选择做多（逆势）"
-       ]
-      }
-     ],
-     "next_step": {
-      "label": "查看策略",
-      "url": "https://github.com/quantskills/skill-qbti"
      }
     }
    ]
