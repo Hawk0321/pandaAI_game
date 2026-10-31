@@ -17,13 +17,13 @@ function EquityChart({ strategy, baseline }: { strategy: Simulation; baseline: S
   const low = Math.min(...values, 1) - .01, high = Math.max(...values, 1) + .01;
   const points = (result: Simulation) => result.points.map(p => `${40 + p.t * 30},${168 - (p.equity - low) / (high - low) * 140}`).join(' ');
   return <figure className="skill-equity"><svg viewBox="0 0 530 205" role="img" aria-label="练习策略与对照的逐日收盘权益曲线">
-    <defs><linearGradient id={gradient} x1="0" y1="0" x2="0" y2="1"><stop stopColor="#9ce5cb" stopOpacity=".2" /><stop offset="1" stopColor="#9ce5cb" stopOpacity="0" /></linearGradient></defs>
-    {[low, (low + high) / 2, high].map(value => <g key={value}><line x1="40" x2="490" y1={168 - (value - low) / (high - low) * 140} y2={168 - (value - low) / (high - low) * 140} stroke="#36544c" strokeOpacity=".45" /><text x="3" y={172 - (value - low) / (high - low) * 140} fill="#9bb4aa" fontSize="10">{((value - 1) * 100).toFixed(0)}%</text></g>)}
+    <defs><linearGradient id={gradient} x1="0" y1="0" x2="0" y2="1"><stop stopColor="#f3c460" stopOpacity=".2" /><stop offset="1" stopColor="#f3c460" stopOpacity="0" /></linearGradient></defs>
+    {[low, (low + high) / 2, high].map(value => <g key={value}><line x1="40" x2="490" y1={168 - (value - low) / (high - low) * 140} y2={168 - (value - low) / (high - low) * 140} stroke="#383d4f" strokeOpacity=".45" /><text x="3" y={172 - (value - low) / (high - low) * 140} fill="#a1a3ae" fontSize="10">{((value - 1) * 100).toFixed(0)}%</text></g>)}
     <polygon points={`40,168 ${points(strategy)} 490,168`} fill={`url(#${gradient})`} />
-    <line x1="40" x2="490" y1={168 - (1 - low) / (high - low) * 140} y2={168 - (1 - low) / (high - low) * 140} stroke="#607a78" strokeDasharray="4 4" />
+    <line x1="40" x2="490" y1={168 - (1 - low) / (high - low) * 140} y2={168 - (1 - low) / (high - low) * 140} stroke="#646876" strokeDasharray="4 4" />
     <polyline points={points(baseline)} fill="none" stroke="#edc884" strokeWidth="2" />
-    <polyline points={points(strategy)} fill="none" stroke="#9ce5cb" strokeWidth="3" />
-    <text x="40" y="194" fill="#afc5c2" fontSize="12">t=0</text><text x="460" y="194" fill="#afc5c2" fontSize="12">t=15</text>
+    <polyline points={points(strategy)} fill="none" stroke="#f3c460" strokeWidth="3" />
+    <text x="40" y="194" fill="#b4b6c0" fontSize="12">t=0</text><text x="460" y="194" fill="#b4b6c0" fontSize="12">t=15</text>
   </svg><figcaption><span>● 练习策略</span><span>● 对照方案</span> · 初始权益为 1</figcaption></figure>;
 }
 

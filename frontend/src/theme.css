@@ -1,0 +1,199 @@
+/*
+ * 主题层：墨蓝底 + 琥珀金强调 + 象牙白文字，红涨绿跌只用于行情。
+ * 加载顺序在 styles.css / ui.css 与各模块 css 之后，只覆盖观感，不改结构、不改交互。
+ * 颜色全部走下面的 token，换配色只需要改这一段。
+ */
+:root {
+  --ink-0: #0a0d15;          /* 页面最深底 */
+  --ink-1: #10141f;          /* 面板 */
+  --ink-2: #161b2a;          /* 抬起的卡片 */
+  --ink-3: #1d2336;          /* 悬停 / 选中底 */
+  --line: #272d42;           /* 常规描边 */
+  --line-strong: #3a4260;    /* 强描边 */
+  --ivory: #f1ece0;          /* 主文字：偏暖的象牙白，比纯白柔和 */
+  --text-secondary: #b9b8b1;
+  --text-muted: #8e8f9a;
+  --gold: #f2c261;           /* 品牌强调 */
+  --gold-soft: #f7d98f;
+  --gold-deep: #c99a3d;
+  --gold-ink: #1d1707;       /* 金色按钮上的字 */
+  --accent: var(--gold);
+  --surface: var(--ink-1);
+  --surface-raised: var(--ink-2);
+  --border: var(--line);
+  --up: #f0766b;
+  --down: #3fcf9f;
+  --shadow-lg: 0 24px 60px -24px #000c, 0 2px 0 #ffffff08 inset;
+  --shadow-md: 0 12px 30px -16px #000b;
+  --radius: 16px;
+  color: var(--ivory);
+  background: var(--ink-0);
+}
+
+body {
+  background:
+    radial-gradient(900px 520px at 88% -8%, #f2c26116, transparent 62%),
+    radial-gradient(760px 520px at -6% 8%, #5b6bd01a, transparent 60%),
+    linear-gradient(180deg, #0c1019 0%, var(--ink-0) 38%);
+  background-attachment: fixed;
+  color: var(--ivory);
+}
+
+/* ---------- 文字 ---------- */
+h1, h2, h3 { color: var(--ivory); }
+p { color: var(--text-secondary); }
+.muted { color: var(--text-muted); }
+a, summary, .eyebrow, .home-kicker { color: var(--gold); }
+.home-copy h1 { color: var(--ivory); }
+.home-copy h1 em { color: var(--gold); background: linear-gradient(100deg, var(--gold-soft), var(--gold) 55%, var(--gold-deep)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.home-kicker { color: var(--gold-deep); }
+.home-kicker > span { background: var(--gold-deep); }
+.home-description, .home-facts { color: var(--text-secondary); }
+
+/* ---------- 按钮 ---------- */
+button { border-radius: 10px; }
+.primary-button, .home-cta button, .play-level .play-submit, .skill-card > button:not(.secondary-button) {
+  background: linear-gradient(180deg, var(--gold-soft), var(--gold) 58%, #e5ae45);
+  color: var(--gold-ink);
+  border: 1px solid #f7d98f66;
+  box-shadow: 0 1px 0 #fff6 inset, 0 10px 26px -12px #f2c26188;
+  letter-spacing: .02em;
+}
+.primary-button:hover:not(:disabled), .home-cta button:hover:not(:disabled), .play-level .play-submit:hover:not(:disabled), .skill-card > button:not(.secondary-button):hover {
+  background: linear-gradient(180deg, #fbe5a8, var(--gold-soft) 58%, var(--gold));
+  color: var(--gold-ink);
+}
+.play-level .play-submit:disabled { background: var(--ink-3); color: var(--text-muted); border-color: var(--line); box-shadow: none; }
+.secondary-button { color: var(--ivory); background: transparent; border: 1px solid var(--line-strong); }
+.secondary-button:hover:not(:disabled) { background: var(--ink-3); border-color: var(--gold-deep); }
+.text-button { color: var(--text-secondary); }
+.text-button:hover:not(:disabled) { background: var(--ink-3); color: var(--ivory); }
+button:focus-visible, summary:focus-visible, a:focus-visible { outline: 2px solid var(--gold-soft); outline-offset: 3px; }
+
+/* ---------- 面板与卡片 ---------- */
+.panel, .skill-card, .rec-card, .dimension-card, .skill-lab, .play-level, .play-actions {
+  background: linear-gradient(180deg, var(--ink-2), var(--ink-1));
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-md);
+}
+.panel { border-radius: var(--radius); }
+.rec-card { background: var(--ink-2); box-shadow: none; }
+.dimension-card { border-radius: 14px; }
+.play-level { background: linear-gradient(180deg, #131828, var(--ink-1)); border-radius: 18px; box-shadow: var(--shadow-lg); }
+.play-actions { background: var(--ink-0); }
+.notice { background: #1a1d2b; border-left-color: var(--gold); color: var(--text-secondary); }
+.sample-notice, .sample-label { border-left-color: var(--gold-deep); background: #221d12; color: #e7d6a8; }
+.sample-label { border: 1px solid #5a4a22; }
+.uncertainty, .event-detail pre { background: var(--ink-0); }
+
+/* ---------- 顶栏与进度 ---------- */
+.game-header { border-bottom-color: var(--line); }
+.brand { color: var(--ivory); }
+.brand span, .header-status { color: var(--text-muted); }
+.status-dot { background: var(--gold); box-shadow: 0 0 12px #f2c26188; }
+.game-progress { border-bottom-color: var(--line); }
+.game-progress li { color: var(--text-muted); }
+.game-progress li > span { border-color: var(--line-strong); }
+.game-progress li[data-state=current] { color: var(--ivory); }
+.game-progress li[data-state=current] > span { background: linear-gradient(180deg, var(--gold-soft), var(--gold)); border-color: var(--gold); color: var(--gold-ink); box-shadow: 0 0 0 4px #f2c26122; }
+.game-progress li[data-state=done] { color: var(--text-secondary); }
+.game-progress li[data-state=done] > span { border-color: var(--gold-deep); color: var(--gold); }
+
+/* ---------- 首页 ---------- */
+.preview-terminal { background: linear-gradient(150deg, #1b2136, #11151f); border: 1px solid var(--line-strong); box-shadow: var(--shadow-lg); }
+.terminal-title { color: var(--ivory); }
+.terminal-title b, .terminal-symbol { color: var(--gold); }
+.terminal-top, .terminal-bottom { color: var(--text-muted); border-color: var(--line); }
+.terminal-top > span:first-child { color: var(--text-secondary); }
+.terminal-top i { background: var(--gold); }
+.preview-skill { background: linear-gradient(120deg, #f7dc96, #e8b755); color: #2a1f08; box-shadow: 0 18px 40px -18px #f2c26199; }
+.preview-skill small { color: #6a5424; }
+.visual-orbit { border-color: #f2c26117; }
+.visual-caption { color: var(--text-muted); }
+.journey-steps { border-top-color: var(--line); }
+.journey-number { color: var(--gold-deep); }
+.journey-steps p { color: var(--text-muted); }
+
+/* ---------- 对局 ---------- */
+.play-level > p:first-child { color: var(--gold-deep); }
+.play-dossier { background: var(--line); border-color: var(--line); }
+.play-dossier > div { background: var(--ink-1); }
+.play-dossier dt { color: var(--text-muted); }
+.play-dossier dd { color: var(--ivory); }
+.play-level > .market-chart { background: var(--ink-0); border-color: var(--line); }
+.chart-future-zone { fill: #f2c26110; opacity: 1; }
+.chart-grid { stroke: #2a3047; }
+.chart-axis { fill: var(--text-muted); }
+.chart-decision, .chart-decision-label { stroke: var(--gold); }
+.chart-decision-label { fill: var(--gold); stroke: none; }
+.market-chart figcaption { color: var(--text-muted); }
+.play-clues > button { background: var(--ink-2); border-color: var(--line); color: var(--ivory); }
+.play-clues > button:hover:not(:disabled) { border-color: var(--gold-deep); background: var(--ink-3); }
+.play-clues > button[aria-expanded=true], .play-clues > .clue-card.is-open { border-color: var(--gold-deep); background: linear-gradient(180deg, #221f17, var(--ink-2)); }
+.clue-face > span { color: var(--text-secondary); }
+.clue-card.is-open .clue-back > span { color: var(--ivory); }
+.play-clues > .clue-card.is-locked { border-color: var(--line); background: var(--ink-1); }
+.play-clues > .clue-card.is-locked .clue-front > span { color: var(--text-muted); }
+.play-level fieldset { border-color: var(--line); }
+.play-level legend { color: var(--text-muted); }
+.play-level fieldset button { background: var(--ink-1); border-color: var(--line); color: var(--text-secondary); }
+.play-level fieldset button:hover:not(:disabled) { border-color: var(--gold-deep); color: var(--ivory); }
+.play-level fieldset button[aria-pressed=true] { background: linear-gradient(180deg, var(--gold-soft), var(--gold)); color: var(--gold-ink); border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold), 0 8px 18px -10px #f2c261aa; }
+.play-level fieldset small { color: var(--text-muted); }
+.gain-scoreboard { background: var(--ink-0); border-color: var(--line); }
+.gain-scoreboard > div + div { border-color: var(--line); }
+.gain-scoreboard dt { color: var(--text-muted); }
+.gain-scoreboard dd { color: var(--ivory); }
+.gain-scoreboard dd.is-gain { color: var(--up); }
+.gain-scoreboard dd.is-loss { color: var(--down); }
+.gain-scoreboard .board-rank dd { color: var(--text-secondary); }
+.action-row > button { background: var(--ink-2); border-color: var(--line-strong); color: var(--ivory); }
+.action-row > button:hover:not(:disabled) { background: var(--ink-3); border-color: var(--gold-deep); }
+.action-row > .action-hold { background: linear-gradient(180deg, var(--gold-soft), var(--gold)); border-color: var(--gold); color: var(--gold-ink); }
+.action-row > .action-hold:hover:not(:disabled) { background: linear-gradient(180deg, #fbe5a8, var(--gold-soft)); }
+.stop-notice { border-left-color: var(--up); background: #2a1719; color: #f3c4bf; }
+.reveal-progress { color: var(--text-muted); }
+.reveal-progress::before { background: var(--gold); }
+.return-positive { color: var(--up); }
+.return-negative { color: var(--down); }
+
+/* ---------- 揭晓 ---------- */
+.reveal-verdict { background: radial-gradient(ellipse at 0 0, #f2c26112, transparent 70%), var(--ink-1); border-color: var(--line-strong); }
+
+/* ---------- 画像 / 人物卡 / 推荐 / 技能卡 ---------- */
+.dimension-meter { background: var(--ink-3); }
+.dimension-meter span { background: linear-gradient(90deg, var(--gold-deep), var(--gold-soft)); }
+.dimension-meter[data-group=preference]::after { background: var(--ivory); opacity: .55; }
+.dimension-meter[data-empty=true] { background: repeating-linear-gradient(90deg, var(--line), var(--line) 7px, transparent 7px, transparent 10px); }
+.dimension-details { border-top-color: var(--line); }
+.confidence-low { color: #f3d699; border-color: #6b5a2c; background: #221d12; }
+.confidence-medium { color: #b9d2f2; border-color: #3f5a86; background: #16213a; }
+.confidence-high { color: var(--gold-soft); border-color: #6b5a2c; background: #221d12; }
+.rec-type { color: var(--gold); border-color: #6b5a2c; background: #221d1233; }
+.rec-provider { color: var(--text-muted); }
+.rec-tags li { background: var(--ink-3); color: var(--text-secondary); }
+.rec-link { color: var(--gold); }
+.skill-card { --skill-color: var(--gold); }
+.skill-shield { --skill-color: #e8c98f; }
+.skill-reversal { --skill-color: #c5b3f0; }
+.skill-review { --skill-color: #8fc3f0; }
+.skill-card::before { opacity: .9; }
+.skill-card:hover { box-shadow: 0 20px 44px -22px #000c, 0 0 0 1px var(--skill-color); }
+.skill-card > button:hover { background: var(--skill-color); filter: brightness(1.08); }
+.skill-card > button.secondary-button { color: var(--skill-color); border-color: var(--skill-color); background: transparent; }
+.skill-count { color: var(--gold-soft); border-color: #6b5a2c; }
+.persona-card-face { background: #11152199; background-color: #0f1320; border-color: #b69550; box-shadow: 0 28px 60px -20px #000d, inset 0 0 0 5px #0f1320, inset 0 0 0 6px #3a4260; }
+.persona-reveal-stage::before { background: radial-gradient(ellipse at 26% 44%, #f2c26122, transparent 62%); }
+.persona-save-button { background: linear-gradient(180deg, var(--gold-soft), var(--gold)); color: var(--gold-ink); border-color: #f7d98f66; }
+.persona-save-button:hover:not(:disabled) { background: linear-gradient(180deg, #fbe5a8, var(--gold-soft)); }
+.persona-flip-button { border-color: var(--line-strong); color: var(--ivory); }
+.persona-flip-button:hover:not(:disabled) { background: var(--ink-3); border-color: var(--gold-deep); }
+.persona-card-controls .persona-motion-toggle { background: var(--ink-1); border-color: var(--line); color: var(--text-secondary); }
+.persona-motion-toggle:hover:not(:disabled) { background: var(--ink-3); }
+
+/* ---------- 页脚 ---------- */
+footer, .app-footer, .disclaimer { color: var(--text-muted); border-color: var(--line); }
+
+/* 细微颗粒，避免大面积深色发闷；不影响点击，减少动态时不受影响（静态） */
+body::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: .035; background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 3px 3px; mix-blend-mode: overlay; }
+.app-shell { position: relative; z-index: 1; }
