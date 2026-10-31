@@ -49,6 +49,9 @@ npx tsc --noEmit            # 类型检查
 结局页人格卡后展示 AI 短评，浏览器只提交人格、结局和最多 2 条脱敏行为证据到同域
 `/api/persona-comment`；后端默认 `qwen3.8-flash`，备用 `deepseek-v4.1-flash`，无密钥、超时或无效回答时回退规则短评。密钥只在 `backend/narrate/` 服务端读取。
 
+AI 短评后接 `StrategyMatch`：15 种人格各映射一段专属 Qube 回测提示词，按钮跳转
+`/agent_quant/chat?message=...` 预填，也支持复制。策略仅用于研究与回测，不是自动交易。
+
 **"为什么是你"文案与依据胶囊**（`personaCopy.ts`，`buildWhyLine` / `buildEvidenceChips`，死逻辑、不随机）：
 
 | 情况 | 文案 | 胶囊 |

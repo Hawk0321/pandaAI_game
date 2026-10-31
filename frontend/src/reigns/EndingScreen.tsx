@@ -8,6 +8,7 @@ import { audio } from './audio/audioManager';
 import { PersonaReveal } from './PersonaReveal';
 import { buildEncounterReferral, buildReferrals } from './referral';
 import { PersonaComment } from './PersonaComment';
+import { StrategyMatch } from './StrategyMatch';
 import { ROLES } from './roles';
 import { endingArtwork, survivalBadge } from './endingArt';
 import { SURVIVAL_TIERS, recordBest, survivalBlurb, survivalProgress, survivalTier } from './survival';
@@ -204,6 +205,7 @@ export function EndingScreen({ state, onRestart, onReplay }: EndingScreenProps) 
         <PersonaReveal state={state} />
       </div>
       <PersonaComment state={state} />
+      <StrategyMatch state={state} />
 
       <div className="reigns-again reigns-rise" style={rise(0.3)}>
         <button type="button" className="reigns-restart reigns-restart-wide" onClick={() => { audio.playSfx('sfx-restart'); onRestart(); }}>再来一局</button>
