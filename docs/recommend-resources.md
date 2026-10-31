@@ -23,15 +23,15 @@ QuantSkills（[quantskills.ai](https://quantskills.ai)，GitHub [quantskills](ht
 | ✅ [skill-oversold-rebound](https://github.com/quantskills/skill-oversold-rebound) | A 股超跌反弹择时与选股 | 逆势反转 🦀 |
 | [skill-keynes-contrarian-investment](https://github.com/quantskills/skill-keynes-contrarian-investment) | 凯恩斯式反共识研究：过度乐观/悲观、价值陷阱 | 逆向 🦀 |
 | [skill-shortterm-mean-reversal](https://github.com/quantskills/skill-shortterm-mean-reversal) | 短期均值回归（仓库无描述） | 逆势 🦀 |
-| [skill-dalio-all-weather](https://github.com/quantskills/skill-dalio-all-weather) | 全天候资产配置：宏观象限 + 风险平价 | 风险预算 🐢 |
+| ✅ [skill-dalio-all-weather](https://github.com/quantskills/skill-dalio-all-weather) | 全天候资产配置：宏观象限 + 风险平价 | 风险预算 🐢 |
 | [skill-portfolio-risk-parity](https://github.com/quantskills/skill-portfolio-risk-parity) | 风险平价组合 | 风险预算 🐢 |
-| [skill-market-regime-analysis](https://github.com/quantskills/skill-market-regime-analysis) | 市场状态划分，先认环境再选策略 | 灵活 🦊 |
+| ✅ [skill-market-regime-analysis](https://github.com/quantskills/skill-market-regime-analysis) | 市场状态划分，先认环境再选策略 | 灵活 🦊 |
 | [skill-rotation-radar](https://github.com/quantskills/skill-rotation-radar) | 行业轮动与市场状态识别 | 灵活 🦊 |
-| [skill-a-share-stock-dossier](https://github.com/quantskills/skill-a-share-stock-dossier) | 一键生成 A 股个股研究档案（41 star） | 研究型 🦉 / 集中下注 🦈 |
+| ✅ [skill-a-share-stock-dossier](https://github.com/quantskills/skill-a-share-stock-dossier) | 一键生成 A 股个股研究档案（41 star） | 研究型 🦉 / 集中下注 🦈 |
 | [skill-buffett-moat-screener](https://github.com/quantskills/skill-buffett-moat-screener) | 巴菲特式护城河选股与持仓复核 | 长期持有 |
 | [skill-dividend-yield-scan](https://github.com/quantskills/skill-dividend-yield-scan) | 股息率与分红质量扫描（社区草稿） | 稳健 🐢 / 观望 🦥 |
 | [skill-simons-pairs-trading](https://github.com/quantskills/skill-simons-pairs-trading) | 配对交易：同行业、协整筛选 | 进阶 |
-| [skill-xingtai-catcher](https://github.com/quantskills/skill-xingtai-catcher) | 相似 K 线形态搜索（37 star），和本游戏"看 K 线"最贴近 | 所有人 |
+| ✅ [skill-xingtai-catcher](https://github.com/quantskills/skill-xingtai-catcher) | 相似 K 线形态搜索（37 star），和本游戏"看 K 线"最贴近 | 所有人 |
 | [skill-kline-pattern-vision](https://github.com/quantskills/skill-kline-pattern-vision) | 截图或行情识别 K 线形态 | 所有人 |
 | ✅ [skill-qbti](https://github.com/quantskills/skill-qbti) | 五组问答把投资性格翻译成因子方向和策略参数 | 风格不明显时兜底 |
 
@@ -61,7 +61,7 @@ QuantSkills（[quantskills.ai](https://quantskills.ai)，GitHub [quantskills](ht
 
 ### 1.4 因子研究类：研究型玩家的进阶，接因子大赛
 
-[skill-pandaai-factor-online](https://github.com/quantskills/skill-pandaai-factor-online)（因子大赛上手）、[skill-factor-mining-pandaai](https://github.com/quantskills/skill-factor-mining-pandaai)、[skill-quant-factor-skill-factory](https://github.com/quantskills/skill-quant-factor-skill-factory)（72 star）、[skill-factor-orthogonalize](https://github.com/quantskills/skill-factor-orthogonalize)、[skill-factor-alpha191-alpha101](https://github.com/quantskills/skill-factor-alpha191-alpha101)，以及几十个 `skill-factor-*`、`skill-alpha-*`。
+✅ [skill-pandaai-factor-online](https://github.com/quantskills/skill-pandaai-factor-online)（因子大赛上手，夜猫研究员的策略卡）、[skill-factor-mining-pandaai](https://github.com/quantskills/skill-factor-mining-pandaai)、[skill-quant-factor-skill-factory](https://github.com/quantskills/skill-quant-factor-skill-factory)（72 star）、[skill-factor-orthogonalize](https://github.com/quantskills/skill-factor-orthogonalize)、[skill-factor-alpha191-alpha101](https://github.com/quantskills/skill-factor-alpha191-alpha101)，以及几十个 `skill-factor-*`、`skill-alpha-*`。
 
 ### 1.5 暂不推荐
 
@@ -89,6 +89,6 @@ QuantSkills（[quantskills.ai](https://quantskills.ai)，GitHub [quantskills](ht
 
 ## 3. 还能做成卡片的方向
 
-- **人物卡 → 策略卡**：每张人物卡对应一个 QuantSkills 策略（见 1.1 右列），画像页直接给"和你风格最像的策略"。
+- ✅ **人物卡 → 策略卡**：已实现，对应表见 [personas.md](personas.md) 第 4 节。
 - **关卡 → 同款工具**：玩家在某关输了，推荐那关用到的同类工具，例如沪金关卡推 `skill-futures-deepview-analyst`、形态关推 `skill-xingtai-catcher`。
 - **对手 → Qube 模板**：揭晓页的双均线、海龟、均值回归三个对手，正好对应 Qube 首页模板，可以加"一键用这个对手的规则回测"。

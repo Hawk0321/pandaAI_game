@@ -479,6 +479,37 @@
      }
     },
     {
+     "id": "strategy-sloth",
+     "type": "strategy",
+     "title": "先在历史里找相似走势",
+     "resource": {
+      "name": "skill-xingtai-catcher",
+      "provider": "QuantSkills",
+      "url": "https://github.com/quantskills/skill-xingtai-catcher",
+      "desc": "相似 K 线形态搜索：找历史上走势相似的股票和期货",
+      "tags": [
+       "K 线",
+       "形态"
+      ],
+      "is_sample": false
+     },
+     "reason": "这局的人物卡是🦥树懒观察员（4 关里观望 100%），风险偏好判断为\"偏保守：轻仓或观望为主\"（置信度高）。相似 K 线搜索能看到历史上走势相似的标的后来怎样，不用下单也能积累判断。",
+     "based_on": [
+      {
+       "dimension_id": "risk_appetite",
+       "judgement": "偏保守：轻仓或观望为主",
+       "evidence": [
+        "第 1 关选择观望不入场",
+        "第 2 关选择观望不入场"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "查看策略",
+      "url": "https://github.com/quantskills/skill-xingtai-catcher"
+     }
+    },
+    {
      "id": "product-qube",
      "type": "product",
      "title": "用一句话把想法变成可回测的策略",
@@ -546,37 +577,6 @@
      "next_step": {
       "label": "查看工具",
       "url": "https://github.com/quantskills/skill-trade-review"
-     }
-    },
-    {
-     "id": "learn-course",
-     "type": "learn",
-     "title": "系统学一遍量化思维",
-     "resource": {
-      "name": "量变学院 · 量化思维入门",
-      "provider": "PandaAI",
-      "url": "https://www.pandaaiquant.com/learninghub/newcourse",
-      "desc": "PandaAI 的量化课程体系，从 L1 量化思维入门开始",
-      "tags": [
-       "课程",
-       "入门"
-      ],
-      "is_sample": false
-     },
-     "reason": "证据使用判断为\"会看线索，但关键线索常有遗漏\"（置信度中）。量变学院的 L1 从\"为什么要用数据和规则做决定\"讲起，正好补上这一块。",
-     "based_on": [
-      {
-       "dimension_id": "evidence_use",
-       "judgement": "会看线索，但关键线索常有遗漏",
-       "evidence": [
-        "第 3 关没有翻开任何关键线索（本关关键是「区间回测」）",
-        "第 4 关没有翻开任何关键线索（本关关键是「成交量」「超跌回测」）"
-       ]
-      }
-     ],
-     "next_step": {
-      "label": "去学习",
-      "url": "https://www.pandaaiquant.com/learninghub/newcourse"
      }
     }
    ]
@@ -1143,6 +1143,37 @@
      }
     },
     {
+     "id": "strategy-sloth",
+     "type": "strategy",
+     "title": "先在历史里找相似走势",
+     "resource": {
+      "name": "skill-xingtai-catcher",
+      "provider": "QuantSkills",
+      "url": "https://github.com/quantskills/skill-xingtai-catcher",
+      "desc": "相似 K 线形态搜索：找历史上走势相似的股票和期货",
+      "tags": [
+       "K 线",
+       "形态"
+      ],
+      "is_sample": false
+     },
+     "reason": "这局的人物卡是🦥树懒观察员（5 关里观望 80%），风险偏好判断为\"偏保守：轻仓或观望为主\"（置信度高）。相似 K 线搜索能看到历史上走势相似的标的后来怎样，不用下单也能积累判断。",
+     "based_on": [
+      {
+       "dimension_id": "risk_appetite",
+       "judgement": "偏保守：轻仓或观望为主",
+       "evidence": [
+        "第 1 关选择观望不入场",
+        "第 2 关选择观望不入场"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "查看策略",
+      "url": "https://github.com/quantskills/skill-xingtai-catcher"
+     }
+    },
+    {
      "id": "product-qube",
      "type": "product",
      "title": "用一句话把想法变成可回测的策略",
@@ -1171,36 +1202,6 @@
      "next_step": {
       "label": "去试试",
       "url": "https://www.pandaaiquant.com/agent_quant/"
-     }
-    },
-    {
-     "id": "strategy-qbti",
-     "type": "strategy",
-     "title": "先找到适合你的策略方向",
-     "resource": {
-      "name": "skill-qbti",
-      "provider": "QuantSkills",
-      "url": "https://github.com/quantskills/skill-qbti",
-      "desc": "QBTI 平凡人策略：五组问答把投资性格翻译成因子方向和策略参数",
-      "tags": [
-       "性格→策略",
-       "入门"
-      ],
-      "is_sample": false
-     },
-     "reason": "趋势 vs 反转判断为\"偏逆势反转：涨多了空、跌多了买\"（置信度低），风格还不明显。QBTI 用五组问答把投资性格翻译成策略参数，可以和这份画像对照着看。",
-     "based_on": [
-      {
-       "dimension_id": "style",
-       "judgement": "偏逆势反转：涨多了空、跌多了买",
-       "evidence": [
-        "补充关决定前 20 天上涨 6.0%，选择做空（逆势）"
-       ]
-      }
-     ],
-     "next_step": {
-      "label": "查看策略",
-      "url": "https://github.com/quantskills/skill-qbti"
      }
     }
    ]

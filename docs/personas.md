@@ -167,7 +167,21 @@
 ## 4. 和维度、推荐的关系
 
 - 人物卡由**特征**判别，6 维判断由**证据**得出，两者用同一套事件和阈值，结论方向一致。例如冲锋蛮牛的"信心偏高"在判断校准维度里有逐关证据。
-- 卡片的"需要留意"和画像页的推荐对应：蛮牛 → 信心校准小测 / 止损演练；刺猬 → 止损演练和止损技能包；树懒 → 信心小测和模拟赛；猫头鹰 → 风格对照和 Qube。规则见 [recommend.md](recommend.md)。
+- 卡片的"需要留意"和画像页的推荐卡片对应，推荐卡片的策略卡优先按人物卡挑（`recommend.ts` 的 `PERSONA_STRATEGY`）：
+
+  | 人物卡 | 策略卡（QuantSkills） | 为什么 |
+  |---|---|---|
+  | 🦥 树懒观察员 | [skill-xingtai-catcher](https://github.com/quantskills/skill-xingtai-catcher) 相似 K 线搜索 | 不用下单，先看历史上相似走势后来怎样 |
+  | 🐂 冲锋蛮牛 | 按趋势偏好（均线 / 超跌反弹） | 先补短板：止损技能包、行为偏差诊断排在前面 |
+  | 🦔 死扛刺猬 | 按趋势偏好 | 先补短板：止损技能包排在前面 |
+  | 🦉 夜猫研究员 | [skill-pandaai-factor-online](https://github.com/quantskills/skill-pandaai-factor-online) 因子大赛上手 | 翻线索的习惯就是因子研究的雏形 |
+  | 🦈 深海猎鲨 | [skill-a-share-stock-dossier](https://github.com/quantskills/skill-a-share-stock-dossier) 个股档案 | 重仓之前把研究做扎实 |
+  | 🐢 稳健老龟 | [skill-dalio-all-weather](https://github.com/quantskills/skill-dalio-all-weather) 全天候 | 风险预算扩展到资产配置 |
+  | 🐬 冲浪海豚 | [skill-ma-crossover-signal](https://github.com/quantskills/skill-ma-crossover-signal) 均线金叉死叉 | 把顺势写成规则 |
+  | 🦀 逆行螃蟹 | [skill-oversold-rebound](https://github.com/quantskills/skill-oversold-rebound) 超跌反弹 | 把抄底量化检验 |
+  | 🦊 灵活狐狸 | [skill-market-regime-analysis](https://github.com/quantskills/skill-market-regime-analysis) 市场状态划分 | 把"看情况"变成可复盘的规则 |
+
+  其余卡片（工具、PandaAI 产品、活动、课程）按 6 维判断挑，规则见 [recommend.md](recommend.md)。
 
 ## 5. 改卡片的流程
 

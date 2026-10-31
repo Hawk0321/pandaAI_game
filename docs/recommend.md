@@ -17,7 +17,7 @@
 
 | 卡片类型 | 作用 | 资源来源 |
 |---|---|---|
-| 策略 | 把玩家的交易风格写成可回测的规则 | QuantSkills 策略技能包 |
+| 策略 | 按人物卡或交易风格推荐可回测的规则 | QuantSkills 策略技能包 |
 | 工具 | 补能力短板（止损、行为偏差、复盘、防过拟合） | QuantSkills 工具技能包 |
 | 产品 | 每份画像必有一张，引到 PandaAI 平台 | Qube、量化因子中心 |
 | 活动 | 适合当下水平的比赛 | 全国期货模拟赛、因子大赛 |
@@ -31,9 +31,10 @@
 
 | 卡片 | 类型 | 触发条件 | 优先级 |
 |---|---|---|---|
-| [skill-ma-crossover-signal](https://github.com/quantskills/skill-ma-crossover-signal) 均线金叉死叉 | 策略 | 趋势偏好明确 | 70 |
-| [skill-oversold-rebound](https://github.com/quantskills/skill-oversold-rebound) 超跌反弹 | 策略 | 反转偏好明确 | 70 |
-| [skill-qbti](https://github.com/quantskills/skill-qbti) 性格 → 策略问答 | 策略 | 风格不明显（兜底） | 40 |
+| 人物卡对应的策略技能包（见 [personas.md](personas.md) 第 4 节） | 策略 | 人物卡有专属策略（蛮牛、刺猬没有） | 70 |
+| [skill-ma-crossover-signal](https://github.com/quantskills/skill-ma-crossover-signal) 均线金叉死叉 | 策略 | 无专属策略时，趋势偏好明确 | 70 |
+| [skill-oversold-rebound](https://github.com/quantskills/skill-oversold-rebound) 超跌反弹 | 策略 | 无专属策略时，反转偏好明确 | 70 |
+| [skill-qbti](https://github.com/quantskills/skill-qbti) 性格 → 策略问答 | 策略 | 以上都不满足（兜底） | 40 |
 | [skill-b11-auto-stop-loss-take-profit](https://github.com/quantskills/skill-b11-auto-stop-loss-take-profit) | 工具 | 风险控制短板 | 100 − 分数×100 |
 | [skill-trade-review](https://github.com/quantskills/skill-trade-review) | 工具 | 证据使用短板 | 95 − 分数×100 |
 | [skill-trading-behavior-diagnostics](https://github.com/quantskills/skill-trading-behavior-diagnostics) | 工具 | 判断校准短板 | 92 − 分数×100 |
@@ -60,8 +61,8 @@
 | 模拟玩家 | 人物卡 | 推荐卡片（按顺序） |
 |---|---|---|
 | 冲动重仓型 | 🐂 冲锋蛮牛 | 止损技能包 → 均线策略 → Qube（趋势模板）→ 量化课程 |
-| 谨慎研究型 | 🦉 夜猫研究员 | 量化因子中心 → 因子大赛 → 防过拟合 → QBTI |
-| 只看不做型 | 🦥 树懒观察员 | 全国期货模拟赛 → Qube → 逐笔复盘 → 量化课程 |
+| 谨慎研究型 | 🦉 夜猫研究员 | 因子大赛上手技能包 → 量化因子中心 → 因子大赛 → 防过拟合 |
+| 只看不做型 | 🦥 树懒观察员 | 全国期货模拟赛 → 相似 K 线搜索 → Qube → 逐笔复盘 |
 
 现场改一个关键选择：冲动型改成每关半仓、设 5% 止损、浮亏就平仓后，止损技能包不再出现。（测试 `recommend.test.ts` 覆盖。）
 

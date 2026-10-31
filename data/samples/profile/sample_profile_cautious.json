@@ -458,6 +458,37 @@
    ],
    "recommendations": [
     {
+     "id": "strategy-owl",
+     "type": "strategy",
+     "title": "把找线索的本事用到因子上",
+     "resource": {
+      "name": "skill-pandaai-factor-online",
+      "provider": "QuantSkills",
+      "url": "https://github.com/quantskills/skill-pandaai-factor-online",
+      "desc": "PandaAI 因子大赛上手：环境体检、登录、在线挖掘因子",
+      "tags": [
+       "因子",
+       "因子大赛"
+      ],
+      "is_sample": false
+     },
+     "reason": "这局的人物卡是🦉夜猫研究员（研究点使用 100%，关键线索命中 100%），证据使用判断为\"会先找关键线索，决定和证据一致\"（置信度高）。你翻线索的习惯就是因子研究的雏形，这个技能包带你在 PandaAI 上在线挖因子、参加因子大赛。",
+     "based_on": [
+      {
+       "dimension_id": "evidence_use",
+       "judgement": "会先找关键线索，决定和证据一致",
+       "evidence": [
+        "第 1 关翻开了全部关键线索「成交量」「同期大盘」",
+        "第 1 关翻开的线索整体看涨，决定做多与线索一致"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "查看策略",
+      "url": "https://github.com/quantskills/skill-pandaai-factor-online"
+     }
+    },
+    {
      "id": "product-factor-center",
      "type": "product",
      "title": "在因子中心把研究做成因子",
@@ -580,37 +611,6 @@
      "next_step": {
       "label": "查看工具",
       "url": "https://github.com/quantskills/skill-backtest-overfit"
-     }
-    },
-    {
-     "id": "strategy-qbti",
-     "type": "strategy",
-     "title": "先找到适合你的策略方向",
-     "resource": {
-      "name": "skill-qbti",
-      "provider": "QuantSkills",
-      "url": "https://github.com/quantskills/skill-qbti",
-      "desc": "QBTI 平凡人策略：五组问答把投资性格翻译成因子方向和策略参数",
-      "tags": [
-       "性格→策略",
-       "入门"
-      ],
-      "is_sample": false
-     },
-     "reason": "趋势 vs 反转判断为\"偏逆势反转：涨多了空、跌多了买\"（置信度中），倾向还不够强，暂不据此定策略。QBTI 用五组问答把投资性格翻译成策略参数，可以和这份画像对照着看。",
-     "based_on": [
-      {
-       "dimension_id": "style",
-       "judgement": "偏逆势反转：涨多了空、跌多了买",
-       "evidence": [
-        "第 2 关决定前 20 天上涨 15.0%，选择做空（逆势）",
-        "第 4 关决定前 20 天下跌 14.0%，选择做多（逆势）"
-       ]
-      }
-     ],
-     "next_step": {
-      "label": "查看策略",
-      "url": "https://github.com/quantskills/skill-qbti"
      }
     }
    ]

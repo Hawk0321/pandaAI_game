@@ -56,12 +56,22 @@ describe('推荐 recommend()', () => {
 
   it('趋势偏好明确时推荐均线策略，逆势时推荐超跌反弹，不明显时推荐 QBTI', async () => {
     const prof = await run(player('cautious'));
-    const withStyle = (score: number | null): Profile => ({ ...prof, dimensions: prof.dimensions.map((d) =>
+    const withStyle = (score: number | null): Profile => ({ ...prof, persona: { ...prof.persona, id: undefined }, dimensions: prof.dimensions.map((d) =>
       d.id === 'style' ? { ...d, score, confidence: 'medium' as const, conflict: false } : d) });
     const strategy = (p: Profile) => recommend(p).find((r) => r.type === 'strategy')?.id;
     expect(strategy(withStyle(0.8))).toBe('strategy-ma-cross');
     expect(strategy(withStyle(0.2))).toBe('strategy-oversold');
     expect(strategy(withStyle(0.5))).toBe('strategy-qbti');
+  });
+
+  it('策略卡优先按人物卡挑：猫头鹰 → 因子大赛上手技能包；蛮牛没有专属策略，按趋势偏好推荐', async () => {
+    const [c, i] = await Promise.all([run(player('cautious')), run(player('impulsive'))]);
+    const strategy = (p: Profile) => p.recommendations!.find((r) => r.type === 'strategy')!;
+    expect(c.persona.id).toBe('owl');
+    expect(strategy(c).resource.name).toBe('skill-pandaai-factor-online');
+    expect(strategy(c).reason).toContain('夜猫研究员');
+    expect(i.persona.id).toBe('bull');
+    expect(strategy(i).id).toBe('strategy-ma-cross');
   });
 
   it('各项都不明显时，仍给 PandaAI 产品卡', async () => {
