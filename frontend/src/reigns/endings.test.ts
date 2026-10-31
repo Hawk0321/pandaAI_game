@@ -4,8 +4,8 @@ import { choose, createGame } from './engine';
 import { ENDING_THRESHOLDS, ENDINGS, GENERIC_ENDINGS, ROLE_SPECIAL_ENDINGS, findEnding, getEndings } from './endings';
 import type { EndingInput } from './endings';
 import { ROLE_IDS } from './roles';
-import { MAX_TURNS, STAT_KEYS, STYLE_TAGS } from './types';
-import type { Card, ChoiceLog, RoleId, Side, Stats, StyleTally } from './types';
+import { OVERTIME_START, STAT_KEYS, STYLE_TAGS } from './types';
+import type { Card, ChoiceLog, GameState, RoleId, Side, Stats, StyleTag, StyleTally } from './types';
 
 const ZERO_TALLY: StyleTally = Object.fromEntries(STYLE_TAGS.map((tag) => [tag, 0])) as unknown as StyleTally;
 const MID: Stats = { capital: 50, risk: 50, confidence: 50, reputation: 50 };
@@ -155,11 +155,12 @@ describe('findEnding：普通结局', () => {
     }
   });
 
-  it('普通结局优先于专属、惯性和走满结局', () => {
+  it('普通结局优先于专属、惯性和收盘结局', () => {
+    const turn = OVERTIME_START + 5;
     for (const role of ROLE_IDS) {
       const stats: Stats = { capital: 100, risk: 10, confidence: 90, reputation: 90 };
-      const log = makeLog(Array<Side>(MAX_TURNS).fill('left'));
-      expect(findEnding(input(role, { stats, turn: MAX_TURNS, log }), NO_CARDS)).toBe(ENDINGS[role].capital.high);
+      const log = makeLog(Array<Side>(turn).fill('left'));
+      expect(findEnding(input(role, { stats, turn, log, closingBell: true }), NO_CARDS)).toBe(ENDINGS[role].capital.high);
     }
   });
 });
@@ -187,13 +188,14 @@ describe('findEnding：角色专属中途特殊结局', () => {
     }
   });
 
-  it('专属结局优先于惯性思维，也优先于走满结局', () => {
+  it('专属结局优先于惯性思维，也优先于收盘结局', () => {
     for (const role of ROLE_IDS) {
       const e = ROLE_SPECIAL_ENDINGS[role][0];
       const stats = ROLE_SPECIAL_STATES[role][e.id];
       const streak = makeLog(Array<Side>(ENDING_THRESHOLDS.inertiaStreak).fill('left'));
       expect(findEnding(input(role, { stats, log: streak }), NO_CARDS)).toBe(e);
-      expect(findEnding(input(role, { stats, turn: MAX_TURNS, log: alternating(MAX_TURNS) }), NO_CARDS)).toBe(e);
+      const turn = OVERTIME_START + 5;
+      expect(findEnding(input(role, { stats, turn, log: alternating(turn), closingBell: true }), NO_CARDS)).toBe(e);
     }
   });
 
@@ -222,17 +224,23 @@ describe('findEnding：惯性思维（通用，按角色给文案）', () => {
   });
 });
 
-describe('findEnding：走满回合', () => {
+describe('findEnding：加时收盘铃', () => {
+  const FULL_TURN = OVERTIME_START + 5;
   const advCards = Array.from({ length: 10 }, (_, i) => adventureCard(`adv-${i}`));
   const full = (role: RoleId, patch: Partial<EndingInput>): EndingInput =>
-    input(role, { turn: MAX_TURNS, log: alternating(MAX_TURNS), ...patch });
+    input(role, { turn: FULL_TURN, log: alternating(FULL_TURN), closingBell: true, ...patch });
   const SKEWED: Stats = { capital: 70, risk: 30, confidence: 50, reputation: 50 };
 
-  it('未走满不触发走满结局', () => {
-    for (const role of ROLE_IDS) expect(findEnding(input(role, { turn: MAX_TURNS - 1 }), NO_CARDS)).toBeNull();
+  it('没有回合上限：铃没响时，走多少回合都不会因回合数结束', () => {
+    for (const role of ROLE_IDS) {
+      for (const turn of [OVERTIME_START - 1, OVERTIME_START, OVERTIME_START + 1, 200]) {
+        expect(findEnding(input(role, { turn, log: alternating(turn) }), NO_CARDS)).toBeNull();
+        expect(findEnding(input(role, { turn, log: alternating(turn), closingBell: false }), NO_CARDS)).toBeNull();
+      }
+    }
   });
 
-  it('走满必有结局：不管数值怎样（没触底爆满）', () => {
+  it('铃响必有结局：不管数值怎样（没触底爆满）', () => {
     for (const role of ROLE_IDS) {
       for (const c of [1, 20, 40, 60, 99]) {
         const stats: Stats = { capital: c, risk: 100 - c, confidence: c, reputation: 100 - c };
@@ -265,7 +273,7 @@ describe('findEnding：走满回合', () => {
   it('行情亲历者：奇遇卡选择次数 >= 8，用 log 和 cards 统计', () => {
     const n = ENDING_THRESHOLDS.adventureCount;
     const advLog = (count: number): ChoiceLog[] => [
-      ...alternating(MAX_TURNS - count, 'day'),
+      ...alternating(FULL_TURN - count, 'day'),
       ...advCards.slice(0, count).map((card, i) => ({ cardId: card.id, side: (i % 2 === 0 ? 'left' : 'right') as Side })),
     ];
     for (const role of ROLE_IDS) {
@@ -287,7 +295,7 @@ describe('findEnding：走满回合', () => {
     }
   });
 
-  it('走满优先级：行情亲历者 > 偏执专家 > 稳如磐石', () => {
+  it('收盘优先级：行情亲历者 > 偏执专家 > 稳如磐石', () => {
     const tally = tallyOf({ cautious: 20 });
     const advLog = advCards.slice(0, 8).map((card, i) => ({ cardId: card.id, side: (i % 2 === 0 ? 'left' : 'right') as Side }));
     for (const role of ROLE_IDS) {
@@ -298,34 +306,84 @@ describe('findEnding：走满回合', () => {
   });
 });
 
+/** 安全阀：只用来防止测试死循环，不是游戏规则（游戏没有回合上限）。 */
+const TEST_GUARD = 1000;
+
+type Strategy = (state: GameState, rand: () => number, i: number) => Side;
+
+const randomStrategy: Strategy = (_s, rand) => (rand() < 0.5 ? 'left' : 'right');
+
+/** 选让四条数值更靠近 50 的一侧的“距离”。 */
+function distanceFromMid(s: GameState, side: Side): number {
+  return STAT_KEYS.reduce((sum, key) => sum + Math.abs(s.stats[key] + (s.current?.[side].effects[key] ?? 0) - 50), 0);
+}
+
+/** 连续 7 次同方向就强制换边，避开惯性思维（阈值 8）。 */
+function avoidStreak(s: GameState, pick: Side): Side {
+  const recent = s.log.slice(-(ENDING_THRESHOLDS.inertiaStreak - 1));
+  const streak = recent.length === ENDING_THRESHOLDS.inertiaStreak - 1 && recent.every((e) => e.side === pick);
+  return streak ? (pick === 'left' ? 'right' : 'left') : pick;
+}
+
+/** 尽量把四条数值拉回 50。用来证明稳如磐石 / 活到收盘可达。 */
+const keepCentered: Strategy = (s) =>
+  avoidStreak(s, distanceFromMid(s, 'left') <= distanceFromMid(s, 'right') ? 'left' : 'right');
+
+/** 稳住数值的同时偏爱某个标签（代价不超过 30 点距离就选带标签的一侧）。用来证明偏执专家可达。 */
+function centeredTagGreedy(tag: StyleTag): Strategy {
+  return (s) => {
+    const has = (side: Side): boolean => s.current?.[side].tags?.includes(tag) ?? false;
+    let pick: Side = distanceFromMid(s, 'left') <= distanceFromMid(s, 'right') ? 'left' : 'right';
+    if (has('left') !== has('right')) {
+      const tagged: Side = has('left') ? 'left' : 'right';
+      const other: Side = tagged === 'left' ? 'right' : 'left';
+      if (distanceFromMid(s, tagged) <= distanceFromMid(s, other) + 30) pick = tagged;
+    }
+    return avoidStreak(s, pick);
+  };
+}
+
+function play(role: RoleId, seed: number, strategy: Strategy, rand: () => number): GameState {
+  let state = createGame(ALL_CARDS, seed, role);
+  for (let i = 0; state.ending === null && i < TEST_GUARD; i += 1) state = choose(state, strategy(state, rand, i), ALL_CARDS);
+  return state;
+}
+
+function quantile(sorted: readonly number[], p: number): number {
+  return sorted[Math.min(sorted.length - 1, Math.floor(p * sorted.length))];
+}
+
 describe('蒙特卡洛：三个角色各 1500 局随机策略（ALL_CARDS）', () => {
   const GAMES = 1500;
 
   for (const role of ROLE_IDS) {
-    it(`${role}：每局必在 MAX_TURNS 内结束，并打印结局占比`, () => {
+    it(`${role}：每局都在有限回合内结束（加时靠抖动 + 收盘铃），并打印结局占比`, () => {
       const rand = rng(20240601 + role.length * 7);
       const counts = new Map<string, number>();
-      let maxTurn = 0;
-      let totalTurns = 0;
+      const lengths: number[] = [];
 
       for (let g = 0; g < GAMES; g += 1) {
-        let state = createGame(ALL_CARDS, g + 1, role);
-        let guard = 0;
-        while (state.ending === null) {
-          state = choose(state, rand() < 0.5 ? 'left' : 'right', ALL_CARDS);
-          guard += 1;
-          if (guard > MAX_TURNS) break;
-        }
+        const state = play(role, g + 1, randomStrategy, rand);
         expect(state.ending).not.toBeNull();
         expect(state.current).toBeNull();
         expect(state.role).toBe(role);
-        expect(state.turn).toBeLessThanOrEqual(MAX_TURNS);
-        maxTurn = Math.max(maxTurn, state.turn);
-        totalTurns += state.turn;
+        expect(state.turn).toBeLessThan(TEST_GUARD);
+        if (state.turn <= OVERTIME_START) expect(state.jitter ?? null).toBeNull();
+        // 收盘类结局只会在铃响时出现，而且此时没有任何数值在 0/100，文案和数字不矛盾
+        if (state.ending?.kind === 'survive') {
+          expect(state.turn).toBeGreaterThan(OVERTIME_START);
+          for (const key of STAT_KEYS) {
+            expect(state.stats[key]).toBeGreaterThan(0);
+            expect(state.stats[key]).toBeLessThan(100);
+          }
+        }
+        lengths.push(state.turn);
         const id = (state.ending as { id: string }).id;
         counts.set(id, (counts.get(id) ?? 0) + 1);
       }
 
+      lengths.sort((a, b) => a - b);
+      const overtime = lengths.filter((t) => t > OVERTIME_START);
       const endings = getEndings(role);
       const pct = (n: number): string => `${((n / GAMES) * 100).toFixed(1)}%`;
       const rows = endings.map(
@@ -335,15 +393,40 @@ describe('蒙特卡洛：三个角色各 1500 局随机策略（ALL_CARDS）', (
       const roleSpecialCount = ROLE_SPECIAL_ENDINGS[role].reduce((s, e) => s + (counts.get(e.id) ?? 0), 0);
       console.info(
         [
-          `蒙特卡洛 ${role} ${GAMES} 局，平均 ${(totalTurns / GAMES).toFixed(1)} 回合，最长 ${maxTurn} 回合`,
+          `蒙特卡洛 ${role} ${GAMES} 局：局长中位数 ${quantile(lengths, 0.5)}，p90 ${quantile(lengths, 0.9)}，最长 ${lengths[lengths.length - 1]}；`
+            + `进入加时 ${pct(overtime.length)}，加时局中位数 ${overtime.length > 0 ? quantile(overtime, 0.5) : '-'}`,
           ...rows,
           `普通结局合计 ${pct(GAMES - specialCount)}，特殊结局合计 ${pct(specialCount)}（其中角色专属 ${pct(roleSpecialCount)}）`,
         ].join('\n'),
       );
+
+      // 加时确实会发生，且几乎所有局在 80 回合内结束
+      expect(overtime.length).toBeGreaterThan(0);
+      expect(quantile(lengths, 0.99)).toBeLessThanOrEqual(80);
 
       // 所有结局都在该角色的结局表里
       const known = new Set(endings.map((e) => e.id));
       for (const id of counts.keys()) expect(known.has(id)).toBe(true);
     });
   }
+
+  it('四个收盘（survive）结局在模拟中都能出现', () => {
+    const survive = new Set<string>();
+    // 注：基金 / 炒股牌库奇遇卡多（各 20 张），收盘时几乎总先命中“行情亲历者”；偏执专家主要在 Web3 出现。
+    const strategies: readonly Strategy[] = [randomStrategy, keepCentered, ...STYLE_TAGS.map((tag) => centeredTagGreedy(tag))];
+    for (const role of ROLE_IDS) {
+      const rand = rng(9001 + role.length);
+      strategies.forEach((strategy) => {
+        for (let g = 0; g < 100; g += 1) {
+          const state = play(role, 90_000 + g, strategy, rand);
+          expect(state.ending).not.toBeNull();
+          if (state.ending?.kind === 'survive') survive.add(state.ending.id);
+        }
+      });
+    }
+    const expected = ['adventurer', 'obsessive', 'balanced', 'survivor'].map(
+      (key) => GENERIC_ENDINGS.stock[key as keyof (typeof GENERIC_ENDINGS)['stock']].id,
+    );
+    for (const id of expected) expect(survive.has(id), `模拟中没出现 ${id}`).toBe(true);
+  });
 });

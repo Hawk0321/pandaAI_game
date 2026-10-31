@@ -1,4 +1,4 @@
-// 结局页：结局 → 本局摘要 → 动态人物卡 → 再来一局 → 引流卡 → 页脚，另有可折叠的“结局图鉴”。
+// 结局页：结局（插图位 + 标题）→ 存活关数 → 本局摘要 → 动态人物卡 → 再来一局 → 引流卡 → 页脚，另有可折叠的“结局图鉴”。
 // 人物卡层级沿用 docs/personas.md（见 PersonaReveal）；引流规则见 referral.ts。人物卡是趣味表达，不是投资建议。
 import { useEffect, useMemo, useRef } from 'react';
 import { resolvePersona } from './engine';
@@ -8,8 +8,11 @@ import { audio } from './audio/audioManager';
 import { PersonaReveal } from './PersonaReveal';
 import { buildReferrals } from './referral';
 import { ROLES } from './roles';
-import { STAT_KEYS } from './types';
-import type { Ending, GameState, StatKey } from './types';
+import { endingArtwork, survivalBadge } from './endingArt';
+import { SURVIVAL_TIERS, recordBest, survivalBlurb, survivalProgress, survivalTier } from './survival';
+import type { BestRecord } from './survival';
+import { OVERTIME_START, STAT_KEYS } from './types';
+import type { Ending, GameState, RoleId, StatKey } from './types';
 import type { CSSProperties } from 'react';
 
 export interface EndingScreenProps {
@@ -56,6 +59,74 @@ function statFlag(key: StatKey, value: number, ending: Ending): string | null {
   return extremeLabel(key, value);
 }
 
+/**
+ * 本局的最佳纪录只记一次：GameState 不可变、每局都是新对象，所以用它做键，
+ * StrictMode 重复渲染也拿到同一个结果，不会把“新纪录”算没了。存储不可用时为 null。
+ */
+const bestCache = new WeakMap<GameState, BestRecord | null>();
+function bestFor(state: GameState): BestRecord | null {
+  if (!bestCache.has(state)) bestCache.set(state, recordBest(state.role, state.turn));
+  return bestCache.get(state) ?? null;
+}
+
+interface SurvivalPanelProps {
+  readonly turn: number;
+  readonly role: RoleId;
+  readonly best: BestRecord | null;
+}
+
+/** “活了 N 关”：超大数字 + 段位 + 文案 + 以 40 为满的进度条（加时段另色）+ 本机最佳。 */
+function SurvivalPanel({ turn, role, best }: SurvivalPanelProps) {
+  const tier = survivalTier(turn);
+  const blurb = survivalBlurb(tier, role);
+  const progress = survivalProgress(turn);
+  const badge = survivalBadge(tier.id);
+  const meterText = progress.overtime > 0
+    ? `常规 ${OVERTIME_START} 关已走满，加时 +${progress.overtime} 关`
+    : `${progress.regular} / ${OVERTIME_START} 关`;
+  return (
+    <section className={`reigns-survival reigns-survival-${tier.id} reigns-rise`} style={rise(0.05)} aria-labelledby="reigns-survival-count">
+      <div className="reigns-survival-head">
+        {badge && <img className="reigns-survival-badge" src={badge} alt="" width="56" height="56" />}
+        <h3 id="reigns-survival-count" className="reigns-survival-count" aria-label={`这一局活了 ${turn} 关`}>
+          <span className="reigns-survival-unit">活了</span>
+          <strong className="reigns-survival-num">{turn}</strong>
+          <span className="reigns-survival-unit">关</span>
+        </h3>
+      </div>
+      <p className="reigns-survival-tier" aria-label={`段位：${tier.name}，第 ${tier.level} 段，共 ${SURVIVAL_TIERS.length} 段`}>
+        <span className="reigns-survival-level" aria-hidden="true">第 {tier.level}/{SURVIVAL_TIERS.length} 段</span>
+        <span className="reigns-survival-name">{tier.name}</span>
+      </p>
+      <p className="reigns-survival-blurb">{blurb}</p>
+      <div
+        className="reigns-survival-meter"
+        role="meter"
+        aria-label="存活进度"
+        aria-valuemin={0}
+        aria-valuemax={OVERTIME_START}
+        aria-valuenow={progress.regular}
+        aria-valuetext={meterText}
+      >
+        <span className="reigns-survival-regular" style={{ width: `${progress.regularPct}%` }} />
+        {progress.overtime > 0 && <span className="reigns-survival-overtime" style={{ width: `${progress.overtimePct}%` }} />}
+      </div>
+      <p className="reigns-survival-scale" aria-hidden="true">
+        <span>0</span>
+        <span>{OVERTIME_START} 关</span>
+        {progress.overtime > 0 && <span className="reigns-survival-ot-label">加时 +{progress.overtime} 关</span>}
+      </p>
+      {best && (
+        <p className="reigns-survival-best">
+          {best.isNew && <span className="reigns-survival-new">新纪录</span>}
+          <span>本机最佳 <strong>{best.best}</strong> 关</span>
+          {best.isNew && best.previous !== null && <span className="reigns-survival-prev">（之前 {best.previous} 关）</span>}
+        </p>
+      )}
+    </section>
+  );
+}
+
 export function EndingScreen({ state, onRestart, onReplay }: EndingScreenProps) {
   const { ending, stats, tally, turn, role } = state;
   const roleDef = ROLES[role];
@@ -76,11 +147,14 @@ export function EndingScreen({ state, onRestart, onReplay }: EndingScreenProps) 
   const personaId = useMemo(() => (ending ? resolvePersona(state, ALL_CARDS).id : null), [state, ending]);
   const referrals = useMemo(() => (ending && personaId ? buildReferrals(personaId, ending, stats, tally, role) : []), [personaId, ending, stats, tally, role]);
   const codex = useMemo(() => getEndings(role), [role]);
+  const best = useMemo(() => (ending ? bestFor(state) : null), [state, ending]);
   if (!ending) return null;
+  const artwork = endingArtwork(ending.id, role);
 
   return (
     <div className="reigns-end">
       <section className={`reigns-ending reigns-rise${ending.special ? ' reigns-ending-special' : ''}`} style={rise(0)} aria-labelledby="reigns-end-title">
+        {artwork && <img className="reigns-ending-art" src={artwork} alt={ending.title} />}
         <p className="reigns-ending-kicker">
           {ending.special ? (
             <>
@@ -93,8 +167,10 @@ export function EndingScreen({ state, onRestart, onReplay }: EndingScreenProps) 
         <p className="reigns-ending-desc">{ending.description}</p>
       </section>
 
+      <SurvivalPanel turn={turn} role={role} best={best} />
+
       <section className="reigns-summary reigns-rise" style={rise(0.1)} aria-label="本局数字">
-        <p className="reigns-summary-turns">本局共 <strong>{turn}</strong> 个回合 · 四项数值</p>
+        <p className="reigns-summary-turns">最终四项数值</p>
         <ul className="reigns-summary-stats">
           {STAT_KEYS.map((key) => {
             const value = stats[key];

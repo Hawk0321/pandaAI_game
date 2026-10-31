@@ -8,7 +8,8 @@ import { RoleSelect } from './RoleSelect';
 import { ROLES } from './roles';
 import { characterArtwork, selfArtwork } from './characterArt';
 import { hintIcon, statIcon } from './uiArt';
-import { STAT_KEYS } from './types';
+import { formatJitter } from './survival';
+import { OVERTIME_START, STAT_KEYS } from './types';
 import type { GameState, RoleId, Side, StatKey } from './types';
 import { audio } from './audio/audioManager';
 import { finalSfxFor, isInDanger, newlyDangerous, playBgmFor } from './audio/bgmPlan';
@@ -32,6 +33,9 @@ const prefersReducedMotion = (): boolean =>
 /** “后来……”这行字停留多久（毫秒），超时或下一次拖动就淡出。 */
 const AFTERMATH_MS = 6000;
 
+/** 加时抖动那一行停留多久（毫秒）。 */
+const JITTER_MS = 2600;
+
 /** 每局用新的 seed 洗牌。 */
 const newGame = (role: RoleId): GameState => createGame(ALL_CARDS, Date.now() % 2147483647, role);
 
@@ -46,6 +50,7 @@ export function ReignsGame() {
   const cardRef = useRef<HTMLDivElement>(null);
   const startX = useRef(0);
   const [aftermathShown, setAftermathShown] = useState(false);
+  const [jitterShown, setJitterShown] = useState(false);
   const timer = useRef<number | undefined>(undefined);
 
   useEffect(() => () => window.clearTimeout(timer.current), []);
@@ -104,6 +109,15 @@ export function ReignsGame() {
     return () => window.clearTimeout(id);
   }, [game?.lastAftermath, game?.turn]);
 
+  // 加时阶段引擎写入 state.jitter（可能暂时为 undefined），每回合短暂显示一行。
+  const jitterText = game ? formatJitter(game.jitter, game.role) : null;
+  useEffect(() => {
+    if (!jitterText) { setJitterShown(false); return undefined; }
+    setJitterShown(true);
+    const id = window.setTimeout(() => setJitterShown(false), JITTER_MS);
+    return () => window.clearTimeout(id);
+  }, [jitterText, game?.turn]);
+
   const commit = useCallback((side: Side) => {
     if (exiting || !game || game.ending || !game.current) return;
     audio.playSfx(side === 'left' ? 'sfx-card-left' : 'sfx-card-right');
@@ -151,7 +165,7 @@ export function ReignsGame() {
   };
   const onPointerCancel = () => { setDragging(false); setDx(0); };
 
-  const resetCard = () => { setDx(0); setDragging(false); setExiting(null); setAftermathShown(false); setOpenStat(null); };
+  const resetCard = () => { setDx(0); setDragging(false); setExiting(null); setAftermathShown(false); setJitterShown(false); setOpenStat(null); };
   const resetAudioState = () => { setTension(false); prevStatsRef.current = null; endedRef.current = null; };
   const start = (role: RoleId) => { resetAudioState(); setGame(newGame(role)); setBackToSelect(false); resetCard(); };
   /** “再来一局”：回到选角页。 */
@@ -187,6 +201,8 @@ export function ReignsGame() {
     transition: dragging ? 'none' : `transform ${EXIT_MS}ms ease-out, opacity ${EXIT_MS}ms ease-out`,
     opacity: exiting ? 0 : 1,
   };
+  /** “关”就是回合数：已做 turn 个决定，正在闯第 turn + 1 关。 */
+  const overtime = game.ending === null && game.turn >= OVERTIME_START;
   const labelOpacity = (side: Side) => (exiting === side ? 1 : leaning === side ? progress : 0);
 
   const onCardKey = (e: ReactKeyboardEvent<HTMLDivElement>) => { if (e.key === 'Enter' || e.key === ' ') e.preventDefault(); };
@@ -195,7 +211,11 @@ export function ReignsGame() {
     <section className="reigns-root" aria-label="交易滑牌">
       <header className="reigns-header">
         <h1 className="reigns-title">交易滑牌 <span className="reigns-role-chip">{roleDef.emoji} {roleDef.name}</span></h1>
-        <p className="reigns-turn">{game.ending ? `共 ${game.turn} 回合` : `第 ${game.turn + 1} 回合`} <span className="reigns-sample">示例内容</span></p>
+        <p className="reigns-turn">
+          {game.ending ? `活了 ${game.turn} 关` : `第 ${game.turn + 1} 关`}
+          {overtime && <span className="reigns-overtime-tag" title={`已走满 ${OVERTIME_START} 关，市场开始随机抖动`}>加时</span>}
+          <span className="reigns-sample">示例内容</span>
+        </p>
         <MuteButton />
       </header>
 
@@ -240,6 +260,11 @@ export function ReignsGame() {
         <EndingScreen state={game} onRestart={restart} onReplay={replay} />
       ) : card && (
         <>
+          {(overtime || jitterText) && (
+            <p className={`reigns-jitter${jitterShown && jitterText ? ' reigns-jitter-on' : ''}`} aria-live="polite" aria-atomic="true">
+              {jitterShown && jitterText ? jitterText : ''}
+            </p>
+          )}
           <div className="reigns-stage">
             <div
               key={`${card.id}-${game.turn}`}

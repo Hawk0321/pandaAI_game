@@ -1,4 +1,4 @@
-import { MAX_TURNS, STAT_KEYS, STYLE_TAGS } from './types';
+import { STAT_KEYS, STYLE_TAGS } from './types';
 import type { Card, ChoiceLog, Ending, EndingKind, RoleId, StatKey, Stats, StyleTally } from './types';
 
 const STAT_FLOOR = 0;
@@ -292,6 +292,11 @@ export interface EndingInput {
   readonly turn: number;
   readonly log: readonly ChoiceLog[];
   readonly tally: StyleTally;
+  /**
+   * 本回合加时“收盘铃”是否响（由引擎按 seed + turn 决定，只在 turn > OVERTIME_START 时可能为 true）。
+   * 省略视为 false。
+   */
+  readonly closingBell?: boolean;
 }
 
 function findNormalEnding(role: RoleId, stats: Stats): Ending | null {
@@ -343,10 +348,11 @@ function findFinalEnding(input: EndingInput, cards: readonly Card[]): Ending {
  *  1. 普通结局：任一数值触底（0）或爆满（100），按资金、风控、信心、口碑的顺序检查，low 先于 high。
  *  2. 角色专属中途特殊结局（任意回合都可能触发，按 ROLE_SPECIALS 里的顺序）。
  *  3. 通用中途特殊结局：惯性思维。
- *  4. 走满 MAX_TURNS 时的特殊结局（按过程判定）：
+ *  4. 收盘铃响（input.closingBell，加时阶段才会响）时的收盘结局（按过程判定）：
  *     行情亲历者 > 偏执专家 > 稳如磐石。
- *  5. 活到收盘（兜底，保证走满一定有结局）。
- *  都不满足则返回 null，游戏继续。
+ *  5. 活到收盘（铃响时的兜底）。
+ *  都不满足则返回 null，游戏继续。没有回合上限：加时阶段靠市场抖动和收盘铃结束。
+ *  因为 1 先判定，收盘结局出现时任何数值都不在 0/100。
  */
 export function findEnding(input: EndingInput, cards: readonly Card[]): Ending | null {
   const normal = findNormalEnding(input.role, input.stats);
@@ -357,6 +363,6 @@ export function findEnding(input: EndingInput, cards: readonly Card[]): Ending |
 
   if (hasStreak(input.log, ENDING_THRESHOLDS.inertiaStreak)) return GENERIC_ENDINGS[input.role].inertia;
 
-  if (input.turn >= MAX_TURNS) return findFinalEnding(input, cards);
+  if (input.closingBell === true) return findFinalEnding(input, cards);
   return null;
 }

@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { CARDS } from './cards';
-import { ENDINGS, choose, createGame, getEndings, inferPersona, previewEffects } from './engine';
+import {
+  CLOSING_BELL, ENDINGS, choose, closingBellChance, createGame, getEndings, inferPersona, overtimeJitter, previewEffects,
+  rollClosingBell,
+} from './engine';
 import { ROLE_IDS } from './roles';
-import { MAX_TURNS, STAT_KEYS, STYLE_TAGS } from './types';
+import { OVERTIME_START, STAT_KEYS, STYLE_TAGS } from './types';
 import type { Card, GameState, RoleId, Side, StatKey, StyleTag, StyleTally } from './types';
 
 function deepFreeze<T>(value: T): T {
@@ -156,20 +159,109 @@ describe('choose', () => {
     expect(second.lastAftermath).toBeNull();
   });
 
-  it('走满 MAX_TURNS 必有结局且 current 为 null；之前不会提前结束', () => {
+  it('OVERTIME_START 及之前不会因回合数结束，jitter 为 null；进入加时后每回合都有 jitter', () => {
     const calm = ['a', 'b', 'c'].map((id) => makeCard(id, { risk: 1 }, { risk: -1 }));
     let state = createGame(calm, 3);
-    for (let i = 0; i < MAX_TURNS - 1; i += 1) {
+    expect(state.jitter).toBeNull();
+    for (let i = 0; i < OVERTIME_START; i += 1) {
       state = choose(state, i % 2 === 0 ? 'left' : 'right', calm);
       expect(state.ending).toBeNull();
+      expect(state.jitter).toBeNull();
     }
-    expect(state.turn).toBe(MAX_TURNS - 1);
-    state = choose(state, 'left', calm);
-    expect(state.turn).toBe(MAX_TURNS);
-    expect(state.ending).not.toBeNull();
-    expect(state.ending?.special).toBe(true);
+    expect(state.turn).toBe(OVERTIME_START);
+    let overtimeTurns = 0;
+    while (state.ending === null) {
+      const before = state;
+      state = choose(state, state.turn % 2 === 0 ? 'left' : 'right', calm);
+      overtimeTurns += 1;
+      expect(state.turn).toBeGreaterThan(OVERTIME_START);
+      // jitter 只写有变化的项，且等于“选项之后 → 抖动之后”的实际差值
+      const jitter = state.jitter ?? {};
+      expect(Object.keys(jitter).length).toBeGreaterThanOrEqual(1);
+      expect(Object.keys(jitter).length).toBeLessThanOrEqual(2);
+      const choiceEffects = before.current?.[before.turn % 2 === 0 ? 'left' : 'right'].effects ?? {};
+      for (const key of STAT_KEYS) {
+        const afterChoice = Math.min(100, Math.max(0, before.stats[key] + (choiceEffects[key] ?? 0)));
+        expect(state.stats[key]).toBe(afterChoice + (jitter[key] ?? 0));
+        if (key in jitter) expect(jitter[key]).not.toBe(0);
+      }
+      expect(overtimeTurns).toBeLessThan(500);
+    }
     expect(state.current).toBeNull();
-    expect(state.log).toHaveLength(MAX_TURNS);
+    expect(state.log).toHaveLength(state.turn);
+  });
+
+  it('同 seed 同选择序列结果完全一致（含抖动）；不同 seed 抖动不同', () => {
+    const calm = ['a', 'b', 'c'].map((id) => makeCard(id, { risk: 1 }, { risk: -1 }));
+    const play = (seed: number): GameState[] => {
+      const states: GameState[] = [];
+      let state = createGame(calm, seed);
+      while (state.ending === null && state.turn < 300) {
+        state = choose(state, state.turn % 2 === 0 ? 'left' : 'right', calm);
+        states.push(state);
+      }
+      return states;
+    };
+    expect(play(42)).toEqual(play(42));
+    for (let turn = 0; turn <= OVERTIME_START; turn += 1) expect(overtimeJitter(42, turn)).toEqual({});
+    const turns = Array.from({ length: 20 }, (_, i) => OVERTIME_START + 1 + i);
+    expect(turns.map((t) => overtimeJitter(42, t))).toEqual(turns.map((t) => overtimeJitter(42, t)));
+    expect(turns.map((t) => overtimeJitter(42, t))).not.toEqual(turns.map((t) => overtimeJitter(43, t)));
+  });
+
+  it('抖动幅度随加时回合增长，单条不超过封顶 25', () => {
+    const maxAbs = (turn: number): number => {
+      let m = 0;
+      for (let seed = 0; seed < 200; seed += 1) {
+        for (const v of Object.values(overtimeJitter(seed, turn))) m = Math.max(m, Math.abs(v ?? 0));
+      }
+      return m;
+    };
+    expect(maxAbs(OVERTIME_START + 1)).toBeLessThanOrEqual(4);
+    expect(maxAbs(OVERTIME_START + 10)).toBeGreaterThan(maxAbs(OVERTIME_START + 1));
+    expect(maxAbs(OVERTIME_START + 100)).toBeLessThanOrEqual(25);
+  });
+
+  it('收盘铃：非加时为 0，随加时回合单调增长并最终到 1；同 seed 同 turn 结果一致', () => {
+    for (let turn = 0; turn <= OVERTIME_START; turn += 1) {
+      expect(closingBellChance(turn)).toBe(0);
+      expect(rollClosingBell(7, turn)).toBe(false);
+    }
+    expect(closingBellChance(OVERTIME_START + 1)).toBeCloseTo(CLOSING_BELL.start);
+    let prev = 0;
+    for (let turn = OVERTIME_START + 1; turn < OVERTIME_START + 400; turn += 1) {
+      expect(closingBellChance(turn)).toBeGreaterThanOrEqual(prev);
+      prev = closingBellChance(turn);
+      expect(rollClosingBell(7, turn)).toBe(rollClosingBell(7, turn));
+    }
+    expect(prev).toBe(1);
+  });
+
+  it('任何选择策略都会在有限回合内结束', () => {
+    const calm = ['a', 'b', 'c'].map((id) => makeCard(id, { risk: 1 }, { risk: -1 }));
+    const strategies: Readonly<Record<string, (state: GameState, i: number) => Side>> = {
+      alwaysLeft: () => 'left',
+      alternating: (_s, i) => (i % 2 === 0 ? 'left' : 'right'),
+      pairs: (_s, i) => (Math.floor(i / 2) % 2 === 0 ? 'left' : 'right'),
+      keepCentered: (s, i) => {
+        if (s.current === null) return 'left';
+        const dist = (side: Side): number =>
+          STAT_KEYS.reduce((sum, key) => sum + Math.abs(s.stats[key] + (s.current?.[side].effects[key] ?? 0) - 50), 0);
+        const pick: Side = dist('left') <= dist('right') ? 'left' : 'right';
+        // 避免惯性思维：每 7 次强制换一次方向
+        return i % 7 === 6 ? (pick === 'left' ? 'right' : 'left') : pick;
+      },
+    };
+    for (const pool of [calm, CARDS]) {
+      for (const [name, strategy] of Object.entries(strategies)) {
+        for (let seed = 1; seed <= 20; seed += 1) {
+          let state = createGame(pool, seed);
+          for (let i = 0; state.ending === null && i < 1000; i += 1) state = choose(state, strategy(state, i), pool);
+          expect(state.ending, `${name} seed=${seed}`).not.toBeNull();
+          expect(state.turn).toBeLessThan(1000);
+        }
+      }
+    }
   });
 
   it('结局出现时 current 为 null，且 log / tally 已包含最后一次选择', () => {
@@ -217,7 +309,7 @@ describe('choose', () => {
     const frozenCards = deepFreeze(CARDS.map((card) => structuredClone(card)));
     let state = deepFreeze(createGame(frozenCards, 7));
     const sides: Side[] = ['left', 'right'];
-    for (let i = 0; i < MAX_TURNS && state.ending === null; i += 1) {
+    for (let i = 0; i < OVERTIME_START + 30 && state.ending === null; i += 1) {
       expect(() => {
         state = deepFreeze(choose(state, sides[i % 2], frozenCards));
         previewEffects(state, 'left');
@@ -305,12 +397,12 @@ describe('角色', () => {
     expect(titles).toEqual(['清盘通知', '空钱包', '爆仓离场']);
   });
 
-  it('各角色走满 MAX_TURNS 必有结局（role 在结局中保留）', () => {
+  it('各角色进入加时后必然结束（role 在结局中保留）', () => {
     const calm = ['a', 'b', 'c'].map((id) => makeCard(id, { risk: 1 }, { risk: -1 }));
     for (const role of ROLE_IDS) {
       let state = createGame(calm, 4, role);
-      for (let i = 0; i < MAX_TURNS; i += 1) state = choose(state, i % 2 === 0 ? 'left' : 'right', calm);
-      expect(state.turn).toBe(MAX_TURNS);
+      for (let i = 0; state.ending === null && i < 1000; i += 1) state = choose(state, i % 2 === 0 ? 'left' : 'right', calm);
+      expect(state.turn).toBeGreaterThan(OVERTIME_START);
       expect(state.ending).not.toBeNull();
       expect(state.ending?.role === role || state.ending?.role === 'all').toBe(true);
     }

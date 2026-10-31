@@ -187,6 +187,50 @@
 .reigns-ref-cta:focus-visible { outline: 2px solid var(--gold-soft, #f7d98f); outline-offset: 3px; }
 .reigns-footnote { margin: 4px 0 0; text-align: center; font-size: 12px; line-height: 1.6; color: var(--rg-muted); }
 
+/* ---- 游戏中：“加时”标记、市场抖动一行 ---- */
+.reigns-overtime-tag { margin-left: 6px; padding: 1px 7px; font-size: 11px; font-weight: 800; letter-spacing: .08em; color: var(--gold-ink, #1d1707); background: var(--up, #f0766b); border-radius: 6px; }
+.reigns-jitter { margin: -6px 0 0; min-height: 1.6em; text-align: center; font-size: 13px; font-weight: 600; line-height: 1.6; color: var(--up, #f0766b); opacity: 0; transition: opacity .4s ease; overflow-wrap: anywhere; }
+.reigns-jitter-on { opacity: 1; }
+
+/* ---- 结局插图位：无图时不渲染 img，不占位 ---- */
+.reigns-ending-art { display: block; width: min(100%, 320px); height: auto; margin: 0 auto 4px; border-radius: 12px; border: 1px solid var(--rg-line); image-rendering: pixelated; }
+
+/* ---- 存活关数：越往后越突出（字号、强调色、描边、发光） ---- */
+.reigns-survival { --rg-tier: var(--rg-muted); --rg-num-size: 44px; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 16px 16px; text-align: center;
+  border: 1px solid var(--rg-line); border-radius: 18px; background: var(--rg-ink); }
+.reigns-survival-head { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.reigns-survival-badge { width: 56px; height: 56px; image-rendering: pixelated; }
+.reigns-survival-count { margin: 0; display: flex; align-items: baseline; gap: 6px; font-weight: 700; }
+.reigns-survival-unit { font-size: 18px; color: var(--rg-text); }
+.reigns-survival-num { font-size: var(--rg-num-size); line-height: 1; color: var(--rg-tier); font-variant-numeric: tabular-nums; }
+.reigns-survival-tier { margin: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.reigns-survival-level { font-size: 11px; color: var(--rg-muted); }
+.reigns-survival-name { padding: 2px 12px; font-size: 15px; font-weight: 800; letter-spacing: .06em; color: var(--rg-tier); border: 1.5px solid var(--rg-tier); border-radius: 999px; }
+.reigns-survival-blurb { margin: 0; font-size: 14px; line-height: 1.5; color: var(--text-secondary, #c4c3bb); overflow-wrap: anywhere; }
+.reigns-survival-meter { display: flex; width: 100%; height: 10px; margin-top: 4px; border-radius: 999px; background: var(--ink-3, #1d2336); border: 1px solid var(--rg-line); overflow: hidden; }
+.reigns-survival-regular { display: block; height: 100%; background: var(--rg-tier); }
+/* 加时段：另色 + 斜纹，不只靠颜色区分；下方还有“加时 +K 关”文字。 */
+.reigns-survival-overtime { display: block; height: 100%; background: repeating-linear-gradient(135deg, var(--up, #f0766b) 0 6px, #ffb3a9 6px 10px); border-left: 2px solid var(--rg-ink); }
+.reigns-survival-scale { width: 100%; margin: 0; display: flex; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--rg-muted); font-variant-numeric: tabular-nums; }
+.reigns-survival-ot-label { margin-left: auto; font-weight: 700; color: var(--up, #f0766b); white-space: nowrap; }
+.reigns-survival-best { margin: 2px 0 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; font-size: 13px; color: var(--rg-muted); }
+.reigns-survival-best strong { color: var(--rg-text); font-variant-numeric: tabular-nums; }
+.reigns-survival-new { padding: 1px 8px; font-size: 12px; font-weight: 800; letter-spacing: .06em; color: var(--gold-ink, #1d1707); background: var(--rg-gold); border-radius: 999px; }
+.reigns-survival-prev { font-size: 12px; }
+
+.reigns-survival-tier-1 { --rg-num-size: 44px; --rg-tier: #a9b0c4; }
+.reigns-survival-tier-2 { --rg-num-size: 48px; --rg-tier: #9fd3c7; }
+.reigns-survival-tier-3 { --rg-num-size: 52px; --rg-tier: #8fc6f5; border-color: #8fc6f555; }
+.reigns-survival-tier-4 { --rg-num-size: 56px; --rg-tier: #f7d98f; border-color: #f7d98f66; }
+.reigns-survival-tier-5 { --rg-num-size: 62px; --rg-tier: var(--rg-gold); border: 1.5px solid var(--rg-gold);
+  background: radial-gradient(ellipse at 50% 0%, #f2c26122, transparent 70%), var(--rg-ink); box-shadow: 0 0 0 1px #f2c26133, 0 8px 30px -12px #f2c26199; }
+.reigns-survival-tier-5 .reigns-survival-num { text-shadow: 0 0 14px #f2c26199; }
+.reigns-survival-tier-6 { --rg-num-size: 68px; --rg-tier: #ffe7a3; border: 2px solid #ffe7a3;
+  background: radial-gradient(ellipse at 50% 0%, #ffe7a333, transparent 70%), var(--rg-ink); box-shadow: 0 0 0 2px #f2c26155, 0 0 36px -6px #f2c261cc; }
+.reigns-survival-tier-6 .reigns-survival-num { -webkit-text-stroke: 1px #f2c261; text-shadow: 0 0 18px #f2c261cc, 0 0 4px #fff6; animation: reigns-glow 2.4s ease-in-out infinite alternate; }
+.reigns-survival-tier-6 .reigns-survival-name { color: var(--gold-ink, #1d1707); background: #ffe7a3; }
+@keyframes reigns-glow { from { text-shadow: 0 0 10px #f2c26199, 0 0 2px #fff6; } to { text-shadow: 0 0 22px #f2c261ee, 0 0 6px #fff9; } }
+
 @keyframes reigns-enter { from { opacity: 0; transform: translateY(14px) scale(.97); } to { opacity: 1; transform: none; } }
 
 @media (min-width: 640px) { .reigns-root { padding-top: 32px; } .reigns-text { font-size: 20px; } }
@@ -196,5 +240,8 @@
   .reigns-aftermath { transition: none; }
   .reigns-rise { animation: none; }
   .reigns-role, .reigns-motion-toggle, .reigns-again-same { transition: none; }
+  .reigns-jitter { transition: none; }
+  .reigns-survival-tier-6 .reigns-survival-num { animation: none; }
 }
+@media (max-width: 380px) { .reigns-survival { padding: 12px; } .reigns-survival-unit { font-size: 16px; } }
 @media (max-width: 360px) { .reigns-sides-body { grid-template-columns: 1fr; } .reigns-ref-foot { flex-direction: column; align-items: stretch; } .reigns-ref-cta { justify-content: center; } .reigns-role-stats { grid-template-columns: 1fr; } }

@@ -1,5 +1,5 @@
 import { ENDINGS, GENERIC_ENDINGS, ROLE_SPECIAL_ENDINGS, findEnding, getEndings } from './endings';
-import { STAT_KEYS, STYLE_TAGS } from './types';
+import { OVERTIME_START, STAT_KEYS, STYLE_TAGS } from './types';
 import { COMPATIBLE_PERSONAS } from './personaRules';
 import type {
   Card, ChoiceLog, Effects, GameState, PersonaId, ResolvedPersona, RoleId, Side, StatKey, Stats, StyleTag, StyleTally,
@@ -65,6 +65,68 @@ function addTags(tally: StyleTally, tags: readonly StyleTag[] | undefined): Styl
   return next;
 }
 
+/**
+ * 加时“市场抖动”：第 k 个加时回合（turn = OVERTIME_START + k）随机改 1–2 条属性，正负随机，
+ * 每条幅度在 [0.7, 1] × min(cap, base + k) 之间取整。只由本局 seed 与 turn 决定，不碰发牌用的随机数。
+ */
+export const OVERTIME_JITTER = { base: 3, cap: 25 } as const;
+
+/**
+ * 收盘铃：第 k 个加时回合铃响的概率 = min(1, start + step × (k - 1))。
+ * 铃响就按“收盘结局”（行情亲历者 > 偏执专家 > 稳如磐石 > 活到收盘）收尾。
+ * 由 3000 局 × 3 角色随机游玩校准：进入加时的局，结束回合中位数约 47–48、p99 约 60–62，
+ * 实测最长 69 回合（多数加时局其实是被抖动推到触底/爆满）。概率在加时第 166 回合到 1，
+ * 只为保证必然终止，实际几乎碰不到；它不是回合上限。
+ */
+export const CLOSING_BELL = { start: 0.01, step: 0.006 } as const;
+
+const JITTER_SALT = 0x6a09e667;
+const BELL_SALT = 0xbb67ae85;
+
+/** 加时专用的独立随机流：由 seed、turn、salt 派生，不影响洗牌。 */
+function overtimeRand(seed: number, turn: number, salt: number): () => number {
+  const mixed = (Math.imul(seed >>> 0, 0x27d4eb2d) ^ Math.imul(turn + 1, 0x165667b1) ^ salt) >>> 0;
+  const rand = mulberry32(mixed);
+  rand(); // 丢掉第一个数，让相近的种子更快散开
+  return rand;
+}
+
+/** 第 turn 回合附加的原始抖动（未夹到 0–100）；非加时回合返回空对象。纯函数、确定性。 */
+export function overtimeJitter(seed: number, turn: number): Effects {
+  const k = turn - OVERTIME_START;
+  if (k <= 0) return {};
+  const rand = overtimeRand(seed, turn, JITTER_SALT);
+  const amplitude = Math.min(OVERTIME_JITTER.cap, OVERTIME_JITTER.base + k);
+  const count = rand() < 0.5 ? 1 : 2;
+  const keys = shuffle(STAT_KEYS, rand).slice(0, count);
+  return Object.fromEntries(
+    keys.map((key) => {
+      const size = Math.max(1, Math.round(amplitude * (0.7 + 0.3 * rand())));
+      return [key, rand() < 0.5 ? -size : size];
+    }),
+  ) as Effects;
+}
+
+/** 第 turn 回合收盘铃响的概率；非加时回合为 0。 */
+export function closingBellChance(turn: number): number {
+  const k = turn - OVERTIME_START;
+  if (k <= 0) return 0;
+  return Math.min(1, CLOSING_BELL.start + CLOSING_BELL.step * (k - 1));
+}
+
+/** 第 turn 回合收盘铃是否响（由 seed 与 turn 决定，确定性）。 */
+export function rollClosingBell(seed: number, turn: number): boolean {
+  const chance = closingBellChance(turn);
+  if (chance <= 0) return false;
+  return overtimeRand(seed, turn, BELL_SALT)() < chance;
+}
+
+/** before → after 实际变化的项（夹值后），没有变化返回 null。 */
+function statDelta(before: Stats, after: Stats): Effects | null {
+  const entries = STAT_KEYS.filter((key) => after[key] !== before[key]).map((key) => [key, after[key] - before[key]] as const);
+  return entries.length === 0 ? null : (Object.fromEntries(entries) as Effects);
+}
+
 /** 由当前局面推出重洗用的种子，保证 choose 仍是纯函数且可复现。 */
 function reshuffleSeed(state: GameState, cardCount: number): number {
   const statSum = STAT_KEYS.reduce((sum, key) => sum + state.stats[key], 0);
@@ -116,6 +178,7 @@ export function createGame(allCards: readonly Card[], seed?: number, role: RoleI
     tally: emptyTally(),
     log: [],
     lastAftermath: null,
+    jitter: null,
   };
 }
 
@@ -127,24 +190,30 @@ export function choose(state: GameState, side: Side, allCards: readonly Card[]):
   }
 
   const choice = state.current[side];
-  const stats = applyEffects(state.stats, choice.effects);
+  const afterChoice = applyEffects(state.stats, choice.effects);
   const turn = state.turn + 1;
+  // 加时：在玩家选项之后再叠一次市场抖动（非加时回合 overtimeJitter 为空，stats 不变）
+  const stats = applyEffects(afterChoice, overtimeJitter(state.seed, turn));
+  const jitter = turn > OVERTIME_START ? statDelta(afterChoice, stats) : null;
+  const closingBell = rollClosingBell(state.seed, turn);
   const tally = addTags(state.tally, choice.tags);
   const log = [...state.log, { cardId: state.current.id, side }];
   const lastAftermath = choice.aftermath ?? null;
+  const base = { role: state.role, seed: state.seed, stats, turn, tally, log, lastAftermath, jitter };
 
-  const ending = findEnding({ role: state.role, stats, turn, log, tally }, cards);
+  const ending = findEnding({ role: state.role, stats, turn, log, tally, closingBell }, cards);
   if (ending !== null) {
-    return { role: state.role, seed: state.seed, stats, turn, current: null, deck: state.deck, ending, tally, log, lastAftermath };
+    return { ...base, current: null, deck: state.deck, ending };
   }
 
+  // 重洗种子用抖动前的数值，保证加时抖动不改变发牌顺序
   const { card, deck } = drawNext(
     state.deck,
     cards,
     state.current.id,
-    reshuffleSeed({ ...state, stats, turn }, cards.length),
+    reshuffleSeed({ ...state, stats: afterChoice, turn }, cards.length),
   );
-  return { role: state.role, seed: state.seed, stats, turn, current: card, deck, ending: null, tally, log, lastAftermath };
+  return { ...base, current: card, deck, ending: null };
 }
 
 export function previewEffects(state: GameState, side: Side): readonly StatKey[] {

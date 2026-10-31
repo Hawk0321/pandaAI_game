@@ -47,8 +47,18 @@ export const STYLE_TAGS: readonly StyleTag[] = [
 
 export type StyleTally = Readonly<Record<StyleTag, number>>;
 
-/** 一局最多走多少回合；走满没触底也没爆满，就以“存活结局”收尾。 */
-export const MAX_TURNS = 40;
+/**
+ * 加时起点：走过这么多回合仍未结束，就进入“加时”。之后每回合在玩家选项后附加随回合增长的种子抖动，
+ * 并有随回合增长的“收盘铃”概率；靠触底/爆满、特殊结局或收盘铃结束。
+ * 没有回合上限。界面（存活关数、加时标记）和引擎都用这个常量。
+ */
+export const OVERTIME_START = 40;
+
+/**
+ * @deprecated 已取消回合上限，不再作为结束条件；请改用 OVERTIME_START（加时起点）。
+ * 仅为兼容旧引用保留，数值等于 OVERTIME_START。
+ */
+export const MAX_TURNS = OVERTIME_START;
 
 export interface Choice {
   /** 选项文字，显示在卡牌上，不超过 8 个字。 */
@@ -105,7 +115,7 @@ export interface Ending {
   readonly kind: EndingKind | 'survive' | 'special';
   readonly title: string;
   readonly description: string;
-  /** 是否特殊结局（含走满回合的存活结局）。 */
+  /** 是否特殊结局（含加时收盘铃响时的存活结局）。 */
   readonly special: boolean;
 }
 
@@ -137,6 +147,11 @@ export interface GameState {
   readonly log: readonly ChoiceLog[];
   /** 上一次选择的 aftermath（没有则为 null），界面用来显示“后来……”。 */
   readonly lastAftermath: string | null;
+  /**
+   * 加时阶段（turn > OVERTIME_START）上一回合附加的市场抖动，只写有变化的项；没有抖动则省略或为 null。
+   * 引擎负责写入，界面用来显示“市场抖动：资金 -6”。
+   */
+  readonly jitter?: Effects | null;
 }
 
 /**
@@ -146,8 +161,10 @@ export interface GameState {
  *   洗牌（seed 相同则顺序相同）、发第一张牌。cards 传完整牌库即可。
  * - choose(state, side, cards)：cards 同样传完整牌库，引擎按 state.role 过滤（重洗时也一样）。应用所选选项的 effects，数值夹在 0–100，
  *   判断结局，没结束就抽下一张；牌抽完则重新洗牌继续。返回新状态。
- *   state.ending 非空时原样返回。抽完 MAX_TURNS 回合且没有触底或爆满，
- *   则进入"存活结局"（按 tally 决定标题和描述）。
+ *   state.ending 非空时原样返回。没有回合上限：turn > OVERTIME_START 进入加时，
+ *   每回合在选项之后再叠一次由 seed + turn 决定的市场抖动（写进 state.jitter，非加时为 null），
+ *   并按随加时回合增长的概率敲“收盘铃”；铃响且没有触底/爆满/特殊结局时进入"存活结局"
+ *   （行情亲历者 > 偏执专家 > 稳如磐石 > 活到收盘）。同一 seed、同一选择序列结果完全确定。
  * - previewEffects(state, side)：返回该选项会改变的数值键，供界面提示用。
  * - inferPersona(tally)：风格标签累计 → 人物卡 id（取得最多的那个标签对应的卡）。
  */
