@@ -159,6 +159,26 @@ async function downloadProfile(expected) {
   assert.equal(Object.hasOwn(downloaded, 'events'), false, 'export contains no raw event log');
   return filename;
 }
+async function downloadSubmission(profile) {
+  const before = new Set(await fs.readdir(downloadDir));
+  await click('导出提交版 JSON');
+  const filename = await poll(async () => (await fs.readdir(downloadDir)).find(name => name.startsWith('submission-') && !before.has(name)), 'submission JSON download');
+  const downloaded = JSON.parse(await fs.readFile(path.join(downloadDir, filename), 'utf8'));
+  assert.equal(downloaded.schema, 'submission/v1');
+  assert.equal(downloaded.session_id, profile.session_id);
+  assert.equal(downloaded.dimensions.length, profile.dimensions.length, 'submission keeps every dimension');
+  assert.equal(downloaded.recommendations.length, 4, 'submission carries all four skill cards');
+  for (const dimension of downloaded.dimensions) {
+    assert.ok(dimension.judgement && dimension.confidence, 'submission dimension carries judgement and confidence');
+    assert.ok(dimension.evidence.every(item => typeof item === 'string' && item.includes(' · ')), 'submission evidence is readable text');
+  }
+  for (const recommendation of downloaded.recommendations) {
+    assert.ok(recommendation.reason && recommendation.next_step, 'submission recommendation carries reason and next step');
+    assert.equal(recommendation.is_sample, true, 'in-game exercise is labelled as sample');
+  }
+  assert.equal(Object.hasOwn(downloaded, 'events'), false, 'submission contains no raw event log');
+  return filename;
+}
 const revealRequests = start => requests.slice(start).filter(url => new URL(url).pathname.endsWith('.reveal.json'));
 
 async function finishPlay() {
@@ -251,10 +271,11 @@ async function actualSample() {
       assert.equal(await evaluate(`document.body.innerText.includes(${JSON.stringify(reveal.symbol)})`), false);
       if (mode === 'research') {
         await evaluate("(()=>{for(const b of document.querySelectorAll('.play-clues button'))if(!b.disabled)b.click();return true})()");
-        await click('5%');
+        await click('做多'); await click('轻仓 20%'); await click('3'); await click('5%');
       }
-      if (mode === 'heavy') { await click('重仓 100%'); await click('5'); }
-      if (mode === 'flat') await click('观望');
+      if (mode === 'heavy') { await click('做多'); await click('重仓 100%'); await click('5'); await click('不设止损'); }
+      if (mode === 'flat') { await click('观望'); await click('3'); await click('不设止损'); }
+      assert.equal(await evaluate("document.querySelector('.play-submit').disabled"), false, 'submit enabled once all four choices are made');
       await checkWidth(`${mode} play at 375px`);
       await finishPlay();
       assert.equal(revealRequests(start).length, cursor + 1);
@@ -290,6 +311,7 @@ async function actualSample() {
     await checkWidth('expanded profile at 375px');
     if (mode === 'research') await screenshot('pandaai-shell-profile-mobile.png');
     await downloadProfile(first.profile);
+    await downloadSubmission(first.profile);
     await navigatePage('Page.reload', { ignoreCache: true });
     await waitFor("document.querySelector('.profile-page')", 'restored profile');
     assert.equal((await saved()).events.filter(e=>e.type==='profile_view').length,1);
@@ -311,6 +333,7 @@ async function actualSample() {
       assert.ok(second.profile.dimensions.some(d=>d.evidence.some(e=>e.level_id===supplement)));
       assert.equal(revealRequests(start).length,5);
       await downloadProfile(second.profile);
+      await downloadSubmission(second.profile);
     } else assert.notEqual(mode,'flat','unscored abilities should offer supplementation');
     await viewport(1280,900);
     await checkWidth('profile desktop');
@@ -443,6 +466,7 @@ async function fullProtocolFixture() {
   validateEvents(roundTwo);
   await checkWidth('round-two profile at 375px');
   await downloadProfile(roundTwo.profile);
+  await downloadSubmission(roundTwo.profile);
   await click('完成本次探索');
   const finishedFourLevels = await saved();
   assert.equal(finishedFourLevels.events.filter(event => event.type === 'session_end').length, 1);

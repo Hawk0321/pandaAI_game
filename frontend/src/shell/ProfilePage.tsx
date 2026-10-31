@@ -1,6 +1,7 @@
 import type { Dimension, GameEvent, Profile } from '../shared/protocol';
 import { SkillCards } from '../skills/SkillCards';
 import type { CompletedLevel } from '../skills/model';
+import { buildSubmission } from '../skills/submission';
 
 interface ProfilePageProps {
   profile: Profile;
@@ -56,6 +57,16 @@ function generatedTime(value: string) {
 }
 
 export function ProfilePage({ profile, events, completed, nextLevelId, onSupplement, onExport, onFinish, onRestart, busy = false, storageWarning, fixedExample = false }: ProfilePageProps) {
+  function exportSubmission() {
+    const blob = new Blob([JSON.stringify(buildSubmission(profile, events), null, 2)], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `submission-${profile.session_id}-round-${profile.round}.json`;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
   return <div className="profile-page page-enter">
     <section className="page-heading"><p className="eyebrow">第 {profile.round} 次画像 · {profile.round === 2 ? '补充观察之后' : '从选择里认识自己'}</p><h1>属于你的交易观察。</h1><p>能力与偏好分别看。结论背后的证据，比一个标签更重要。</p></section>
 
@@ -75,7 +86,7 @@ export function ProfilePage({ profile, events, completed, nextLevelId, onSupplem
 
     {(profile.needs_more.length > 0 || (profile.round === 1 && nextLevelId)) && <section className="panel followup-panel" aria-labelledby="profile-needs-title"><h2 id="profile-needs-title">还有一点看不准</h2><ul className="needs-list">{profile.needs_more.map((need, index) => <li key={`${need.dimension_id}-${index}`}><strong>{profile.dimensions.find(dimension => dimension.id === need.dimension_id)?.name ?? need.dimension_id}</strong><p>{need.reason}</p></li>)}</ul>{profile.round === 1 && nextLevelId ? <button className="primary-button" disabled={busy} onClick={onSupplement}>再来一关，补充观察</button> : <p className="muted">{profile.round === 2 ? '本次补充观察已完成，以上项目仍需更多行为证据。' : '当前没有可用的补充关卡。先保留这些不确定项，等待关卡与画像模块接入。'}</p>}</section>}
 
-    <section className="panel profile-actions" aria-labelledby="profile-save-title"><h2 id="profile-save-title">把这份观察留给自己</h2><p>导出只包含 Profile 画像，不附带完整动作日志。动作详情仅用于当前页面核对。</p><div className="button-row"><button className="primary-button" disabled={busy} onClick={onExport}>导出画像 JSON</button><button className="secondary-button" disabled={busy} onClick={onFinish}>完成本次探索</button><button className="text-button" disabled={busy} onClick={onRestart}>重新开始</button></div></section>
+    <section className="panel profile-actions" aria-labelledby="profile-save-title"><h2 id="profile-save-title">把这份观察留给自己</h2><p>两个导出对应不同用途：提交版 JSON 把六个维度和四张推荐卡排成赛题要求的结构，画像 JSON 是模块原始输出。两者都不附带完整动作日志。动作详情仅用于当前页面核对。</p><div className="button-row"><button className="primary-button" disabled={busy} onClick={exportSubmission}>导出提交版 JSON</button><button className="secondary-button" disabled={busy} onClick={onExport}>导出画像 JSON</button><button className="text-button" disabled={busy} onClick={onFinish}>完成本次探索</button><button className="text-button" disabled={busy} onClick={onRestart}>重新开始</button></div></section>
 
     <details className="profile-metadata"><summary>查看画像生成信息</summary><dl><div><dt>生成时间（北京时间）</dt><dd>{generatedTime(profile.generated_at)}</dd></div><div><dt>分析方法</dt><dd>{profile.method === 'rules+llm' ? '规则 + 大模型润色' : '规则'}</dd></div><div><dt>格式</dt><dd>{profile.schema}</dd></div><div><dt>会话</dt><dd>{profile.session_id}</dd></div></dl></details>
   </div>;

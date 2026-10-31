@@ -35,13 +35,21 @@ export function recommendSkills(profile: Profile, events: GameEvent[]): Recommen
   const weak = (d: typeof risk) => !!d && d.score !== null && d.score < .55;
   const following = !!style && !needs(style) && style.score! >= .65;
   const contrarian = !!style && !needs(style) && style.score! <= .35;
+  // 复盘卡可由两个不同维度触发；分数、维度和理由必须出自同一个分支，否则展开的证据会和理由对不上。
+  const reviewByCalibration = needs(calibration) || weak(calibration);
+  const reviewByEvidenceUse = !reviewByCalibration && weak(dim('evidence_use'));
+  const review: { score: number; dimension: DimensionId; reason: string } = reviewByEvidenceUse
+    ? { score: 85, dimension: 'evidence_use', reason: '本局用到的线索和实际落点对不上。回到那次决定，先核对你依据哪几条、又忽略了哪几条。' }
+    : reviewByCalibration
+      ? { score: 100, dimension: 'calibration', reason: needs(calibration)
+        ? '判断校准的证据不足或有冲突。先复盘一次决定，暂不把它当成稳定能力结论。'
+        : '信心与方向结果还不够匹配。回到具体决定，核对当时的依据与把握。' }
+      : { score: 45, dimension: 'calibration', reason: '把一次判断拆成依据、信心和动作，找一个下次可验证的改动。' };
   const ranks: { id: SkillId; score: number; dimension: DimensionId; reason: string }[] = [
     { id: 'shield', score: weak(risk) ? 110 : needs(risk) ? 75 : 40, dimension: 'risk_control', reason: needs(risk)
       ? '风险控制还看不准。先用同一段行情比较有无保护线，探索你愿意承担的波动。'
       : weak(risk) ? '本局风险管理还有可调整之处。用相同入场和仓位，看看保护线带来的变化。' : '已有风险管理证据，可以继续比较不同保护线的取舍。' },
-    { id: 'review', score: needs(calibration) || weak(calibration) ? 100 : weak(dim('evidence_use')) ? 85 : 45, dimension: 'calibration', reason: needs(calibration)
-      ? '判断校准的证据不足或有冲突。先复盘一次决定，暂不把它当成稳定能力结论。'
-      : weak(calibration) ? '信心与方向结果还不够匹配。回到具体决定，核对当时的依据与把握。' : '把一次判断拆成依据、信心和动作，找一个下次可验证的改动。' },
+    { id: 'review', ...review },
     { id: 'trend', score: following ? 105 : 55, dimension: 'style', reason: following
       ? '你的方向选择较常顺着已有趋势。试试双均线，比较参数变化与追踪延迟。' : '用双均线探索趋势跟随；这是一项探索建议，不代表你已形成趋势偏好。' },
     { id: 'reversal', score: contrarian ? 105 : 50, dimension: 'style', reason: contrarian

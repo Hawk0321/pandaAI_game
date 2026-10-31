@@ -30,8 +30,9 @@ try {
     assert.equal(await evaluate('window.revealCalls'),0);
     assert.equal(requests.slice(start).some(url=>url.includes('L01.reveal')),false,'no reveal import before decision');
     if(mode==='research')await evaluate(`(()=>{for(const b of document.querySelectorAll('.play-clues button'))if(!b.disabled)b.click()})()`);
-    if(mode==='heavy')await click('重仓 100%');
-    if(mode==='flat')await click('观望');
+    if(mode==='heavy'){await click('做多');await click('重仓 100%');await click('5');await click('不设止损');}
+    if(mode==='flat'){await click('观望');await click('3');await click('不设止损');}
+    if(mode==='research'){await click('做多');await click('轻仓 20%');await click('3');await click('5%');}
     await click('提交决定，揭晓走势');
     await until(()=>evaluate("Boolean(document.querySelector('.play-actions'))"));
     for(let i=0;i<3;i++){

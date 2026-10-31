@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import type { Bar, GameEvent, Profile } from '../shared/protocol';
 import { analyze } from '../profile';
 import { PLAYERS, SAMPLE_INDEX, buildPlayerEvents, buildSampleLevels } from '../profile/samples';
-import { recommendSkills } from './model';
+import { CARDS, recommendSkills } from './model';
+import { buildSubmission } from './submission';
 import type { CompletedLevel } from './model';
 import { review, reversal, shield, trend } from './simulations';
 import p from '../../public/levels/L01.play.json';
@@ -39,12 +40,65 @@ describe('画像后的推荐规则', () => {
     expect(new Set(lists).size).toBeGreaterThan(1);
   });
 
+  it('复盘卡由证据使用触发时，维度与理由必须一起改成 evidence_use', async () => {
+    const events = buildPlayerEvents(PLAYERS[0]);
+    const base = await analyze({ session_id: 'sample-cautious', round: 1, events, levels: buildSampleLevels() });
+    const profile: Profile = {
+      ...base,
+      dimensions: base.dimensions.map((d) =>
+        d.id === 'calibration' ? { ...d, score: .8, confidence: 'high' as const, conflict: false }
+          : d.id === 'evidence_use' ? { ...d, score: .3, confidence: 'high' as const, conflict: false } : d),
+    };
+    const card = recommendSkills(profile, events).find((c) => c.id === 'review')!;
+    expect(card.dimension).toBe('evidence_use');
+    expect(card.reason).toContain('线索');
+    // 推荐的证据与它声称的维度属于同一维度，不会拿校准的证据去解释证据使用的问题
+    const source = profile.dimensions.find((d) => d.id === 'evidence_use')!.evidence;
+    for (const e of card.evidence) {
+      expect(source.some((s) => s.level_id === e.level_id && s.text === e.text)).toBe(true);
+    }
+  });
+
   it('不以人物名或盈亏排名推荐；忽略其他会话的同序号证据', async () => {
     const events = buildPlayerEvents(PLAYERS[0]);
     const profile = await analyze({ session_id: 'sample-cautious', round: 1, events, levels: buildSampleLevels() });
     const changed: Profile = { ...profile, persona: { ...profile.persona, name: '任意人物' } };
     expect(recommendSkills(profile, events)).toEqual(recommendSkills(changed, events));
     expect(recommendSkills(profile, events.map(e => ({ ...e, session_id: 'someone-else' }))).every(c => c.evidence.length === 0)).toBe(true);
+  });
+});
+
+describe('提交版 JSON 导出', () => {
+  it('六个维度都带判断、依据、置信度和不确定项，四张卡都有理由和下一步', async () => {
+    const events = buildPlayerEvents(PLAYERS[0]);
+    const profile = await analyze({ session_id: 'sample-cautious', round: 1, events, levels: buildSampleLevels() });
+    const submission = buildSubmission(profile, events);
+    expect(submission.schema).toBe('submission/v1');
+    expect(submission.dimensions).toHaveLength(6);
+    for (const dimension of submission.dimensions) {
+      expect(dimension.judgement.length).toBeGreaterThan(0);
+      expect(dimension.evidence.length).toBeGreaterThan(0);
+      expect(['low', 'medium', 'high']).toContain(dimension.confidence);
+      // 高置信度可以不写不确定项；其余情况必须写出来，导出不能把"还不知道"吞掉
+      if (dimension.confidence !== 'high') expect(dimension.uncertain.length).toBeGreaterThan(0);
+      // 证据排成字符串后仍然保留关卡和方向，评委不必回看界面
+      expect(dimension.evidence[0]).toMatch(/^(L\d+|S\d+|补充关|\S+ · )/);
+    }
+    expect(submission.recommendations).toHaveLength(4);
+    for (const recommendation of submission.recommendations) {
+      expect(recommendation.reason.length).toBeGreaterThan(0);
+      expect(recommendation.next_step).toContain(CARDS[recommendation.id].name);
+      expect(recommendation.is_sample).toBe(true);
+    }
+  });
+
+  it('导出不引入画像里没有的维度，也不改画像本身的判断', async () => {
+    const events = buildPlayerEvents(PLAYERS[1]);
+    const profile = await analyze({ session_id: 'sample-impulsive', round: 1, events, levels: buildSampleLevels() });
+    const submission = buildSubmission(profile, events);
+    expect(submission.dimensions.map(d => d.id)).toEqual(profile.dimensions.map(d => d.id));
+    expect(submission.summary).toBe(profile.summary);
+    expect(submission.persona).toEqual(profile.persona);
   });
 });
 

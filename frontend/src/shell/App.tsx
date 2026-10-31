@@ -67,7 +67,6 @@ export function App() {
   const working = useRef(false);
   const [error, setError] = useState('');
   const [loader, setLoader] = useState(() => createLevelLoader(import.meta.env.BASE_URL));
-  const log = useRef<ReturnType<typeof createEventLog> | null>(null);
   const previousInMemory = useRef<SavedGame | null>(null);
 
   function commit(patch: Partial<SavedGame>) {
@@ -78,10 +77,11 @@ export function App() {
     catch { setStorageWarning('本机存储不可用：行为仍保存在内存，刷新会丢失本次进度。'); }
   }
 
-  if (!log.current) log.current = createEventLog(game.sessionId, game.events, events => commit({ events: [...events] }));
+  // 用惰性初始化而不是在渲染里写 ref：StrictMode 会重复渲染，渲染期赋值会多造一个日志容器。
+  const [log, setLog] = useState(() => createEventLog(game.sessionId, game.events, events => commit({ events: [...events] })));
 
   function emit(type: EventType, data: Record<string, unknown>, levelId: string | null = null) {
-    return log.current!.emit(type, data, levelId);
+    return log.emit(type, data, levelId);
   }
 
   useEffect(() => {
@@ -123,7 +123,7 @@ export function App() {
     const index = current.current.index ?? await loader.loadIndex();
     if (!current.current.index) commit({ index });
     if (!index?.main.length) throw new Error('关卡索引没有可玩的正式关卡，请联系关卡负责人。');
-    if (!log.current!.events.some(event => event.type === 'session_start')) {
+    if (!log.events.some(event => event.type === 'session_start')) {
       emit('session_start', { device: matchMedia('(pointer: coarse)').matches || innerWidth <= 600 ? 'mobile' : 'desktop' });
     }
     await startLevel(index.main[0], false, 0);
@@ -132,7 +132,7 @@ export function App() {
   async function loadActiveReveal() {
     const play = current.current.play;
     if (!play) throw new Error('当前没有对局，不能请求揭晓数据。');
-    const reveal = await loader.loadReveal(play.id, () => hasDecisionForActiveLevel(log.current!.events, play.id));
+    const reveal = await loader.loadReveal(play.id, () => hasDecisionForActiveLevel(log.events, play.id));
     commit({ reveal });
     return reveal;
   }
@@ -150,7 +150,7 @@ export function App() {
   async function showProfile(round: 1 | 2) {
     const snapshot = current.current;
     const profile = await analyze({ session_id: snapshot.sessionId, round,
-      events: [...log.current!.events], levels: snapshot.completed.map(({ play, reveal }) => ({ play, reveal })),
+      events: [...log.events], levels: snapshot.completed.map(({ play, reveal }) => ({ play, reveal })),
       ...(round === 2 && snapshot.profile ? { previous: snapshot.profile } : {}) });
     if (profile.schema !== 'profile/v1' || profile.round !== round) throw new Error('画像返回的 schema 或轮次不符合协议，流程已停止。');
     commit({ profile, screen: 'profile', revealEnteredAt: null });
@@ -185,7 +185,7 @@ export function App() {
   }
 
   function finishSession() {
-    if (!log.current!.events.some(event => event.type === 'session_end')) emit('session_end', {});
+    if (!log.events.some(event => event.type === 'session_end')) emit('session_end', {});
     commit({ screen: 'finished' });
   }
 
@@ -199,7 +199,7 @@ export function App() {
     try { localStorage.setItem(`${STORAGE_KEY}:previous`, JSON.stringify(previous)); }
     catch { setStorageWarning('上一局仅保留在本页内存，浏览器无法归档。新局仍可体验，刷新会丢失未保存内容。'); }
     const fresh = freshGame();
-    log.current = createEventLog(fresh.sessionId, [], events => commit({ events: [...events] }));
+    setLog(createEventLog(fresh.sessionId, [], events => commit({ events: [...events] })));
     current.current = fresh;
     setLoader(createLevelLoader(import.meta.env.BASE_URL));
     setRecoveryNeeded(false);
