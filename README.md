@@ -18,7 +18,7 @@ cd frontend && npm install && npm run dev
 cd frontend && npm run typecheck && npm test
 ```
 
-`npm test` 跑 8 个测试文件、57 个用例，覆盖证据层、判断层、推荐规则、示例画像快照、四种策略练习和提交版 JSON 导出。示例画像快照由生成器校验，改动规则后运行 `UPDATE_SAMPLES=1 npx vitest run src/profile/samples.test.ts` 重新生成。
+`npm test` 跑 11 个测试文件、71 个用例，覆盖证据层、判断层、推荐规则、示例画像快照、四种策略练习和提交版 JSON 导出。示例画像快照由生成器校验，改动规则后运行 `UPDATE_SAMPLES=1 npx vitest run src/profile/samples.test.ts` 重新生成。
 
 浏览器自测（需要本机装了 Chrome，走 CDP，不引入额外依赖）：
 
