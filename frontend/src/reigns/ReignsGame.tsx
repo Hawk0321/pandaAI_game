@@ -6,7 +6,8 @@ import { EndingScreen } from './EndingScreen';
 import { choose, createGame, previewEffects } from './engine';
 import { RoleSelect } from './RoleSelect';
 import { ROLES } from './roles';
-import { characterArtwork } from './characterArt';
+import { characterArtwork, selfArtwork } from './characterArt';
+import { hintIcon, statIcon } from './uiArt';
 import { STAT_KEYS } from './types';
 import type { GameState, RoleId, Side, StatKey } from './types';
 import { audio } from './audio/audioManager';
@@ -173,7 +174,7 @@ export function ReignsGame() {
 
   const roleDef = ROLES[game.role];
   const card = game.current;
-  const cardArtwork = card ? characterArtwork(card.speaker) : undefined;
+  const cardArtwork = card?.speaker === '自己' ? selfArtwork(game.role) : card ? characterArtwork(card.speaker) : undefined;
   const leaning: Side | null = exiting ?? (Math.abs(dx) > HINT_MIN_PX ? (dx < 0 ? 'left' : 'right') : null);
   const affected: readonly StatKey[] = leaning && card ? previewEffects(game, leaning) : [];
 
@@ -208,6 +209,7 @@ export function ReignsGame() {
               const open = openStat === key;
               return (
                 <li key={key} className="reigns-stat">
+                  <img className="reigns-stat-icon" src={statIcon(game.role, key, value)} alt="" width="32" height="32" />
                   <button
                     type="button"
                     className="reigns-stat-name"
@@ -219,7 +221,7 @@ export function ReignsGame() {
                     {def.label}
                   </button>
                   <span className="reigns-dot-slot" aria-hidden="true">
-                    {affected.includes(key) && <span className="reigns-dot" />}
+                    {affected.includes(key) && <img className="reigns-hint-icon" src={hintIcon(key)} alt="" width="12" height="12" />}
                   </span>
                   <div className="reigns-bar" role="meter" aria-label={def.label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={value}>
                     <div className={`reigns-bar-fill${low ? ' reigns-bar-danger' : ''}`} style={{ width: `${value}%` }} />

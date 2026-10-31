@@ -11,7 +11,8 @@
 .reigns-sample { margin-left: 6px; font-size: 11px; color: #f1d99c; border: 1px solid #776844; border-radius: 6px; padding: 1px 6px; }
 
 .reigns-stats { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
-.reigns-stat { display: grid; grid-template-rows: auto 10px auto; justify-items: center; gap: 4px; min-width: 0; }
+.reigns-stat { display: grid; grid-template-rows: 32px auto 12px auto; justify-items: center; gap: 4px; min-width: 0; }
+.reigns-stat-icon { width: 32px; height: 32px; image-rendering: pixelated; }
 .reigns-stat-name { min-height: 32px; max-width: 100%; padding: 4px 6px; font-size: 13px; font-weight: 500; line-height: 1.25; color: var(--text-secondary, #b9b8b1); background: transparent; border: 0; border-bottom: 1px dotted var(--rg-muted); border-radius: 6px; cursor: help; overflow-wrap: anywhere; }
 .reigns-stat-name:hover:not(:disabled) { background: var(--ink-3, #1d2336); color: var(--rg-text); }
 .reigns-stat-name[aria-expanded='true'] { color: var(--rg-gold); border-bottom-color: var(--rg-gold); }
@@ -19,7 +20,8 @@
 .reigns-stat-meaning { margin: -6px 0 0; padding: 8px 12px; font-size: 13px; line-height: 1.5; color: var(--rg-text); background: var(--rg-ink); border: 1px solid var(--rg-line); border-radius: 10px; }
 .reigns-stat-meaning[hidden] { display: none; }
 .reigns-role-chip { display: inline-block; margin-left: 4px; padding: 1px 8px; font-size: 12px; font-weight: 600; vertical-align: middle; color: var(--rg-gold); border: 1px solid var(--rg-line); border-radius: 999px; }
-.reigns-dot-slot { height: 10px; display: flex; align-items: center; }
+.reigns-dot-slot { height: 12px; display: flex; align-items: center; }
+.reigns-hint-icon { width: 12px; height: 12px; image-rendering: pixelated; }
 .reigns-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--rg-gold); box-shadow: 0 0 6px var(--rg-gold); }
 .reigns-bar { width: 100%; height: 8px; border-radius: 999px; background: var(--ink-3, #1d2336); border: 1px solid var(--rg-line); overflow: hidden; }
 .reigns-bar-fill { height: 100%; background: var(--rg-gold); border-radius: 999px; transition: width .3s ease, background-color .3s ease; }

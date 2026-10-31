@@ -6,8 +6,11 @@
 
 - 复用 `frontend/` 已有依赖（React、Vitest），没有新增依赖。
 - 不需要任何密钥或环境变量，前端不调用 Panda Data。
-- 选角页使用 `assets/avatars/` 的三张像素头像；“朋友”类事件使用 `assets/characters/` 的样张。
-  其余人物尚未出图，保持纯文本，不用其他角色冒充。头像加载失败时回退到原 emoji。
+- 选角页使用 `assets/avatars/` 的三张像素头像与锁定占位；所有事件 speaker 已接入
+  `assets/characters/` 的 neutral 人物图，“自己”使用对应角色的思考气泡剪影。
+  头像加载失败时回退到原 emoji。
+- 属性条按 low / normal / high 切换 `assets/icons/` 的像素图标，拖动提示使用四槽位
+  不同形状的小图标；小图标由确定性像素绘制生成，不依赖 AI 生图。
 - 2026-10-31 的四张样张由 `gpt-image-2.5` 生成，再离线量化为 64×64、单图最多 16 色。
   完整素材规划为 162 张基础图，另有 15 张可选换色；当前只接入已完成的四张，详见生成记录。
 - 动态人物卡复用 `../shell/` 的 `PersonaArt`、`PERSONA_ARTWORKS` 和 `persona-card.css`（只 import，不修改，见下文）。
