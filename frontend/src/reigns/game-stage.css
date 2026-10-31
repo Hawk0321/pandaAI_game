@@ -1,0 +1,41 @@
+/* Storybook tabletop treatment: game board first, web layout second. */
+.reigns-scene::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(115deg, transparent 48%, #ffffff30 48.2%, transparent 48.4%);
+}
+.reigns-scene-select::after, .reigns-scene-ending::after {
+  content: '✦'; position: absolute; left: 8%; top: 18%; color: var(--scene-accent);
+  font-size: 34px; opacity: .2; transform: rotate(-15deg); text-shadow: 70vw 45vh 0 var(--scene-accent), 12vw 64vh 0 var(--scene-accent);
+}
+.reigns-header { padding-bottom: 9px; border-bottom: 1px solid #8198a933; }
+.reigns-console { border-radius: 14px; }
+.reigns-stage { min-height: 410px; }
+.reigns-card { min-height: 386px; border-radius: 22px 22px 28px 28px; }
+.reigns-card-portrait { height: 228px; border-radius: 12px 12px 4px 4px; }
+.reigns-speaker-art { width: 176px; height: 176px; }
+.reigns-card-body { min-height: 105px; border-radius: 0 0 14px 14px; }
+.reigns-card-body::before { content: '“'; position: absolute; right: 12px; top: -8px; color: var(--scene-accent); opacity: .16; font: 72px Georgia,serif; }
+.reigns-card-index { font-weight: 700; }
+.reigns-actions { position: relative; margin: 0 6px; }
+.reigns-actions::before { content: ''; position: absolute; left: 50%; top: -18px; width: 1px; height: 18px; background: var(--scene-accent); opacity: .35; }
+.reigns-choice { border-radius: 12px; min-height: 70px; }
+.reigns-choice-left { transform: rotate(-.5deg); }
+.reigns-choice-right { transform: rotate(.5deg); }
+.reigns-choice-left:hover:not(:disabled) { transform: rotate(-.5deg) translateY(-3px); }
+.reigns-choice-right:hover:not(:disabled) { transform: rotate(.5deg) translateY(-3px); }
+
+@media (min-width: 900px) {
+  .reigns-scene:not(.reigns-scene-select):not(.reigns-scene-ending)::after {
+    position: absolute; left: calc(50% - 490px); bottom: 12%; width: 170px; height: 170px;
+    display: grid; place-items: center; border: 1px solid rgba(var(--scene-rgb),.25);
+    border-radius: 50%; color: rgba(var(--scene-rgb),.35); font-size: 12px; letter-spacing: .15em;
+    content: 'DECISION\A IS YOURS'; white-space: pre; text-align: center; line-height: 2;
+    box-shadow: 0 0 0 12px rgba(var(--scene-rgb),.035),0 0 0 13px rgba(var(--scene-rgb),.14);
+  }
+  .reigns-scene-fund::after { content: 'RESEARCH\A BEFORE ACTION'; }
+  .reigns-scene-crypto::after { content: 'STAY\A ON CHAIN'; }
+  .reigns-scene-stock::after { content: 'KEEP\A YOUR COOL'; }
+  .reigns-play { width: 480px; align-self: center; }
+  .reigns-stage { min-height: 420px; }
+  .reigns-card { width: 370px; }
+}

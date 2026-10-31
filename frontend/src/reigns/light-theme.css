@@ -1,0 +1,104 @@
+/* Light collectible tabletop: cool paper, warm stock, mint chain, ivory opening. */
+.reigns-scene {
+  --rg-line: #cbd3da; --rg-ink: #fffdf7; --rg-text: #24313b; --rg-muted: #687681;
+  --paper: #fffdf7; --paper-raised: #ffffff; --scene-ink: #31445f;
+  color: var(--rg-text); background: radial-gradient(ellipse at 50% 25%, #ffffffaa, transparent 52%), linear-gradient(145deg, #eef2f5, #dfe7ec);
+}
+.reigns-scene-fund { --scene-rgb: 72, 107, 157; --scene-accent: #426896; --scene-ink: #314f75; background: radial-gradient(ellipse at 15% 15%, #ffffffc9, transparent 48%), linear-gradient(145deg, #edf3f8, #d8e5ef); }
+.reigns-scene-crypto { --scene-rgb: 32, 135, 134; --scene-accent: #167e80; --scene-ink: #176364; background: radial-gradient(ellipse at 80% 12%, #fafff8e6, transparent 48%), linear-gradient(145deg, #eaf7f1, #d1eae5); }
+.reigns-scene-stock { --scene-rgb: 174, 107, 55; --scene-accent: #a75f32; --scene-ink: #814b2e; background: radial-gradient(ellipse at 15% 10%, #fffdf1e6, transparent 50%), linear-gradient(145deg, #fbf0e3, #efd9c7); }
+.reigns-scene-select { --scene-rgb: 167, 117, 55; --scene-accent: #9a6a30; background: radial-gradient(ellipse at 50% 0%, #ffffffe6, transparent 52%), linear-gradient(160deg, #f7f3ea, #e8e1d4); }
+.reigns-scene-ending { --scene-rgb: 151, 109, 47; --scene-accent: #936128; background: radial-gradient(ellipse at 50% 0%, #fffdf4eb, transparent 50%), linear-gradient(160deg, #f5f0e4, #e5ddce); }
+.reigns-ambient { opacity: .75; }
+.reigns-root { --text-secondary: #55646f; --text-muted: #687681; --up: #bd4e47; color: var(--rg-text); }
+.reigns-root :where(h1,h2,h3,h4,p,span,strong,summary,a,dt,dd) { color: #2d3942; }
+.reigns-root button { color: #2d3942; }
+.reigns-header, .reigns-title, .reigns-select-title, .reigns-scene-intro h2, .reigns-ending-scene-copy h2 { color: #24313b; }
+.reigns-brand-mark { color: #fffdf7; }
+.reigns-brand-mark, .reigns-hint, .reigns-ref-type { color: #fffdf7; }
+.reigns-turn, .reigns-chapter, .reigns-card-index, .reigns-choice-copy small, .reigns-choice-tick, .reigns-help { color: var(--rg-muted); }
+.reigns-sample { color: #765a31; border-color: #cdbb9c; background: #fff9e9; }
+.reigns-role-chip { border-color: #bac8d4; background: #ffffff80; }
+.reigns-mute { color: var(--rg-text); background: #ffffff8c; border-color: var(--rg-line); }
+.reigns-console { background: #ffffff9e; border-color: #ffffff; box-shadow: 0 12px 32px -22px #31445f55, inset 0 0 0 1px #b9c8d333; }
+.reigns-stat { background: #ffffff8c; border-bottom-color: #c7d3dc; }
+.reigns-stat-danger { background: #fbe9e4; }
+.reigns-stat-affected { background: #fff9e9; }
+.reigns-stat-heading strong, .reigns-stat-name { color: #4e5e6b; }
+.reigns-stat-name:hover:not(:disabled) { color: var(--scene-accent); background: #ffffff; }
+.reigns-stat-meaning { color: var(--rg-text); background: var(--paper); border-color: var(--rg-line); }
+.reigns-bar { background: #d9e1e6; }
+.reigns-card-shadow { background: #e4ddd0; border-color: #fff; }
+.reigns-card-shadow-two { background: #f2ecdf; }
+.reigns-card { border-color: #fff9e9; background: linear-gradient(145deg, #f2dfad, #fff9e9 40%, #e8d3a0); box-shadow: 0 24px 50px -25px #40576a66, 0 0 0 1px #b89c64, inset 0 0 0 3px #fff9e9; }
+.reigns-card::before { border-color: #a88b5266; box-shadow: inset 0 0 0 1px #fff9e9; }
+.reigns-card-portrait { border-color: #d9c69b; background: radial-gradient(circle at 50% 35%, #ffffffd9, transparent 66%), #e9e5d9; }
+.reigns-card-portrait::after { background: linear-gradient(transparent 70%, #e9e5d9); }
+.reigns-card-role { color: var(--scene-ink); background: #fffdf4f2; border-color: #d3bb88; }
+.reigns-card-body { background: #fffdf7e8; border-top: 1px solid #fff; }
+.reigns-speaker { color: var(--scene-accent); }
+.reigns-text { color: #24313b; }
+.reigns-hint { color: #fff; background: var(--scene-accent); }
+.reigns-choice { color: var(--rg-text); background: linear-gradient(145deg, #ffffff, #f1f4f5); border-color: #c7d2da; box-shadow: 0 8px 22px -18px #31445f66; }
+.reigns-choice:hover:not(:disabled) { background: #fffdf5; border-color: var(--scene-accent); }
+.reigns-choice-key { color: var(--scene-accent); }
+.reigns-choice-tick { border-color: #c7d2da; }
+.reigns-aftermath { color: #52636e; }
+
+/* Opening cards use the same paper stock as the playable deck. */
+.reigns-role { color: var(--rg-text); background: linear-gradient(155deg, #ffffff, #f8f4e9); border-color: #fff; box-shadow: 0 14px 32px -24px #31445f66, 0 0 0 1px #cbd3da; }
+.reigns-role:hover:not(:disabled) { background: #fffdf6; border-color: var(--scene-accent); transform: translateY(-3px); }
+.reigns-role-name { color: var(--scene-accent); }
+.reigns-role-tagline, .reigns-role-stat-meaning, .reigns-role-intro, .reigns-select-sub { color: #53636e; }
+.reigns-role-stat { background: #edf1f2; border: 1px solid #dce4e7; }
+.reigns-role-stat-label { color: #35444e; }
+.reigns-role-soon, .reigns-role-soon:hover:not(:disabled) { background: #ecece7; border-color: #c6cbc9; }
+
+/* The settlement page remains in the same physical tabletop scene. */
+.reigns-ending, .reigns-summary, .reigns-persona, .reigns-codex, .reigns-ref { color: #2d3942; background: #fffdf7e8; border-color: #d7ccb7; box-shadow: 0 12px 30px -24px #614c2f55; }
+.reigns-ending-title { color: #2d3942; }
+.reigns-ending-special { background: linear-gradient(160deg, #fffdf4, #f4e7c9); border-color: #c6a565; box-shadow: 0 12px 30px -22px #a7844466; }
+.reigns-ending-special .reigns-ending-title { color: #855928; }
+.reigns-ending-desc, .reigns-summary-turns, .reigns-summary-name, .reigns-ref-reason, .reigns-ref-provider, .reigns-ref-desc, .reigns-codex-note, .reigns-footnote { color: #64716f; }
+.reigns-summary-bar { background: #e2ddd1; }
+.reigns-summary-value, .reigns-summary-turns strong { color: #2e393f; }
+.reigns-summary-fill { background: #b78b43; }
+.reigns-persona { --rg-persona: #9a6a30; --rg-persona-soft: #f8f0df; }
+.reigns-persona-name, .reigns-persona-tagline, .reigns-why, .reigns-codex-reached, .reigns-codex-summary, .reigns-ref-name { color: #3b423e; }
+.reigns-side { background: #f0eee6; color: #586560; }
+.reigns-motion-toggle, .reigns-again-same, .reigns-ref-cta { color: #715127; background: #fffaf0; border-color: #c6aa79; }
+.reigns-motion-toggle:hover:not(:disabled), .reigns-again-same:hover:not(:disabled), .reigns-ref-cta:hover { background: #f3e7cc; }
+.reigns-ref-type { background: #b38a48; color: #fff; }
+.reigns-codex-item { background: #f6f3e9; border-color: #ddd6c7; }
+.reigns-codex-reached { background: #fff4d9; }
+
+/* Explicit foregrounds for nested game controls; never inherit the site's ivory text. */
+.reigns-choice, .reigns-choice-copy strong, .reigns-choice-copy small, .reigns-choice-tick,
+.reigns-again-same, .reigns-motion-toggle, .reigns-ref-cta, .reigns-sides-summary,
+.reigns-persona-top, .reigns-archetype, .reigns-fun-tag, .reigns-traits li, .reigns-chips li,
+.reigns-side-title, .reigns-codex-tag, .reigns-codex-now { color: #715127; }
+.reigns-restart { color: #241b0e; }
+.reigns-codex-item, .reigns-codex-lock { color: #53636e; }
+.reigns-persona-art, .reigns-persona-art :where(h1,h2,h3,h4,p,span,strong,summary), .reigns-persona-art button { color: #f1ece0; }
+
+/* 浅色主题下的存活关数模块、加时标记与结局插图（原配色按深色背景设计，这里改成深色字，对比度 ≥ 4.5:1）。 */
+.reigns-scene .reigns-survival { color: #2d3942; background: #fffdf7e8; border-color: #d7ccb7; box-shadow: 0 12px 30px -24px #614c2f55; }
+.reigns-scene .reigns-survival-unit, .reigns-scene .reigns-survival-best strong { color: #2d3942; }
+.reigns-scene .reigns-survival-blurb { color: #55646f; }
+.reigns-scene .reigns-survival-level, .reigns-scene .reigns-survival-scale, .reigns-scene .reigns-survival-best { color: #64716f; }
+.reigns-scene .reigns-survival-meter { background: #e9e3d6; border-color: #d7ccb7; }
+.reigns-scene .reigns-survival-overtime { background: repeating-linear-gradient(135deg, #bd4e47 0 6px, #e59a92 6px 10px); border-left-color: #fffdf7; }
+.reigns-scene .reigns-survival-ot-label { color: #a8403a; }
+.reigns-scene .reigns-survival-new { color: #fffdf7; background: #9a5a12; }
+.reigns-scene .reigns-survival-tier-1 { --rg-tier: #5f6b78; }
+.reigns-scene .reigns-survival-tier-2 { --rg-tier: #2f7a6b; }
+.reigns-scene .reigns-survival-tier-3 { --rg-tier: #2f6aa0; border-color: #2f6aa055; }
+.reigns-scene .reigns-survival-tier-4 { --rg-tier: #8a6414; border-color: #8a641466; }
+.reigns-scene .reigns-survival-tier-5 { --rg-tier: #9a5a12; border-color: #c6a565; background: radial-gradient(ellipse at 50% 0%, #f2c26140, transparent 70%), #fffdf7; box-shadow: 0 0 0 1px #c6a56555, 0 10px 30px -14px #a78444aa; }
+.reigns-scene .reigns-survival-tier-5 .reigns-survival-num { text-shadow: 0 0 12px #f2c26188; }
+.reigns-scene .reigns-survival-tier-6 { --rg-tier: #7a3d0c; border-color: #c6a565; background: radial-gradient(ellipse at 50% 0%, #f2c26155, transparent 70%), linear-gradient(160deg, #fffdf4, #f4e7c9); box-shadow: 0 0 0 2px #c6a56577, 0 0 34px -8px #d9a54acc; }
+.reigns-scene .reigns-survival-tier-6 .reigns-survival-num { -webkit-text-stroke: 0; }
+.reigns-scene .reigns-survival-tier-6 .reigns-survival-name { color: #fffdf7; background: #7a3d0c; border-color: #7a3d0c; }
+.reigns-scene .reigns-overtime-tag { color: #fffdf7; background: #a8403a; }
+.reigns-scene .reigns-jitter { color: #a8403a; }
+.reigns-scene .reigns-ending-art { border-color: #d7ccb7; }

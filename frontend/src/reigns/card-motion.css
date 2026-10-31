@@ -1,0 +1,32 @@
+/* Collectible-card composition and tactile motion. No animation changes game timing. */
+.reigns-stage { perspective: 1100px; isolation: isolate; }
+.reigns-card { transform-style: preserve-3d; backface-visibility: hidden; }
+.reigns-card::before {
+  content: ''; position: absolute; inset: 7px; z-index: 4; border: 1px solid #f7d98f38;
+  border-radius: 15px; pointer-events: none; box-shadow: inset 0 0 0 1px #0a0d1580;
+}
+.reigns-card::after {
+  content: ''; position: absolute; inset: -30%; z-index: 3; pointer-events: none;
+  background: linear-gradient(112deg, transparent 35%, #fff9 48%, #f7d98f26 52%, transparent 65%);
+  transform: translateX(-75%) rotate(8deg); opacity: 0;
+}
+.reigns-card:hover::after, .reigns-card:focus-visible::after { animation: reigns-card-foil 1.4s ease-out; }
+.reigns-card-portrait { transform: translateZ(12px); }
+.reigns-card-body { transform: translateZ(20px); }
+.reigns-card-shadow { transition: transform .35s ease, opacity .35s ease; }
+.reigns-stage:hover .reigns-card-shadow-one { transform: rotate(-5deg) translate(-10px, 7px); }
+.reigns-stage:hover .reigns-card-shadow-two { transform: rotate(4deg) translate(9px, 8px); }
+.reigns-stage-left .reigns-card-shadow-one { transform: rotate(-9deg) translate(-18px, 8px); }
+.reigns-stage-right .reigns-card-shadow-two { transform: rotate(9deg) translate(18px, 8px); }
+.reigns-choice { transform: translateY(0); transition: transform .16s ease, border-color .16s ease, background .16s ease, box-shadow .16s ease; }
+.reigns-choice:hover:not(:disabled) { transform: translateY(-3px); }
+.reigns-choice:active:not(:disabled) { transform: translateY(1px); }
+@keyframes reigns-card-foil {
+  0% { opacity: 0; transform: translateX(-75%) rotate(8deg); }
+  22% { opacity: .5; }
+  100% { opacity: 0; transform: translateX(75%) rotate(8deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reigns-card::after, .reigns-card-shadow, .reigns-choice { animation: none !important; transition: none !important; }
+  .reigns-card-portrait, .reigns-card-body { transform: none; }
+}
