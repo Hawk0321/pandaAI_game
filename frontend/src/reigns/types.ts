@@ -129,6 +129,24 @@ export interface ChoiceLog {
   readonly side: Side;
 }
 
+/** Deterministic, explainable behavior evidence used by both persona rules and AI narration. */
+export interface BehaviorAnalysis {
+  readonly decisions: number;
+  readonly longestStreak: number;
+  readonly chaseCount: number;
+  readonly dipCount: number;
+  readonly panicFollowCount: number;
+  readonly riskActionCount: number;
+  readonly cautionCount: number;
+  readonly reviewCount: number;
+  readonly nightChaseCount: number;
+  readonly lateFlipCount: number;
+  readonly lateDecisionCount: number;
+  readonly adventureCount: number;
+  readonly endingPath: string;
+  readonly evidence: readonly string[];
+}
+
 export interface GameState {
   /** 当前扮演的角色。 */
   readonly role: RoleId;
@@ -209,7 +227,10 @@ export interface ResolvedPersona {
   readonly isTop: boolean;
   /** 最终人格对应标签是否与别的标签并列最高。 */
   readonly isTied: boolean;
+  readonly behavior: BehaviorAnalysis;
 }
 
 /** 人物卡 id，和 frontend/src/profile/persona.ts 的 PersonaId 一致。 */
-export type PersonaId = 'sloth' | 'bull' | 'hedgehog' | 'owl' | 'shark' | 'turtle' | 'dolphin' | 'crab' | 'fox';
+export type PersonaId =
+  | 'sloth' | 'bull' | 'hedgehog' | 'owl' | 'shark' | 'turtle' | 'dolphin' | 'crab' | 'fox'
+  | 'puffin' | 'raccoon' | 'gecko' | 'squirrel' | 'bat' | 'panda';

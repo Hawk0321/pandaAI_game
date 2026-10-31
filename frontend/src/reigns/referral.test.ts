@@ -23,7 +23,7 @@ const ENDINGS: Ending[] = endingsFor('stock');
 const stats = (v: number): Stats => ({ capital: v, risk: v, confidence: v, reputation: v });
 const tallyOf = (personaId: PersonaId, n: number): StyleTally => {
   const base = Object.fromEntries(STYLE_TAGS.map((t) => [t, 0])) as Record<string, number>;
-  const tag = { sloth: 'passive', bull: 'impulsive', hedgehog: 'stubborn', owl: 'research', shark: 'concentrated', turtle: 'cautious', dolphin: 'trend', crab: 'contrarian', fox: 'adaptive' }[personaId];
+  const tag = { sloth: 'passive', bull: 'impulsive', hedgehog: 'stubborn', owl: 'research', shark: 'concentrated', turtle: 'cautious', dolphin: 'trend', crab: 'contrarian', fox: 'adaptive', puffin: 'trend', raccoon: 'contrarian', gecko: 'cautious', squirrel: 'research', bat: 'impulsive', panda: 'adaptive' }[personaId];
   return { ...base, [tag]: n } as StyleTally;
 };
 
@@ -57,7 +57,7 @@ describe('buildReferrals', () => {
   it('产品卡：owl / shark 给量化因子中心，其余给 Qube', () => {
     for (const persona of PERSONAS) {
       const product = buildReferrals(persona, ENDINGS[0], stats(50), tallyOf(persona, 3))[2];
-      expect(product.resource).toBe(persona === 'owl' || persona === 'shark' ? CATALOG.factorCenter : CATALOG.qube);
+      expect(product.resource).toBe(['owl','shark','squirrel'].includes(persona) ? CATALOG.factorCenter : CATALOG.qube);
     }
   });
 

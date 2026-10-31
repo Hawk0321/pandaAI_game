@@ -1,6 +1,7 @@
 import { ENDINGS, GENERIC_ENDINGS, ROLE_SPECIAL_ENDINGS, findEnding, getEndings } from './endings';
 import { OVERTIME_START, STAT_KEYS, STYLE_TAGS } from './types';
 import { COMPATIBLE_PERSONAS } from './personaRules';
+import { analyzeBehavior, behaviorPersona } from './behavior';
 import type {
   Card, ChoiceLog, Effects, GameState, PersonaId, ResolvedPersona, RoleId, Side, StatKey, Stats, StyleTag, StyleTally,
 } from './types';
@@ -290,6 +291,10 @@ const PERSONA_TO_TAG: Readonly<Record<PersonaId, StyleTag>> = Object.fromEntries
   (Object.entries(TAG_TO_PERSONA) as [StyleTag, PersonaId][]).map(([tag, persona]) => [persona, tag]),
 ) as Record<PersonaId, StyleTag>;
 
+const PERSONA_TAGS: Partial<Record<PersonaId, StyleTag>> = {
+  puffin: 'trend', raccoon: 'contrarian', gecko: 'cautious', squirrel: 'research', bat: 'impulsive', panda: 'adaptive',
+};
+
 /** FNV-1a 字符串哈希，用来把结局 id 混进种子。 */
 function hashString(text: string): number {
   let h = 0x811c9dc5;
@@ -309,7 +314,7 @@ function pickSeeded(
   const mixed = (Math.imul(seed >>> 0, 0x9e3779b1) ^ hashString(endingId)) >>> 0;
   const rand = mulberry32(mixed);
   rand(); // 丢掉第一个数，让相近的种子更快散开
-  const weights = compatible.map((id) => 1 + tally[PERSONA_TO_TAG[id]]);
+  const weights = compatible.map((id) => 1 + tally[PERSONA_TO_TAG[id] ?? PERSONA_TAGS[id]!]);
   const total = weights.reduce((sum, w) => sum + w, 0);
   let roll = rand() * total;
   for (let i = 0; i < compatible.length; i += 1) {
@@ -319,15 +324,8 @@ function pickSeeded(
   return compatible[compatible.length - 1];
 }
 
-/**
- * 压低热门人格：这些人格在随机游玩下占比偏高（卡牌池里 adaptive、stubborn 标签偏多），
- * 命中时以“1 - 保留率”的概率被换成同结局兼容的别的人格，换谁用本局种子决定，同一局稳定。
- * 保留率由 4500 局随机游玩校准：fox 0.55、hedgehog 0.74，其余不动；
- * 校准后 9 个人格占比约 6%-15%（原来 fox 25%）。换牌后按 seeded 处理，文案不会谎称是选择次数。
- */
+/** @deprecated Behavior evidence is now primary; personas are never randomly downgraded. */
 export const PERSONA_KEEP_RATE: Readonly<Partial<Record<PersonaId, number>>> = {
-  fox: 0.55,
-  hedgehog: 0.74,
 };
 
 function rebalancePersona(
@@ -346,7 +344,7 @@ function rebalancePersona(
   const others = compatible.filter((id) => id !== base);
   if (others.length === 0) return base;
   // 换谁：按 1 + 标签次数加权，再乘各人格自己的保留率，避免又把热门人格抽回来
-  const weights = others.map((id) => (1 + tally[PERSONA_TO_TAG[id]]) * (PERSONA_KEEP_RATE[id] ?? 1));
+  const weights = others.map((id) => (1 + tally[PERSONA_TO_TAG[id] ?? PERSONA_TAGS[id]!]) * (PERSONA_KEEP_RATE[id] ?? 1));
   const total = weights.reduce((sum, w) => sum + w, 0);
   let roll = rand() * total;
   for (let i = 0; i < others.length; i += 1) {
@@ -364,18 +362,18 @@ export function resolvePersona(state: GameState, cards: readonly Card[]): Resolv
   if (state.ending === null) {
     throw new Error('resolvePersona: 游戏还没结束（state.ending 为空）');
   }
-  const compatible = COMPATIBLE_PERSONAS(state.ending.id);
-  const rawId = inferPersona(state.tally, state.log, cards, state.seed);
-  const picked = compatible.includes(rawId)
-    ? rawId
-    : pickSeeded(compatible, state.tally, state.seed, state.ending.id);
-  const id = rebalancePersona(picked, compatible, state.tally, state.seed, state.ending.id);
+    const behavior = analyzeBehavior(state, cards);
+  const tagId = inferPersona(state.tally, state.log, cards, state.seed);
+  const specialId = behaviorPersona(behavior);
+  const rawId = specialId ?? tagId;
+  const picked = specialId ?? tagId;
+  const id = picked;
   // 只要最终人格不是“标签直接推出的那个”，就算 seeded（含压低热门人格造成的换牌）
   const fromTally = id === rawId;
 
   const counts = STYLE_TAGS.map((tag) => state.tally[tag]);
   const max = Math.max(...counts);
-  const count = state.tally[PERSONA_TO_TAG[id]];
+  const count = state.tally[PERSONA_TO_TAG[id] ?? PERSONA_TAGS[id]!];
   const isTop = count > 0 && count === max;
   const isTied = isTop && counts.filter((n) => n === max).length > 1;
   return {
@@ -386,5 +384,6 @@ export function resolvePersona(state: GameState, cards: readonly Card[]): Resolv
     total: counts.reduce((sum, n) => sum + n, 0),
     isTop,
     isTied,
+    behavior,
   };
 }

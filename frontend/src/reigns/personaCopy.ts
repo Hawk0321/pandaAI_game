@@ -42,16 +42,8 @@ function seededLine(
   phrase: string,
   compatIds: readonly PersonaId[],
 ): string {
-  const isHotRebalance = compatIds.includes(resolved.rawId); // rawId 在兼容表里却被换掉，是热门人格被压低
-  if (isHotRebalance) {
-    const rawTag = TAG_BY_PERSONA[resolved.rawId];
-    const rawPhrase = TAG_PHRASE[rawTag];
-    const base = `你这局的选择更偏${rawPhrase}，不过这个风格这局被平衡了一下，所以给你配了${personaName}这张卡。`;
-    return resolved.count > 0 ? `${base}你有 ${resolved.count} 次选择偏${phrase}。` : base;
-  } else {
-    const base = `”${endingTitle}”这样的结局，常见于${personaName}这类${ROLE_STYLE_WORD[role]}；你这局的选择比较分散，我们按结局的气质给你配了这张卡。`;
-    return resolved.count > 0 ? `${base}你有 ${resolved.count} 次选择偏${phrase}。` : base;
-  }
+  const base = `“${endingTitle}”和${personaName}这类${ROLE_STYLE_WORD[role]}比较呼应；你的行为轨迹有些分散，所以参考了结局的气质。`;
+  return resolved.count > 0 ? `${base}你有 ${resolved.count} 次选择偏${phrase}。` : base;
 }
 
 /**

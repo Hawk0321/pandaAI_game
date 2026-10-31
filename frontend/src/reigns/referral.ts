@@ -32,6 +32,7 @@ export interface Referral {
 export const TAG_BY_PERSONA: Readonly<Record<PersonaId, StyleTag>> = {
   sloth: 'passive', bull: 'impulsive', hedgehog: 'stubborn', owl: 'research', shark: 'concentrated',
   turtle: 'cautious', dolphin: 'trend', crab: 'contrarian', fox: 'adaptive',
+  puffin: 'trend', raccoon: 'contrarian', gecko: 'cautious', squirrel: 'research', bat: 'impulsive', panda: 'adaptive',
 };
 
 /** 风格标签在文案里的说法：“有 N 次选择偏……”。 */
@@ -44,6 +45,12 @@ export const TAG_PHRASE: Readonly<Record<StyleTag, string>> = {
 const FALLBACK_STRATEGY: Readonly<Partial<Record<PersonaId, { res: CatalogId; title: string }>>> = {
   bull: { res: 'stopLoss', title: '先把止损写成规则' },
   hedgehog: { res: 'behavior', title: '给“亏了不认”照一面镜子' },
+  puffin: { res: 'behavior', title: '看看跟风时的自己' },
+  raccoon: { res: 'stopLoss', title: '给抄底也设一条边界' },
+  gecko: { res: 'tradeReview', title: '把止损做得更有章法' },
+  squirrel: { res: 'tradeReview', title: '把复盘继续做成规则' },
+  bat: { res: 'behavior', title: '看看疲劳时的决定' },
+  panda: { res: 'dailyReview', title: '给变化留下可复盘的线索' },
 };
 
 /** 策略卡理由的后半句，每个人物卡一句，不含买卖建议。 */
@@ -57,6 +64,9 @@ const STRATEGY_TAIL: Readonly<Record<PersonaId, string>> = {
   dolphin: '均线金叉死叉是经典的趋势规则，可以检验顺势的直觉在更多行情里是否成立。',
   crab: '超跌反弹技能包把逆势思路拆成择时和选股条件，能检验这种直觉。',
   fox: '市场状态划分能把“看情况出牌”变成可复盘的规则。',
+  puffin: '行为诊断能区分有计划的顺势与被人群推着走。', raccoon: '事前风险边界能让逆向判断不被“越跌越补”替代。',
+  gecko: '逐笔复盘能看清哪些退出是纪律，哪些只是紧张。', squirrel: '把研究、规则和结果放在一起，复盘才会越来越可靠。',
+  bat: '行为诊断能帮你发现疲劳和害怕错过时的选择变化。', panda: '每日复盘能记录改变的理由，让灵活调整和摇摆不定更容易区分。',
 };
 
 /** 工具卡：结局 → 补短板的技能包（主选），映射表见 toolKeyFor。 */
@@ -105,7 +115,7 @@ export function toolKeyFor(ending: Ending): ToolKey {
 }
 
 /** 产品卡：夜猫研究员、深海猎鲨重研究，给量化因子中心；其余给 Qube（免登录试用）。 */
-const FACTOR_PERSONAS: readonly PersonaId[] = ['owl', 'shark'];
+const FACTOR_PERSONAS: readonly PersonaId[] = ['owl', 'shark', 'squirrel'];
 
 /** 找出最能代表本局结局的数值：触底/爆满的那条，没有则取离 50 最远的一条。 */
 function headlineStat(ending: Ending, stats: Stats): StatKey {

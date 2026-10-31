@@ -35,10 +35,10 @@ def nearest(rgb):
     return LAB_CACHE[rgb]
 
 
-def pixelate(source, output, size=64, max_colors=16):
-    im = Image.open(source).convert("RGBA").resize((size, size), Image.Resampling.LANCZOS)
+def pixelate(source, output, size=64, max_colors=16, height=None):
+    im = Image.open(source).convert("RGBA").resize((size, height or size), Image.Resampling.LANCZOS)
     colors = Counter()
-    for y in range(size):
+    for y in range(im.height):
         for x in range(size):
             r, g, b, a = im.getpixel((x, y))
             if a < 128:
@@ -52,7 +52,7 @@ def pixelate(source, output, size=64, max_colors=16):
         # Merge the smallest accidental color groups into their nearest used colors.
         for unused, _ in sorted(colors.items(), key=lambda item: item[1])[:len(colors) - max_colors]:
             replacement = min((i for i in colors if i != unused), key=lambda i: sum((a - b) ** 2 for a, b in zip(PALETTE_LAB[i], PALETTE_LAB[unused])))
-            for y in range(size):
+            for y in range(im.height):
                 for x in range(size):
                     if im.getpixel((x, y))[:3] == PALETTE_RGB[unused]:
                         im.putpixel((x, y), (*PALETTE_RGB[replacement], 255))

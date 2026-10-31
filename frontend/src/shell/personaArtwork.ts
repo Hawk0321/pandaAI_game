@@ -16,6 +16,7 @@ import dolphinThumbnail from './assets/persona-dolphin-thumb.webp';
 import foxThumbnail from './assets/persona-fox-thumb.webp';
 import slothThumbnail from './assets/persona-sloth-thumb.webp';
 import hedgehogThumbnail from './assets/persona-hedgehog-thumb.webp';
+import { EXTRA_PERSONA_ARTWORKS } from './personaArtworkExtras';
 
 export interface PersonaArtwork {
   id: string;
@@ -40,6 +41,7 @@ export const PERSONA_ARTWORKS: readonly PersonaArtwork[] = [
   { id: 'fox', number: '07', name: '灵活狐狸', emoji: '🦊', image: fox, thumbnail: foxThumbnail, accent: '#e4bd88' },
   { id: 'sloth', number: '08', name: '树懒观察员', emoji: '🦥', image: sloth, thumbnail: slothThumbnail, accent: '#d0cfab' },
   { id: 'hedgehog', number: '09', name: '死扛刺猬', emoji: '🦔', image: hedgehog, thumbnail: hedgehogThumbnail, accent: '#C9A36B' },
+  ...EXTRA_PERSONA_ARTWORKS,
 ];
 
 export function resolvePersonaArtwork(name: string): { artwork: PersonaArtwork; matched: boolean } {

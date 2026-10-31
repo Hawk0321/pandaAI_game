@@ -80,6 +80,9 @@ export function PersonaReveal({ state }: PersonaRevealProps) {
         {persona.traits.map((t) => <li key={t} className="reigns-trait">{t}</li>)}
       </ul>
       <p className="reigns-why"><strong>为什么是你：</strong>{whyText}</p>
+      <ul className="reigns-behavior-evidence" aria-label="本局选择轨迹">
+        {resolved.behavior.evidence.map((item) => <li key={item}>{item}</li>)}
+      </ul>
       {chips.length > 0 && (
         <ul className="reigns-chips" aria-label="依据">
           {chips.map((chip) => <li key={chip.kind} className={`reigns-chip reigns-chip-${chip.kind}`}>{chip.label}</li>)}

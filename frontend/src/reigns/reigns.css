@@ -228,6 +228,13 @@
 .reigns-ref-cta:hover { background: var(--ink-3, #1d2336); }
 .reigns-ref-cta:focus-visible { outline: 2px solid var(--gold-soft, #f7d98f); outline-offset: 3px; }
 .reigns-footnote { margin: 4px 0 0; text-align: center; font-size: 12px; line-height: 1.6; color: var(--rg-muted); }
+.reigns-behavior-evidence { display: grid; gap: 5px; list-style: none; padding: 10px 0 0; margin: 0; font-size: 12px; color: var(--rg-muted); }
+.reigns-behavior-evidence li::before { content: '↳ '; color: var(--rg-persona); }
+.reigns-ai-comment { padding: 14px 16px; background: #fffaf0; border: 1px solid #d7c49d; border-radius: 14px; }
+.reigns-ai-kicker { display: flex; justify-content: space-between; gap: 10px; margin: 0 0 8px; font-size: 12px; color: #8b612c; font-weight: 700; }
+.reigns-ai-kicker span { color: var(--rg-muted); font-weight: 400; }
+.reigns-ai-text { margin: 0; font-size: 14px; line-height: 1.75; color: var(--rg-text); }
+.reigns-ai-note { margin: 8px 0 0; font-size: 11px; color: var(--rg-muted); }
 
 /* ---- 游戏中：“加时”标记、市场抖动一行 ---- */
 .reigns-overtime-tag { margin-left: 6px; padding: 1px 7px; font-size: 11px; font-weight: 800; letter-spacing: .08em; color: var(--gold-ink, #1d1707); background: var(--up, #f0766b); border-radius: 6px; }
