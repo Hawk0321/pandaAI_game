@@ -241,7 +241,7 @@ export function App() {
       {game.screen === 'reveal' && game.play && game.reveal && lastCompleted && <RevealPage level={game.play} reveal={game.reveal} result={lastCompleted.result} events={game.events} busy={busy} onContinue={() => void run(continueAfterReveal)} />}
       {(game.screen === 'profile' || game.screen === 'finished') && game.profile && <>
         {game.screen === 'finished' && <p className="notice" role="status">本局已结束。你仍可查看或导出这份画像。</p>}
-        <ProfilePage profile={game.profile} fixedExample={isFixedSampleProfile(game.profile)} events={game.events} nextLevelId={game.screen === 'finished' ? null : nextLevelId}
+        <ProfilePage profile={game.profile} fixedExample={isFixedSampleProfile(game.profile)} events={game.events} completed={game.completed} nextLevelId={game.screen === 'finished' ? null : nextLevelId}
           onSupplement={() => { if (nextLevelId) void run(() => startLevel(nextLevelId, true, game.mainCursor)); }}
           onExport={exportProfile} onFinish={finishSession} onRestart={restart} busy={busy} />
       </>}

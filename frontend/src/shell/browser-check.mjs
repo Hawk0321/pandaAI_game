@@ -170,6 +170,54 @@ async function finishPlay() {
   await waitFor("document.querySelector('.reveal-page')", 'reveal');
 }
 
+const skillRecommendations = [];
+async function checkSkillCards(mode) {
+  assert.equal(await evaluate("document.querySelectorAll('.skill-card').length"), 4);
+  assert.equal(await evaluate("document.querySelectorAll('.skill-card[data-recommended=true]').length"), 2);
+  skillRecommendations.push(await evaluate("[...document.querySelectorAll('.skill-card[data-recommended=true]')].map(e=>e.dataset.skill).join(',')"));
+  const before = await saved();
+  const start = requests.length;
+  for (const name of ['趋势追踪卡', '止损护盾卡', '反转确认卡', '交易复盘卡']) {
+    await click(`体验${name}`);
+    await waitFor(`document.querySelector('#skill-lab-title')?.textContent === ${JSON.stringify(`${name}实验室`)}`, `${name} lab`);
+    assert.equal(await evaluate("document.querySelectorAll('select[aria-label=练习关卡] option').length"), before.completed.length);
+    if (name === '趋势追踪卡') await evaluate("(()=>{const s=document.querySelector('select[aria-label=快均线]');s.value='10';s.dispatchEvent(new Event('change',{bubbles:true}));return true})()");
+    if (name === '止损护盾卡') await evaluate("(()=>{const s=document.querySelector('select[aria-label=练习方向]');s.value='-1';s.dispatchEvent(new Event('change',{bubbles:true}));return true})()");
+    if (name === '反转确认卡') await evaluate("(()=>{const s=document.querySelector('select[aria-label=确认窗口]');s.value='5';s.dispatchEvent(new Event('change',{bubbles:true}));return true})()");
+    if (name === '交易复盘卡') {
+      assert.equal(await evaluate("document.querySelectorAll('.skill-review article').length"), 3);
+      await evaluate("(()=>{const s=document.querySelector('select[aria-label=下一次改动]');s.value='缩小仓位，先设保护线';s.dispatchEvent(new Event('change',{bubbles:true}));return true})()");
+    } else {
+      assert.equal(await evaluate("document.querySelectorAll('.skill-metrics strong').length"), 3);
+      assert.equal(await evaluate("document.querySelectorAll('.skill-equity polyline').length"), 2);
+      assert.equal(await evaluate("document.querySelector('.skill-metrics').innerText.includes('NaN')"), false);
+    }
+    await checkWidth(`${mode} ${name} at 375px`);
+    await click('完成这次练习');
+    await waitFor("document.querySelector('.skill-completion')", 'practice completion');
+    if (name === '止损护盾卡' && mode === 'research') await screenshot('pandaai-skill-shield-mobile.png');
+    await click('关闭练习');
+    assert.equal(await evaluate("document.querySelector('#skill-lab') === null"), true);
+  }
+  const downloadsBefore = new Set(await fs.readdir(downloadDir));
+  await click('导出推荐与练习 JSON');
+  const filename = await poll(async () => (await fs.readdir(downloadDir)).find(n => n.startsWith('skill-practice-') && n.endsWith('.json') && !downloadsBefore.has(n)), 'practice download');
+  const data = JSON.parse(await fs.readFile(path.join(downloadDir, filename), 'utf8'));
+  assert.equal(data.schema, 'skill-practice/v1');
+  assert.equal(data.session_id, before.sessionId);
+  assert.equal(data.exercises.length, 4);
+  assert.equal(data.exercises.find(e=>e.skill_id==='trend').parameters.fast, 10);
+  assert.equal(data.exercises.find(e=>e.skill_id==='shield').parameters.side, -1);
+  assert.equal(data.exercises.find(e=>e.skill_id==='reversal').parameters.window, 5);
+  assert.equal(data.exercises.find(e=>e.skill_id==='review').lesson, '缩小仓位，先设保护线');
+  assert.equal(Object.hasOwn(data, 'events'), false);
+  const after = await saved();
+  assert.deepEqual(after.events, before.events, 'practice never adds game/profile evidence');
+  assert.deepEqual(after.profile, before.profile, 'practice never rewrites profile');
+  assert.equal(requests.slice(start).some(u => /\/levels\//.test(u)), false, 'practice uses completed data without new level requests');
+  checks.push(`${mode}: four functional skill cards, parameter changes, task JSON, original profile/events unchanged`);
+}
+
 async function actualSample() {
   const index = await (await fetch(new URL('levels/index.json', baseUrl))).json();
   assert.equal(index.is_sample, false);
@@ -221,6 +269,7 @@ async function actualSample() {
     assert.equal(await evaluate("document.querySelectorAll('.dimension-card').length"), 6);
     assert.equal(await evaluate("document.body.innerText.includes('固定示例画像')"), false);
     personas.add(first.profile.persona.name);
+    await checkSkillCards(mode);
     if (mode === 'flat') for (const id of ['calibration','risk_control']) assert.equal(first.profile.dimensions.find(d=>d.id===id).score,null);
     await evaluate("document.querySelectorAll('details').forEach(e=>e.open=true)");
     assert.ok(await evaluate("document.querySelectorAll('.event-detail').length > 0"));
@@ -259,6 +308,7 @@ async function actualSample() {
     checks.push(`real ${mode}: four main levels, computed profile, available supplement, evidence, JSON, refresh, mobile/desktop`);
   }
   assert.ok(personas.size>=2,'contrasting players produce different personas');
+  assert.ok(new Set(skillRecommendations).size>=2,'contrasting players get different recommendations');
   await click('重新开始');
   await waitFor("document.querySelector('.home-hero')", 'new session home');
   await begin();

@@ -1,8 +1,11 @@
 import type { Dimension, GameEvent, Profile } from '../shared/protocol';
+import { SkillCards } from '../skills/SkillCards';
+import type { CompletedLevel } from '../skills/model';
 
 interface ProfilePageProps {
   profile: Profile;
   events: GameEvent[];
+  completed: CompletedLevel[];
   nextLevelId: string | null;
   onSupplement: () => void;
   onExport: () => void;
@@ -51,7 +54,7 @@ function generatedTime(value: string) {
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai', hour12: false });
 }
 
-export function ProfilePage({ profile, events, nextLevelId, onSupplement, onExport, onFinish, onRestart, busy = false, storageWarning, fixedExample = false }: ProfilePageProps) {
+export function ProfilePage({ profile, events, completed, nextLevelId, onSupplement, onExport, onFinish, onRestart, busy = false, storageWarning, fixedExample = false }: ProfilePageProps) {
   return <div className="profile-page page-enter">
     <section className="page-heading"><p className="eyebrow">第 {profile.round} 次画像 · {profile.round === 2 ? '补充观察之后' : '从选择里认识自己'}</p><h1>属于你的交易观察。</h1><p>能力与偏好分别看。结论背后的证据，比一个标签更重要。</p></section>
 
@@ -60,6 +63,8 @@ export function ProfilePage({ profile, events, nextLevelId, onSupplement, onExpo
     {storageWarning && <p role="status" className="notice">{storageWarning}</p>}
 
     <section className="persona-card" aria-labelledby="persona-name"><div className="persona-emoji" aria-hidden="true">{profile.persona.emoji}</div><div><p className="eyebrow">{profile.persona.is_fun_label ? '趣味人物卡' : '人物卡'}</p><h2 id="persona-name">{profile.persona.name}</h2><p className="persona-tagline">{profile.persona.tagline}</p></div><p className="persona-summary">{profile.summary}</p></section>
+
+    {!fixedExample && <SkillCards key={`${profile.session_id}-${profile.round}`} profile={profile} events={events} completed={completed} />}
 
     <div className="profile-columns">
       {(['ability', 'preference'] as const).map(group => <section className="dimension-group" key={group} aria-labelledby={`dimension-group-${group}`}><div className="group-heading"><h2 id={`dimension-group-${group}`}>{group === 'ability' ? '能力观察' : '交易偏好'}</h2><p>{group === 'ability' ? '如何使用证据、校准判断和控制风险' : '习惯怎样研究、选择方向和承担风险'}</p></div>{profile.dimensions.filter(dimension => dimension.group === group).map(dimension => <DimensionCard key={dimension.id} dimension={dimension} events={events} profile={profile} fixedExample={fixedExample} />)}</section>)}
