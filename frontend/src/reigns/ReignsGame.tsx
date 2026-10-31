@@ -6,6 +6,7 @@ import { EndingScreen } from './EndingScreen';
 import { choose, createGame, previewEffects } from './engine';
 import { RoleSelect } from './RoleSelect';
 import { ROLES } from './roles';
+import { characterArtwork } from './characterArt';
 import { STAT_KEYS } from './types';
 import type { GameState, RoleId, Side, StatKey } from './types';
 import { audio } from './audio/audioManager';
@@ -172,6 +173,7 @@ export function ReignsGame() {
 
   const roleDef = ROLES[game.role];
   const card = game.current;
+  const cardArtwork = card ? characterArtwork(card.speaker) : undefined;
   const leaning: Side | null = exiting ?? (Math.abs(dx) > HINT_MIN_PX ? (dx < 0 ? 'left' : 'right') : null);
   const affected: readonly StatKey[] = leaning && card ? previewEffects(game, leaning) : [];
 
@@ -254,7 +256,10 @@ export function ReignsGame() {
             >
               {card.adventure && <span className="reigns-adv-tag">奇遇</span>}
               <div className="reigns-card-body" aria-live="polite" aria-atomic="true">
-                <p className="reigns-speaker">{card.speaker}</p>
+                <div className="reigns-speaker-row">
+                  {cardArtwork && <img className="reigns-speaker-art" src={cardArtwork} alt="" width="64" height="64" />}
+                  <p className="reigns-speaker">{card.speaker}</p>
+                </div>
                 <p className="reigns-text">{card.text}</p>
               </div>
               <span className="reigns-hint reigns-hint-left" aria-hidden="true" style={{ opacity: labelOpacity('left') }}>{card.left.label}</span>

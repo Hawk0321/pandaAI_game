@@ -33,6 +33,9 @@
 .reigns-card:active { cursor: grabbing; }
 .reigns-card:focus-visible { outline: 2px solid var(--gold-soft, #f7d98f); outline-offset: 3px; }
 .reigns-speaker { margin: 0 0 12px; font-size: 14px; font-weight: 700; color: var(--rg-gold); }
+.reigns-speaker-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.reigns-speaker-row .reigns-speaker { margin-bottom: 0; }
+.reigns-speaker-art { flex: 0 0 auto; width: 64px; height: 64px; border: 1px solid var(--rg-line); image-rendering: pixelated; }
 .reigns-text { margin: 0; font-size: 18px; line-height: 1.6; color: var(--rg-text); overflow-wrap: anywhere; }
 .reigns-hint { position: absolute; top: 14px; max-width: 46%; padding: 4px 10px; border-radius: 8px; font-size: 14px; font-weight: 700; pointer-events: none;
   background: var(--rg-gold); color: var(--gold-ink, #1d1707); }
@@ -74,6 +77,8 @@
 .reigns-role:focus-visible { outline: 2px solid var(--gold-soft, #f7d98f); outline-offset: 3px; }
 .reigns-role-top { display: flex; align-items: center; gap: 12px; }
 .reigns-role-emoji { flex: 0 0 auto; font-size: 36px; line-height: 1; }
+.reigns-role-avatar { display: grid; place-items: center; flex: 0 0 auto; width: 80px; height: 80px; }
+.reigns-role-avatar img { display: block; width: 80px; height: 80px; image-rendering: pixelated; }
 .reigns-role-id { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .reigns-role-name { font-size: 18px; font-weight: 700; color: var(--rg-gold); }
 .reigns-role-tagline { font-size: 13px; line-height: 1.45; color: var(--text-secondary, #b9b8b1); overflow-wrap: anywhere; }
