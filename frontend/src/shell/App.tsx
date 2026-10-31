@@ -6,6 +6,7 @@ import { createEventLog, createLevelLoader, hasDecisionForActiveLevel } from './
 import { isFixedSampleProfile } from './profileView';
 import { RevealPage } from './RevealPage';
 import { ProfilePage } from './ProfilePage';
+import { HomeVisual, PandaMark } from './GameVisuals';
 
 const STORAGE_KEY = 'pandaai:c-shell:v1';
 type Screen = 'home' | 'instructions' | 'play' | 'reveal' | 'profile' | 'finished';
@@ -66,7 +67,6 @@ export function App() {
   const working = useRef(false);
   const [error, setError] = useState('');
   const [loader, setLoader] = useState(() => createLevelLoader(import.meta.env.BASE_URL));
-  const log = useRef<ReturnType<typeof createEventLog> | null>(null);
   const previousInMemory = useRef<SavedGame | null>(null);
 
   function commit(patch: Partial<SavedGame>) {
@@ -77,10 +77,11 @@ export function App() {
     catch { setStorageWarning('本机存储不可用：行为仍保存在内存，刷新会丢失本次进度。'); }
   }
 
-  if (!log.current) log.current = createEventLog(game.sessionId, game.events, events => commit({ events: [...events] }));
+  // 用惰性初始化而不是在渲染里写 ref：StrictMode 会重复渲染，渲染期赋值会多造一个日志容器。
+  const [log, setLog] = useState(() => createEventLog(game.sessionId, game.events, events => commit({ events: [...events] })));
 
   function emit(type: EventType, data: Record<string, unknown>, levelId: string | null = null) {
-    return log.current!.emit(type, data, levelId);
+    return log.emit(type, data, levelId);
   }
 
   useEffect(() => {
@@ -122,7 +123,7 @@ export function App() {
     const index = current.current.index ?? await loader.loadIndex();
     if (!current.current.index) commit({ index });
     if (!index?.main.length) throw new Error('关卡索引没有可玩的正式关卡，请联系关卡负责人。');
-    if (!log.current!.events.some(event => event.type === 'session_start')) {
+    if (!log.events.some(event => event.type === 'session_start')) {
       emit('session_start', { device: matchMedia('(pointer: coarse)').matches || innerWidth <= 600 ? 'mobile' : 'desktop' });
     }
     await startLevel(index.main[0], false, 0);
@@ -131,7 +132,7 @@ export function App() {
   async function loadActiveReveal() {
     const play = current.current.play;
     if (!play) throw new Error('当前没有对局，不能请求揭晓数据。');
-    const reveal = await loader.loadReveal(play.id, () => hasDecisionForActiveLevel(log.current!.events, play.id));
+    const reveal = await loader.loadReveal(play.id, () => hasDecisionForActiveLevel(log.events, play.id));
     commit({ reveal });
     return reveal;
   }
@@ -149,7 +150,7 @@ export function App() {
   async function showProfile(round: 1 | 2) {
     const snapshot = current.current;
     const profile = await analyze({ session_id: snapshot.sessionId, round,
-      events: [...log.current!.events], levels: snapshot.completed.map(({ play, reveal }) => ({ play, reveal })),
+      events: [...log.events], levels: snapshot.completed.map(({ play, reveal }) => ({ play, reveal })),
       ...(round === 2 && snapshot.profile ? { previous: snapshot.profile } : {}) });
     if (profile.schema !== 'profile/v1' || profile.round !== round) throw new Error('画像返回的 schema 或轮次不符合协议，流程已停止。');
     commit({ profile, screen: 'profile', revealEnteredAt: null });
@@ -184,7 +185,7 @@ export function App() {
   }
 
   function finishSession() {
-    if (!log.current!.events.some(event => event.type === 'session_end')) emit('session_end', {});
+    if (!log.events.some(event => event.type === 'session_end')) emit('session_end', {});
     commit({ screen: 'finished' });
   }
 
@@ -198,7 +199,7 @@ export function App() {
     try { localStorage.setItem(`${STORAGE_KEY}:previous`, JSON.stringify(previous)); }
     catch { setStorageWarning('上一局仅保留在本页内存，浏览器无法归档。新局仍可体验，刷新会丢失未保存内容。'); }
     const fresh = freshGame();
-    log.current = createEventLog(fresh.sessionId, [], events => commit({ events: [...events] }));
+    setLog(createEventLog(fresh.sessionId, [], events => commit({ events: [...events] })));
     current.current = fresh;
     setLoader(createLevelLoader(import.meta.env.BASE_URL));
     setRecoveryNeeded(false);
@@ -209,7 +210,11 @@ export function App() {
   const sample = game.index?.is_sample || game.play?.is_sample || game.profile?.is_sample;
   const lastCompleted = game.completed.at(-1);
   return <main className="app-shell">
-    <header className="game-header"><div className="brand">PANDAAI <span>交易观察室</span></div>{sample && <span className="sample-label">示例数据</span>}</header>
+    <header className="game-header"><div className="brand"><PandaMark /><div>PANDAAI <span>交易观察室</span></div></div><div className="header-status"><span className="status-dot" />{sample ? <span className="sample-label">示例数据</span> : <span>交易人格探索</span>}</div></header>
+    {!['home', 'instructions'].includes(game.screen) && <ol className="game-progress" aria-label="本次探索进度">{['观察与决策', '揭晓与复盘', '画像与练习'].map((label, index) => {
+      const step = game.screen === 'play' ? 0 : game.screen === 'reveal' ? 1 : 2;
+      return <li key={label} data-state={index < step ? 'done' : index === step ? 'current' : 'next'} aria-current={index === step ? 'step' : undefined}><span>{index < step ? '✓' : `0${index + 1}`}</span>{label}</li>;
+    })}</ol>}
     {storageWarning && <p className="notice" role="status">{storageWarning}</p>}
     {(error || invalidPick) && <section className="error-state" role="alert"><h2>流程已暂停</h2><p>{error || invalidPick}</p><p>请把错误原文反馈给负责人。</p></section>}
     {!error && !invalidPick && recoveryNeeded ? <section className="panel">
@@ -218,12 +223,15 @@ export function App() {
       <p className="muted">上一局会保留在本机历史存档，不会上传或用于新一局画像。</p>
       <button className="primary-button" onClick={restart}>保留记录，重新开始</button>
     </section> : !error && !invalidPick && <>
-      {game.screen === 'home' && <section className="home-hero"><p className="home-kicker">寻找你的交易人格</p>
-        <h1>看行情，做选择。<br /><em>看见你的交易习惯。</em></h1>
-        <p>在匿名历史行情里做判断，用有限的线索和真实选择，认识自己的研究与风险习惯。</p>
-        <div className="journey-steps" aria-label="体验流程"><span>看盘与研究</span><span>做出判断</span><span>揭晓与画像</span></div>
-        <button className="primary-button" disabled={!game.index || busy} onClick={() => commit({ screen: 'instructions' })}>{game.index ? '进入交易观察室' : '正在加载关卡'}</button>
-        {sample && <p className="muted">当前包含 {game.index?.main.length ?? 0} 关示例行情。模拟结果不代表真实交易表现，请留意对局和画像页的来源说明。</p>}
+      {game.screen === 'home' && <section className="home-hero"><div className="home-layout"><div className="home-copy"><p className="home-kicker"><span />寻找你的交易人格</p>
+        <h1>看懂行情，<br />也看见<em>自己。</em></h1>
+        <p className="home-description">面对同一段行情，每个人都有自己的选择。<br />用有限的线索做判断，发现你的研究与风险习惯。</p>
+        <div className="home-facts"><span>{game.index?.main.length ?? '—'} 关主线探索</span><span>6 维行为画像</span><span>4 种策略练习</span></div>
+        <div className="home-cta"><button className="primary-button" disabled={!game.index || busy} onClick={() => commit({ screen: 'instructions' })}>{game.index ? '进入交易观察室' : '正在加载关卡'}</button><span>从一次选择开始 <b aria-hidden="true">↗</b></span></div>
+        <p className="home-privacy">无需填写问卷 · 行为保留在当前浏览器</p>
+        {sample && <p className="notice">当前包含 {game.index?.main.length ?? 0} 关示例行情。模拟结果不代表真实交易表现。</p>}
+      </div><HomeVisual /></div>
+        <div className="journey-steps" aria-label="体验流程">{[['观察行情', '用研究点翻开你最关心的线索。'], ['做出选择', '方向、仓位与持有，每一步都留下依据。'], ['找到下一步', '解锁行为画像，体验适合你的技能卡。']].map(([title, text], i) => <div key={title}><span className="journey-number">0{i + 1}</span><div><h2>{title}</h2><p>{text}</p></div></div>)}</div>
       </section>}
       {game.screen === 'instructions' && <section className="panel intro"><p className="eyebrow">30 秒了解玩法</p><h1>先观察，再决定。</h1>
         <ol className="step-list"><li><b>看一段匿名行情</b><p>名称和日期暂时隐藏。只能看到决定时刻以前的信息。</p></li>
@@ -241,7 +249,7 @@ export function App() {
       {game.screen === 'reveal' && game.play && game.reveal && lastCompleted && <RevealPage level={game.play} reveal={game.reveal} result={lastCompleted.result} events={game.events} busy={busy} onContinue={() => void run(continueAfterReveal)} />}
       {(game.screen === 'profile' || game.screen === 'finished') && game.profile && <>
         {game.screen === 'finished' && <p className="notice" role="status">本局已结束。你仍可查看或导出这份画像。</p>}
-        <ProfilePage profile={game.profile} fixedExample={isFixedSampleProfile(game.profile)} events={game.events} nextLevelId={game.screen === 'finished' ? null : nextLevelId}
+        <ProfilePage profile={game.profile} fixedExample={isFixedSampleProfile(game.profile)} events={game.events} completed={game.completed} nextLevelId={game.screen === 'finished' ? null : nextLevelId}
           onSupplement={() => { if (nextLevelId) void run(() => startLevel(nextLevelId, true, game.mainCursor)); }}
           onExport={exportProfile} onFinish={finishSession} onRestart={restart} busy={busy} />
       </>}

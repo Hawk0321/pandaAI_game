@@ -25,16 +25,31 @@ try {
   const keys=Object.fromEntries(samples.events.map(e=>[e.type,Object.keys(e.data).sort()]));keys.stop_triggered=['pnl','step'];
   for(const mode of ['research','heavy','flat']){
     const start=requests.length;
+    // flat 路径模拟系统"减少动态"：K 线应一次全部出现；另外两条路径验证逐根揭晓。
+    const reduced=mode==='flat';
+    await send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:reduced?'reduce':''}]});
     await send('Page.navigate',{url:`http://127.0.0.1:5173/src/play/demo.html?${mode==='flat'?'supplementary':''}`});
     await until(()=>evaluate('Boolean(window.playEvents?.length)'));
     assert.equal(await evaluate('window.revealCalls'),0);
     assert.equal(requests.slice(start).some(url=>url.includes('L01.reveal')),false,'no reveal import before decision');
-    if(mode==='research')await evaluate(`(()=>{for(const b of document.querySelectorAll('.play-clues button'))if(!b.disabled)b.click()})()`);
-    if(mode==='heavy')await click('重仓 100%');
-    if(mode==='flat')await click('观望');
+    assert.equal(await evaluate("document.querySelectorAll('.market-chart g.candle-pending').length"),0,'no pending candles before decision');
+    if(mode==='research'){
+      await evaluate(`(()=>{for(const b of document.querySelectorAll('.play-clues button'))if(!b.disabled)b.click()})()`);
+      const clues=await evaluate("(()=>({open:document.querySelectorAll('.play-clues .clue-card.is-open').length,locked:document.querySelectorAll('.play-clues .clue-card.is-locked:disabled').length,total:document.querySelectorAll('.play-clues .clue-card').length}))()");
+      assert.ok(clues.open>0&&clues.locked>0&&clues.open+clues.locked===clues.total,`flipped cards + greyed-out cards cover all clues: ${JSON.stringify(clues)}`);
+    }
+    if(mode==='heavy'){await click('做多');await click('重仓 100%');await click('5');await click('不设止损');}
+    if(mode==='flat'){await click('观望');await click('3');await click('不设止损');}
+    if(mode==='research'){await click('做多');await click('轻仓 20%');await click('3');await click('5%');}
     await click('提交决定，揭晓走势');
     await until(()=>evaluate("Boolean(document.querySelector('.play-actions'))"));
+    const chart=()=>evaluate("(()=>({candles:document.querySelectorAll('.market-chart g.candle-up,.market-chart g.candle-down').length,pending:document.querySelectorAll('.market-chart g.candle-pending').length,actionsDisabled:[...document.querySelectorAll('.action-row button')].every(b=>b.disabled),decisionLine:Boolean(document.querySelector('.market-chart .chart-decision'))}))()");
+    const first=await chart();
+    assert.ok(first.decisionLine,'decision line drawn after submit');
+    if(reduced)assert.equal(first.pending,0,'reduced motion: whole step shown at once');
+    else assert.ok(first.pending>0&&first.actionsDisabled,`bars appear one by one and actions wait: ${JSON.stringify(first)}`);
     for(let i=0;i<3;i++){
+      await until(async()=>{const c=await chart();return c.pending===0&&c.candles===60+5*(i+1);});
       if(mode==='flat'&&i===0){await click('入场做空');await click('加仓');}
       else await click(i===2&&mode==='heavy'?'平仓':'持有');
     }
@@ -54,5 +69,5 @@ try {
   }
   assert.deepEqual(exceptions,[]);
   assert.ok(logs.length>0,'console events captured');
-  console.log('PASS: three mobile-emulated paths, event schemas, reveal isolation, console output');
+  console.log('PASS: three mobile-emulated paths, event schemas, reveal isolation, clue flip / greyed cards, bar-by-bar reveal (+ reduced motion), console output');
 } finally {socket?.close();child.kill();await wait(300);await fs.rm(profile,{recursive:true,force:true});}

@@ -265,7 +265,7 @@
      "group": "preference",
      "name": "研究深度",
      "judgement": "偏研究型：先把研究点用足再决定",
-     "score": 1,
+     "score": 0.98,
      "evidence": [
       {
        "level_id": "S01",
@@ -275,7 +275,7 @@
         5,
         6
        ],
-       "text": "第 1 关3 个研究点用了 3 个，思考 38 秒后决定",
+       "text": "第 1 关3 个研究点用了 3 个，思考 38 秒后决定（平均每张线索 13 秒）",
        "direction": "+"
       },
       {
@@ -286,7 +286,7 @@
         15,
         16
        ],
-       "text": "第 2 关3 个研究点用了 3 个，思考 42 秒后决定",
+       "text": "第 2 关3 个研究点用了 3 个，思考 42 秒后决定（平均每张线索 14 秒）",
        "direction": "+"
       },
       {
@@ -296,7 +296,7 @@
         24,
         25
        ],
-       "text": "第 3 关3 个研究点用了 3 个，思考 35 秒后决定",
+       "text": "第 3 关3 个研究点用了 3 个，思考 35 秒后决定（平均每张线索 18 秒）",
        "direction": "+"
       },
       {
@@ -306,7 +306,7 @@
         33,
         34
        ],
-       "text": "第 4 关3 个研究点用了 3 个，思考 45 秒后决定",
+       "text": "第 4 关3 个研究点用了 3 个，思考 45 秒后决定（平均每张线索 23 秒）",
        "direction": "+"
       }
      ],
@@ -363,13 +363,255 @@
     "name": "夜猫研究员",
     "emoji": "🦉",
     "tagline": "线索翻遍才出手，证据说话",
-    "is_fun_label": true
+    "is_fun_label": true,
+    "id": "owl",
+    "archetype": "证据驱动 · 慢思考",
+    "traits": [
+     "研究点用足",
+     "先看关键线索",
+     "跟着证据走"
+    ],
+    "strength": "决定有依据，不容易被单一信号带偏",
+    "blind_spot": "研究得越多越容易觉得\"已经想清楚了\"，仍需检验规则是否只是巧合",
+    "basis": "双系统理论区分快速直觉（系统 1）与慢速推理（系统 2）；预测研究发现，愿意主动找反方证据、按新信息更新判断的人预测更准。确认偏误则是只找支持自己观点的证据。",
+    "refs": [
+     "Kahneman (2011), Thinking, Fast and Slow",
+     "Nickerson (1998), Confirmation Bias, Review of General Psychology",
+     "Tetlock & Gardner (2015), Superforecasting"
+    ],
+    "why": "研究点使用 100%，关键线索命中 100%",
+    "also": {
+     "id": "turtle",
+     "name": "稳健老龟",
+     "emoji": "🐢",
+     "why": "入场时设止损 100%，平均仓位 43%"
+    }
    },
-   "summary": "能力上表现稳定，证据使用最突出（会先找关键线索，决定和证据一致）。偏好上，偏研究型、仓位适中；人物卡依据是\"研究点用足、紧跟关键线索\"。趋势 vs 反转还看不准，结论仅供参考。",
+   "features": {
+    "flat_rate": {
+     "value": 0,
+     "n": 4
+    },
+    "avg_size": {
+     "value": 0.425,
+     "n": 4
+    },
+    "stop_rate": {
+     "value": 1,
+     "n": 4
+    },
+    "add_on_loss": {
+     "value": 0,
+     "n": 4
+    },
+    "cut_on_loss": {
+     "value": 1,
+     "n": 4
+    },
+    "research_spend": {
+     "value": 1,
+     "n": 4
+    },
+    "think_sec": {
+     "value": 40,
+     "n": 4
+    },
+    "key_clue_hit": {
+     "value": 1,
+     "n": 4
+    },
+    "clue_agree": {
+     "value": 1,
+     "n": 3
+    },
+    "confirm_only": {
+     "value": 0,
+     "n": 4
+    },
+    "trend_follow": {
+     "value": 0.3333333333333333,
+     "n": 3
+    },
+    "avg_confidence": {
+     "value": 3.25,
+     "n": 4
+    },
+    "hit_rate": {
+     "value": 1,
+     "n": 4
+    },
+    "overconfidence": {
+     "value": -0.2749999999999999,
+     "n": 4
+    },
+    "reveal_dwell_sec": {
+     "value": 6,
+     "n": 4
+    }
+   },
+   "summary": "能力上表现稳定，证据使用最突出（会先找关键线索，决定和证据一致）。偏好上，偏研究型、仓位适中；人物卡依据是\"研究点使用 100%，关键线索命中 100%\"。趋势 vs 反转还看不准，结论仅供参考。",
    "needs_more": [
     {
      "dimension_id": "style",
      "reason": "顺势和逆势都做过，可能是在看具体线索而不是固定风格"
+    }
+   ],
+   "recommendations": [
+    {
+     "id": "strategy-owl",
+     "type": "strategy",
+     "title": "把找线索的本事用到因子上",
+     "resource": {
+      "name": "skill-pandaai-factor-online",
+      "provider": "QuantSkills",
+      "url": "https://github.com/quantskills/skill-pandaai-factor-online",
+      "desc": "PandaAI 因子大赛上手：环境体检、登录、在线挖掘因子",
+      "tags": [
+       "因子",
+       "因子大赛"
+      ],
+      "is_sample": false
+     },
+     "reason": "这局的人物卡是🦉夜猫研究员（研究点使用 100%，关键线索命中 100%），证据使用判断为\"会先找关键线索，决定和证据一致\"（置信度高）。你翻线索的习惯就是因子研究的雏形，这个技能包带你在 PandaAI 上在线挖因子、参加因子大赛。",
+     "based_on": [
+      {
+       "dimension_id": "evidence_use",
+       "judgement": "会先找关键线索，决定和证据一致",
+       "evidence": [
+        "第 1 关翻开了全部关键线索「成交量」「同期大盘」",
+        "第 1 关翻开的线索整体看涨，决定做多与线索一致"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "查看策略",
+      "url": "https://github.com/quantskills/skill-pandaai-factor-online"
+     }
+    },
+    {
+     "id": "product-factor-center",
+     "type": "product",
+     "title": "在因子中心把研究做成因子",
+     "resource": {
+      "name": "量化因子中心",
+      "provider": "PandaAI",
+      "url": "https://www.pandaaiquant.com/quantfactor-center",
+      "desc": "因子搜索、对比和诊断，带 AI 因子助手；免费版有 20 个因子的因子池",
+      "tags": [
+       "因子",
+       "免费版"
+      ],
+      "is_sample": false
+     },
+     "reason": "证据使用判断为\"会先找关键线索，决定和证据一致\"（置信度高），研究深度判断为\"偏研究型：先把研究点用足再决定\"（置信度高）。你习惯先看证据再决定，因子中心可以把\"看什么\"变成可检验的因子，免费版就能用。",
+     "based_on": [
+      {
+       "dimension_id": "evidence_use",
+       "judgement": "会先找关键线索，决定和证据一致",
+       "evidence": [
+        "第 1 关翻开了全部关键线索「成交量」「同期大盘」",
+        "第 1 关翻开的线索整体看涨，决定做多与线索一致"
+       ]
+      },
+      {
+       "dimension_id": "research_depth",
+       "judgement": "偏研究型：先把研究点用足再决定",
+       "evidence": [
+        "第 1 关3 个研究点用了 3 个，思考 38 秒后决定（平均每张线索 13 秒）",
+        "第 2 关3 个研究点用了 3 个，思考 42 秒后决定（平均每张线索 14 秒）"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "去试试",
+      "url": "https://www.pandaaiquant.com/quantfactor-center"
+     }
+    },
+    {
+     "id": "event-factor-contest",
+     "type": "event",
+     "title": "去因子大赛试试身手",
+     "resource": {
+      "name": "第四届因子大赛",
+      "provider": "PandaAI",
+      "url": "https://www.pandaaiquant.com/factorhub/fourthFactorCompetition/",
+      "desc": "永续赛制、随时参赛的因子研究比赛",
+      "tags": [
+       "因子",
+       "进行中"
+      ],
+      "is_sample": false
+     },
+     "reason": "三项能力都表现不错（证据使用、判断校准、风险控制）。因子大赛随时可以参加，适合把研究能力放到真实数据上检验。",
+     "based_on": [
+      {
+       "dimension_id": "evidence_use",
+       "judgement": "会先找关键线索，决定和证据一致",
+       "evidence": [
+        "第 1 关翻开了全部关键线索「成交量」「同期大盘」",
+        "第 1 关翻开的线索整体看涨，决定做多与线索一致"
+       ]
+      },
+      {
+       "dimension_id": "calibration",
+       "judgement": "信心和对错比较匹配",
+       "evidence": [
+        "第 1 关信心 4/5，做多，之后上涨：信心高且方向判断正确",
+        "第 2 关信心 4/5，做空，之后下跌：信心高且方向判断正确"
+       ]
+      },
+      {
+       "dimension_id": "risk_control",
+       "judgement": "会用止损和仓位管住风险",
+       "evidence": [
+        "第 1 关半仓做多时设了 5.0% 止损",
+        "第 2 关半仓做空时设了 5.0% 止损"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "去看活动",
+      "url": "https://www.pandaaiquant.com/factorhub/fourthFactorCompetition/"
+     }
+    },
+    {
+     "id": "tool-overfit",
+     "type": "tool",
+     "title": "规则写出来后，先查过拟合",
+     "resource": {
+      "name": "skill-backtest-overfit",
+      "provider": "QuantSkills",
+      "url": "https://github.com/quantskills/skill-backtest-overfit",
+      "desc": "检测回测过拟合：Deflated Sharpe、PBO",
+      "tags": [
+       "回测",
+       "防过拟合"
+      ],
+      "is_sample": false
+     },
+     "reason": "证据使用判断为\"会先找关键线索，决定和证据一致\"（置信度高），研究深度判断为\"偏研究型：先把研究点用足再决定\"（置信度高）。下一步把判断写成规则时，最容易踩的坑是回测过拟合。",
+     "based_on": [
+      {
+       "dimension_id": "evidence_use",
+       "judgement": "会先找关键线索，决定和证据一致",
+       "evidence": [
+        "第 1 关翻开了全部关键线索「成交量」「同期大盘」",
+        "第 1 关翻开的线索整体看涨，决定做多与线索一致"
+       ]
+      },
+      {
+       "dimension_id": "research_depth",
+       "judgement": "偏研究型：先把研究点用足再决定",
+       "evidence": [
+        "第 1 关3 个研究点用了 3 个，思考 38 秒后决定（平均每张线索 13 秒）",
+        "第 2 关3 个研究点用了 3 个，思考 42 秒后决定（平均每张线索 14 秒）"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "查看工具",
+      "url": "https://github.com/quantskills/skill-backtest-overfit"
+     }
     }
    ]
   }

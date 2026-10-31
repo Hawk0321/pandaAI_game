@@ -247,7 +247,7 @@
      "group": "preference",
      "name": "研究深度",
      "judgement": "偏研究型：先把研究点用足再决定",
-     "score": 0.98,
+     "score": 0.89,
      "evidence": [
       {
        "level_id": "S01",
@@ -257,7 +257,7 @@
         5,
         6
        ],
-       "text": "第 1 关3 个研究点用了 3 个，思考 30 秒后决定",
+       "text": "第 1 关3 个研究点用了 3 个，思考 30 秒后决定（平均每张线索 10 秒）",
        "direction": "+"
       },
       {
@@ -268,7 +268,7 @@
         15,
         16
        ],
-       "text": "第 2 关3 个研究点用了 3 个，思考 28 秒后决定",
+       "text": "第 2 关3 个研究点用了 3 个，思考 28 秒后决定（平均每张线索 9 秒）",
        "direction": "+"
       },
       {
@@ -279,7 +279,7 @@
         25,
         26
        ],
-       "text": "第 3 关3 个研究点用了 3 个，思考 25 秒后决定",
+       "text": "第 3 关3 个研究点用了 3 个，思考 25 秒后决定（平均每张线索 8 秒）",
        "direction": "+"
       },
       {
@@ -290,7 +290,7 @@
         35,
         36
        ],
-       "text": "第 4 关3 个研究点用了 3 个，思考 32 秒后决定",
+       "text": "第 4 关3 个研究点用了 3 个，思考 32 秒后决定（平均每张线索 11 秒）",
        "direction": "+"
       }
      ],
@@ -347,9 +347,87 @@
     "name": "树懒观察员",
     "emoji": "🦥",
     "tagline": "看得多、动得少，按兵不动也是一种选择",
-    "is_fun_label": true
+    "is_fun_label": true,
+    "id": "sloth",
+    "archetype": "损失厌恶 · 维持现状偏差",
+    "traits": [
+     "爱观望",
+     "怕亏损",
+     "重研究轻行动"
+    ],
+    "strength": "不会因为冲动而亏钱，耐心是稀缺品质",
+    "blind_spot": "把\"不确定\"当成\"不行动\"的理由，也就没机会验证自己的判断",
+    "basis": "前景理论发现，同样金额的损失带来的痛苦约是收益快乐的两倍，人因此倾向回避可能亏钱的选择；面对模糊信息时，人还会偏好\"什么都不改\"的默认选项。",
+    "refs": [
+     "Kahneman & Tversky (1979), Prospect Theory, Econometrica",
+     "Samuelson & Zeckhauser (1988), Status Quo Bias in Decision Making, J. Risk & Uncertainty",
+     "Ellsberg (1961), Risk, Ambiguity, and the Savage Axioms, QJE"
+    ],
+    "why": "4 关里观望 100%"
    },
-   "summary": "能力上，证据使用会看线索，但关键线索常有遗漏。偏好上，偏研究型、偏保守；人物卡依据是\"大多数关卡观望或极轻仓\"。证据使用、判断校准、风险控制、趋势 vs 反转还看不准，结论仅供参考。",
+   "features": {
+    "flat_rate": {
+     "value": 1,
+     "n": 4
+    },
+    "avg_size": {
+     "value": 0,
+     "n": 4
+    },
+    "stop_rate": {
+     "value": null,
+     "n": 0
+    },
+    "add_on_loss": {
+     "value": 0,
+     "n": 4
+    },
+    "cut_on_loss": {
+     "value": 0,
+     "n": 4
+    },
+    "research_spend": {
+     "value": 1,
+     "n": 4
+    },
+    "think_sec": {
+     "value": 29,
+     "n": 4
+    },
+    "key_clue_hit": {
+     "value": 0.375,
+     "n": 4
+    },
+    "clue_agree": {
+     "value": null,
+     "n": 0
+    },
+    "confirm_only": {
+     "value": 0,
+     "n": 0
+    },
+    "trend_follow": {
+     "value": null,
+     "n": 0
+    },
+    "avg_confidence": {
+     "value": null,
+     "n": 0
+    },
+    "hit_rate": {
+     "value": null,
+     "n": 0
+    },
+    "overconfidence": {
+     "value": null,
+     "n": 0
+    },
+    "reveal_dwell_sec": {
+     "value": 6,
+     "n": 4
+    }
+   },
+   "summary": "能力上，证据使用会看线索，但关键线索常有遗漏。偏好上，偏研究型、偏保守；人物卡依据是\"4 关里观望 100%\"。证据使用、判断校准、风险控制、趋势 vs 反转还看不准，结论仅供参考。",
    "needs_more": [
     {
      "dimension_id": "evidence_use",
@@ -366,6 +444,140 @@
     {
      "dimension_id": "style",
      "reason": "还没有在明显上涨或下跌的行情里下过方向，看不出偏好"
+    }
+   ],
+   "recommendations": [
+    {
+     "id": "event-futures-contest",
+     "type": "event",
+     "title": "在模拟盘上迈出第一步",
+     "resource": {
+      "name": "全国期货模拟赛",
+      "provider": "PandaAI",
+      "url": "https://www.pandaaiquant.com/contest/",
+      "desc": "模拟盘交易比赛，手动、策略、AI 辅助三个赛道，不用真金白银",
+      "tags": [
+       "模拟盘",
+       "进行中"
+      ],
+      "is_sample": false
+     },
+     "reason": "风险偏好判断为\"偏保守：轻仓或观望为主\"（置信度高），例如第 1 关选择观望不入场。模拟赛不用真金白银，适合先用小仓位把\"看懂了\"变成\"做一次\"。",
+     "based_on": [
+      {
+       "dimension_id": "risk_appetite",
+       "judgement": "偏保守：轻仓或观望为主",
+       "evidence": [
+        "第 1 关选择观望不入场",
+        "第 2 关选择观望不入场"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "去看活动",
+      "url": "https://www.pandaaiquant.com/contest/"
+     }
+    },
+    {
+     "id": "strategy-sloth",
+     "type": "strategy",
+     "title": "先在历史里找相似走势",
+     "resource": {
+      "name": "skill-xingtai-catcher",
+      "provider": "QuantSkills",
+      "url": "https://github.com/quantskills/skill-xingtai-catcher",
+      "desc": "相似 K 线形态搜索：找历史上走势相似的股票和期货",
+      "tags": [
+       "K 线",
+       "形态"
+      ],
+      "is_sample": false
+     },
+     "reason": "这局的人物卡是🦥树懒观察员（4 关里观望 100%），风险偏好判断为\"偏保守：轻仓或观望为主\"（置信度高）。相似 K 线搜索能看到历史上走势相似的标的后来怎样，不用下单也能积累判断。",
+     "based_on": [
+      {
+       "dimension_id": "risk_appetite",
+       "judgement": "偏保守：轻仓或观望为主",
+       "evidence": [
+        "第 1 关选择观望不入场",
+        "第 2 关选择观望不入场"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "查看策略",
+      "url": "https://github.com/quantskills/skill-xingtai-catcher"
+     }
+    },
+    {
+     "id": "product-qube",
+     "type": "product",
+     "title": "用一句话把想法变成可回测的策略",
+     "resource": {
+      "name": "Qube",
+      "provider": "PandaAI",
+      "url": "https://www.pandaaiquant.com/agent_quant/",
+      "desc": "用自然语言生成策略并回测，支持调参和仿真盘；快速试用不用登录",
+      "tags": [
+       "免登录试用",
+       "自然语言"
+      ],
+      "is_sample": false
+     },
+     "reason": "研究深度判断为\"偏研究型：先把研究点用足再决定\"（置信度高）。把\"我觉得会涨\"写成一句话交给 Qube，它会生成策略并用历史数据回测，快速试用不用登录。",
+     "based_on": [
+      {
+       "dimension_id": "research_depth",
+       "judgement": "偏研究型：先把研究点用足再决定",
+       "evidence": [
+        "第 1 关3 个研究点用了 3 个，思考 30 秒后决定（平均每张线索 10 秒）",
+        "第 2 关3 个研究点用了 3 个，思考 28 秒后决定（平均每张线索 9 秒）"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "去试试",
+      "url": "https://www.pandaaiquant.com/agent_quant/"
+     }
+    },
+    {
+     "id": "tool-trade-review",
+     "type": "tool",
+     "title": "逐笔复盘下单前看了什么",
+     "resource": {
+      "name": "skill-trade-review",
+      "provider": "QuantSkills",
+      "url": "https://github.com/quantskills/skill-trade-review",
+      "desc": "按走势、策略和交易记录逐笔复盘，给出下一阶段建议",
+      "tags": [
+       "复盘",
+       "证据"
+      ],
+      "is_sample": false
+     },
+     "reason": "证据使用判断为\"会看线索，但关键线索常有遗漏\"（置信度中），例如第 3 关没有翻开任何关键线索（本关关键是「区间回测」）。逐笔复盘能帮你看清每次下单前到底依据了什么。",
+     "based_on": [
+      {
+       "dimension_id": "evidence_use",
+       "judgement": "会看线索，但关键线索常有遗漏",
+       "evidence": [
+        "第 3 关没有翻开任何关键线索（本关关键是「区间回测」）",
+        "第 4 关没有翻开任何关键线索（本关关键是「成交量」「超跌回测」）"
+       ]
+      },
+      {
+       "dimension_id": "research_depth",
+       "judgement": "偏研究型：先把研究点用足再决定",
+       "evidence": [
+        "第 1 关3 个研究点用了 3 个，思考 30 秒后决定（平均每张线索 10 秒）",
+        "第 2 关3 个研究点用了 3 个，思考 28 秒后决定（平均每张线索 9 秒）"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "查看工具",
+      "url": "https://github.com/quantskills/skill-trade-review"
+     }
     }
    ]
   },
@@ -658,7 +870,7 @@
      "group": "preference",
      "name": "研究深度",
      "judgement": "偏研究型：先把研究点用足再决定",
-     "score": 0.98,
+     "score": 0.91,
      "evidence": [
       {
        "level_id": "S01",
@@ -668,7 +880,7 @@
         5,
         6
        ],
-       "text": "第 1 关3 个研究点用了 3 个，思考 30 秒后决定",
+       "text": "第 1 关3 个研究点用了 3 个，思考 30 秒后决定（平均每张线索 10 秒）",
        "direction": "+"
       },
       {
@@ -679,7 +891,7 @@
         15,
         16
        ],
-       "text": "第 2 关3 个研究点用了 3 个，思考 28 秒后决定",
+       "text": "第 2 关3 个研究点用了 3 个，思考 28 秒后决定（平均每张线索 9 秒）",
        "direction": "+"
       },
       {
@@ -690,7 +902,7 @@
         25,
         26
        ],
-       "text": "第 3 关3 个研究点用了 3 个，思考 25 秒后决定",
+       "text": "第 3 关3 个研究点用了 3 个，思考 25 秒后决定（平均每张线索 8 秒）",
        "direction": "+"
       },
       {
@@ -701,7 +913,7 @@
         35,
         36
        ],
-       "text": "第 4 关3 个研究点用了 3 个，思考 32 秒后决定",
+       "text": "第 4 关3 个研究点用了 3 个，思考 32 秒后决定（平均每张线索 11 秒）",
        "direction": "+"
       },
       {
@@ -711,7 +923,7 @@
         44,
         45
        ],
-       "text": "补充关3 个研究点用了 3 个，思考 30 秒后决定",
+       "text": "补充关3 个研究点用了 3 个，思考 30 秒后决定（平均每张线索 15 秒）",
        "direction": "+"
       }
      ],
@@ -776,9 +988,93 @@
     "name": "树懒观察员",
     "emoji": "🦥",
     "tagline": "看得多、动得少，按兵不动也是一种选择",
-    "is_fun_label": true
+    "is_fun_label": true,
+    "id": "sloth",
+    "archetype": "损失厌恶 · 维持现状偏差",
+    "traits": [
+     "爱观望",
+     "怕亏损",
+     "重研究轻行动"
+    ],
+    "strength": "不会因为冲动而亏钱，耐心是稀缺品质",
+    "blind_spot": "把\"不确定\"当成\"不行动\"的理由，也就没机会验证自己的判断",
+    "basis": "前景理论发现，同样金额的损失带来的痛苦约是收益快乐的两倍，人因此倾向回避可能亏钱的选择；面对模糊信息时，人还会偏好\"什么都不改\"的默认选项。",
+    "refs": [
+     "Kahneman & Tversky (1979), Prospect Theory, Econometrica",
+     "Samuelson & Zeckhauser (1988), Status Quo Bias in Decision Making, J. Risk & Uncertainty",
+     "Ellsberg (1961), Risk, Ambiguity, and the Savage Axioms, QJE"
+    ],
+    "why": "5 关里观望 80%",
+    "also": {
+     "id": "turtle",
+     "name": "稳健老龟",
+     "emoji": "🐢",
+     "why": "入场时设止损 100%，平均仓位 4%"
+    }
    },
-   "summary": "能力上，判断校准相对最好（信心和对错比较匹配），证据使用最需要加强（会看线索，但关键线索常有遗漏）。偏好上，偏研究型、偏保守；人物卡依据是\"大多数关卡观望或极轻仓\"。证据使用、判断校准、风险控制、趋势 vs 反转还看不准，结论仅供参考。",
+   "features": {
+    "flat_rate": {
+     "value": 0.8,
+     "n": 5
+    },
+    "avg_size": {
+     "value": 0.04,
+     "n": 5
+    },
+    "stop_rate": {
+     "value": 1,
+     "n": 1
+    },
+    "add_on_loss": {
+     "value": 0,
+     "n": 5
+    },
+    "cut_on_loss": {
+     "value": 0,
+     "n": 5
+    },
+    "research_spend": {
+     "value": 1,
+     "n": 5
+    },
+    "think_sec": {
+     "value": 30,
+     "n": 5
+    },
+    "key_clue_hit": {
+     "value": 0.5,
+     "n": 5
+    },
+    "clue_agree": {
+     "value": 1,
+     "n": 1
+    },
+    "confirm_only": {
+     "value": 0,
+     "n": 1
+    },
+    "trend_follow": {
+     "value": 0,
+     "n": 1
+    },
+    "avg_confidence": {
+     "value": 3,
+     "n": 1
+    },
+    "hit_rate": {
+     "value": 1,
+     "n": 1
+    },
+    "overconfidence": {
+     "value": null,
+     "n": 1
+    },
+    "reveal_dwell_sec": {
+     "value": 6,
+     "n": 5
+    }
+   },
+   "summary": "能力上，判断校准相对最好（信心和对错比较匹配），证据使用最需要加强（会看线索，但关键线索常有遗漏）。偏好上，偏研究型、偏保守；人物卡依据是\"5 关里观望 80%\"。证据使用、判断校准、风险控制、趋势 vs 反转还看不准，结论仅供参考。",
    "needs_more": [
     {
      "dimension_id": "evidence_use",
@@ -812,6 +1108,101 @@
      "dimension_id": "style",
      "before": "证据不足，暂不下结论（置信度低）",
      "after": "偏逆势反转：涨多了空、跌多了买（置信度低）"
+    }
+   ],
+   "recommendations": [
+    {
+     "id": "event-futures-contest",
+     "type": "event",
+     "title": "在模拟盘上迈出第一步",
+     "resource": {
+      "name": "全国期货模拟赛",
+      "provider": "PandaAI",
+      "url": "https://www.pandaaiquant.com/contest/",
+      "desc": "模拟盘交易比赛，手动、策略、AI 辅助三个赛道，不用真金白银",
+      "tags": [
+       "模拟盘",
+       "进行中"
+      ],
+      "is_sample": false
+     },
+     "reason": "风险偏好判断为\"偏保守：轻仓或观望为主\"（置信度高），例如第 1 关选择观望不入场。模拟赛不用真金白银，适合先用小仓位把\"看懂了\"变成\"做一次\"。",
+     "based_on": [
+      {
+       "dimension_id": "risk_appetite",
+       "judgement": "偏保守：轻仓或观望为主",
+       "evidence": [
+        "第 1 关选择观望不入场",
+        "第 2 关选择观望不入场"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "去看活动",
+      "url": "https://www.pandaaiquant.com/contest/"
+     }
+    },
+    {
+     "id": "strategy-sloth",
+     "type": "strategy",
+     "title": "先在历史里找相似走势",
+     "resource": {
+      "name": "skill-xingtai-catcher",
+      "provider": "QuantSkills",
+      "url": "https://github.com/quantskills/skill-xingtai-catcher",
+      "desc": "相似 K 线形态搜索：找历史上走势相似的股票和期货",
+      "tags": [
+       "K 线",
+       "形态"
+      ],
+      "is_sample": false
+     },
+     "reason": "这局的人物卡是🦥树懒观察员（5 关里观望 80%），风险偏好判断为\"偏保守：轻仓或观望为主\"（置信度高）。相似 K 线搜索能看到历史上走势相似的标的后来怎样，不用下单也能积累判断。",
+     "based_on": [
+      {
+       "dimension_id": "risk_appetite",
+       "judgement": "偏保守：轻仓或观望为主",
+       "evidence": [
+        "第 1 关选择观望不入场",
+        "第 2 关选择观望不入场"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "查看策略",
+      "url": "https://github.com/quantskills/skill-xingtai-catcher"
+     }
+    },
+    {
+     "id": "product-qube",
+     "type": "product",
+     "title": "用一句话把想法变成可回测的策略",
+     "resource": {
+      "name": "Qube",
+      "provider": "PandaAI",
+      "url": "https://www.pandaaiquant.com/agent_quant/",
+      "desc": "用自然语言生成策略并回测，支持调参和仿真盘；快速试用不用登录",
+      "tags": [
+       "免登录试用",
+       "自然语言"
+      ],
+      "is_sample": false
+     },
+     "reason": "研究深度判断为\"偏研究型：先把研究点用足再决定\"（置信度高）。把\"我觉得会涨\"写成一句话交给 Qube，它会生成策略并用历史数据回测，快速试用不用登录。",
+     "based_on": [
+      {
+       "dimension_id": "research_depth",
+       "judgement": "偏研究型：先把研究点用足再决定",
+       "evidence": [
+        "第 1 关3 个研究点用了 3 个，思考 30 秒后决定（平均每张线索 10 秒）",
+        "第 2 关3 个研究点用了 3 个，思考 28 秒后决定（平均每张线索 9 秒）"
+       ]
+      }
+     ],
+     "next_step": {
+      "label": "去试试",
+      "url": "https://www.pandaaiquant.com/agent_quant/"
+     }
     }
    ]
   }

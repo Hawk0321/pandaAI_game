@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  frontend:
+    name: 前端（类型检查 / 单元测试 / 构建）
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npx vite build
+
+  levels:
+    name: 关卡数据（离线校验）
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # 只用标准库，不需要登录或联网；重建后要求工作区无差异，防止关卡文件与生成脚本脱节。
+      - run: python backend/levels/build.py
+      - run: python backend/levels/check.py --require-complete
+      - run: python -m unittest discover -s backend/levels -p 'test_*.py' -v
+      - name: 重建结果必须与提交的关卡文件一致
+        run: git diff --exit-code -- frontend/public/levels

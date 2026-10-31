@@ -4,10 +4,12 @@ import type { Bar } from '../shared/protocol';
 interface MarketChartProps {
   bars: Bar[];
   decisionT?: number;
+  /** 可选：只把前 visibleCount 根画成可见，其余加 candle-pending 类（对局页逐根揭晓用）。坐标按全部传入的 bars 算，动画时不会抖。 */
+  visibleCount?: number;
 }
 
 /** 只画已获准展示的 OHLC 数据，不请求或推算后续行情。 */
-export function MarketChart({ bars, decisionT = 0 }: MarketChartProps) {
+export function MarketChart({ bars, decisionT = 0, visibleCount }: MarketChartProps) {
   const chartId = useId();
   const visible = [...bars].filter(bar => [bar.t, bar.o, bar.h, bar.l, bar.c].every(Number.isFinite)).sort((a, b) => a.t - b.t);
   if (visible.length === 0) return <p className="muted">暂无可展示的行情。</p>;
@@ -39,7 +41,7 @@ export function MarketChart({ bars, decisionT = 0 }: MarketChartProps) {
         <line className="chart-grid" x1={left} x2={right} y1={y(price)} y2={y(price)} />
         <text className="chart-axis" x={left - 10} y={y(price) + 4} textAnchor="end">{price.toFixed(2)}</text>
       </g>)}
-      {visible.map((bar, index) => <g className={bar.c >= bar.o ? 'candle-up' : 'candle-down'} key={bar.t}>
+      {visible.map((bar, index) => <g className={`${bar.c >= bar.o ? 'candle-up' : 'candle-down'}${visibleCount !== undefined && index >= visibleCount ? ' candle-pending' : ''}`} key={bar.t}>
         <title>{`t=${bar.t}，开 ${bar.o.toFixed(2)}，高 ${bar.h.toFixed(2)}，低 ${bar.l.toFixed(2)}，收 ${bar.c.toFixed(2)}`}</title>
         <line x1={x(index)} x2={x(index)} y1={y(bar.h)} y2={y(bar.l)} />
         <rect x={x(index) - candleWidth / 2} y={Math.min(y(bar.o), y(bar.c))} width={candleWidth} height={Math.max(1.5, Math.abs(y(bar.o) - y(bar.c)))} />
