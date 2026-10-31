@@ -1,11 +1,12 @@
 # 交易滑牌（Reigns 类）
 
-手机竖屏优先的交易主题滑牌游戏：左右滑动做决定，管理资金、风控、信心、口碑四条数值，任意一条触底或爆满就结局。结局页展示玩家的交易人物卡，并引到 PandaAI 产品和 QuantSkills 技能包。卡牌内容为原创虚构示例（`is_sample: true`），不含真实行情；人物卡是趣味表达，不构成投资建议。
+手机竖屏优先的交易主题滑牌游戏：先选一个身份，再左右滑动做决定，管理四条数值，任意一条触底或爆满就结局。结局页展示玩家的交易人物卡（带动态插画），并引到 PandaAI 产品和 QuantSkills 技能包。卡牌内容为原创虚构示例（`is_sample: true`），不含真实行情；人物卡是趣味表达，不构成投资建议。
 
 ## 依赖与配置
 
 - 复用 `frontend/` 已有依赖（React、Vitest），没有新增依赖。
 - 不需要任何密钥或环境变量，前端不调用 Panda Data。
+- 动态人物卡复用 `../shell/` 的 `PersonaArt`、`PERSONA_ARTWORKS` 和 `persona-card.css`（只 import，不修改，见下文）。
 - 引流资源来自 `../recommend/catalog.ts` 的 `CATALOG`，人物卡来自 `../profile/persona.ts` 的 `PERSONA_CARDS`。
 
 ## 启动
@@ -17,15 +18,41 @@ npx vitest run src/reigns   # 单测
 npx tsc --noEmit            # 类型检查
 ```
 
+## 角色与四条属性
+
+引擎里仍是四个固定槽位（`capital` / `risk` / `confidence` / `reputation`），语义对所有角色一致：钱、安全垫、定力、外界认可。不同角色只是叫法和含义不同（数据在 `roles.ts` 的 `ROLES`）。游戏里点数值条上的名字可展开一句话说明。
+
+| 槽位 | 基金经理 | Web3 玩家 | 炒股达人 |
+|---|---|---|---|
+| `capital` 钱 | 业绩：基金净值和排名 | 钱包资产：钱包里所有资产折合的价值 | 账户资金：账户里的本金和浮盈 |
+| `risk` 安全垫 | 回撤控制：回撤和仓位的安全垫 | 保证金健康：距离被清算有多远 | 仓位风控：止损纪律和仓位安全垫 |
+| `confidence` 定力 | 投研定力：团队的信念和判断一致性 | 钻石手：拿得住的定力 | 心态：盘中的情绪稳定度 |
+| `reputation` 外界认可 | 客户信任：持有人和销售渠道的信任 | 社区声量：推特和社群里别人怎么看你 | 股友口碑：股友群里别人对你的评价 |
+
+选角页还有第四张灰色“待开发”卡片（`COMING_SOON_ROLE`），`aria-disabled="true"`，点不进游戏。
+
+流程：选角（`RoleSelect`）→ 游戏中 → 结局页。结局页“再来一局”回到选角页，“同一角色再来一次”直接用同一角色重开。结局页还有折叠的“结局图鉴”，列出该角色全部结局（`getEndings(role)`），本局达成的显示标题，没达成的显示“？？？”，不剧透。
+
+## 动态人物卡
+
+`PersonaReveal.tsx` 用 `inferPersona(tally)` 得到 9 张人物卡之一，所有角色都展示。插画来自 main 分支 shell 模块（#17）：9 张静态 webp，由 `shell/PersonaArt.tsx` 用 WebGL 着色器实时做呼吸、摇摆和光点，没有 gif 或视频。
+
+- 通过 `PERSONA_ARTWORKS`（`shell/personaArtwork.ts`）按人物卡 id 找插画，主色 `accent` 用作卡片描边和强调色；找不到插画时回退到 emoji。
+- `prefers-reduced-motion` 或 WebGL 不可用时，`PersonaArt` 自动显示静态图；卡片上另有“暂停动态 / 播放动态”按钮。
+- 样式：引入了 `shell/persona-card.css`，它的选择器全部以 `persona-` 开头，不会影响 reigns 以外的页面；外层容器尺寸写在 `reigns.css`（`.reigns-persona-art`）。
+
 ## 目录说明
 
 | 文件 | 作用 |
 |---|---|
 | `types.ts` | 共享契约（数值、卡牌、结局、引擎接口） |
+| `roles.ts` | 三个角色及各自四条属性的名称与含义，`COMING_SOON_ROLE` |
 | `engine.ts` | 纯函数引擎：`createGame` / `choose` / `previewEffects` / `inferPersona` |
 | `cards.ts`、`adventures.ts`、`allCards.ts` | 日常卡、由真实关卡改写的奇遇卡、合并后的牌库 `ALL_CARDS` |
-| `ReignsGame.tsx` | 游戏界面：拖动/按钮/方向键、“后来……”一行、奇遇小标签 |
-| `EndingScreen.tsx` | 结局页：结局 → 本局数字 → 人物卡 → 再来一局 → 引流卡 |
+| `ReignsGame.tsx` | 状态机（选角 → 游戏 → 结局）、拖动/按钮/方向键、“后来……”一行、奇遇小标签 |
+| `RoleSelect.tsx` | 选角页 |
+| `PersonaReveal.tsx` | 动态交易人格卡 |
+| `EndingScreen.tsx` | 结局页：结局 → 本局摘要 → 人物卡 → 再来一局 / 同角色再来 → 引流卡 → 结局图鉴 |
 | `referral.ts` | `buildReferrals()`：人物卡 + 结局 + 数值 + 风格标签 → 3 张引流卡 |
 | `reigns.css` | 样式，类名统一 `reigns-` 前缀 |
 | `demo.html` / `demo.tsx` | 独立试玩入口 |
@@ -38,4 +65,4 @@ npx tsc --noEmit            # 类型检查
 2. 工具：按结局补短板，映射表写在 `referral.ts` 的 `TOOL_BY_STAT` 上方注释。
 3. 产品：默认 Qube；夜猫研究员、深海猎鲨给量化因子中心。
 
-文案只引用本局事实（风格标签次数、结局和数值），不出现买卖建议。
+文案只引用本局事实（风格标签次数、结局和数值），不出现买卖建议。`buildReferrals` 的可选第五个参数 `role`（缺省取 `ending.role`）只改文案口吻（基金经理提到“持有人”，Web3 提到“链上”），资源映射和三张卡的结构不变。

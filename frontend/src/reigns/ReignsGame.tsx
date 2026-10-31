@@ -4,8 +4,10 @@ import type { CSSProperties, KeyboardEvent as ReactKeyboardEvent, PointerEvent a
 import { ALL_CARDS } from './allCards';
 import { EndingScreen } from './EndingScreen';
 import { choose, createGame, previewEffects } from './engine';
-import { STAT_KEYS, STAT_LABELS } from './types';
-import type { GameState, Side, StatKey } from './types';
+import { RoleSelect } from './RoleSelect';
+import { ROLES } from './roles';
+import { STAT_KEYS } from './types';
+import type { GameState, RoleId, Side, StatKey } from './types';
 import './reigns.css';
 
 /** 位移超过卡宽的这个比例，松手即算选择。 */
@@ -25,10 +27,13 @@ const prefersReducedMotion = (): boolean =>
 const AFTERMATH_MS = 6000;
 
 /** 每局用新的 seed 洗牌。 */
-const newGame = (): GameState => createGame(ALL_CARDS, Date.now() % 2147483647);
+const newGame = (role: RoleId): GameState => createGame(ALL_CARDS, Date.now() % 2147483647, role);
 
 export function ReignsGame() {
-  const [game, setGame] = useState<GameState>(newGame);
+  // 状态机：select（选角）→ playing（game 非空且未结束）→ ending（game.ending 非空）。
+  const [game, setGame] = useState<GameState | null>(null);
+  const [backToSelect, setBackToSelect] = useState(false);
+  const [openStat, setOpenStat] = useState<StatKey | null>(null);
   const [dx, setDx] = useState(0);
   const [dragging, setDragging] = useState(false);
   const [exiting, setExiting] = useState<Side | null>(null);
@@ -41,25 +46,25 @@ export function ReignsGame() {
 
   // 每次选完出现新的“后来……”，停几秒后淡出。
   useEffect(() => {
-    if (!game.lastAftermath) { setAftermathShown(false); return undefined; }
+    if (!game?.lastAftermath) { setAftermathShown(false); return undefined; }
     setAftermathShown(true);
     const id = window.setTimeout(() => setAftermathShown(false), AFTERMATH_MS);
     return () => window.clearTimeout(id);
-  }, [game.lastAftermath, game.turn]);
+  }, [game?.lastAftermath, game?.turn]);
 
   const commit = useCallback((side: Side) => {
-    if (exiting || game.ending || !game.current) return;
+    if (exiting || !game || game.ending || !game.current) return;
     setDragging(false);
     setExiting(side);
     const apply = () => {
-      setGame((prev) => choose(prev, side, ALL_CARDS));
+      setGame((prev) => (prev ? choose(prev, side, ALL_CARDS) : prev));
       setExiting(null);
       setDx(0);
     };
     const ms = prefersReducedMotion() ? 0 : EXIT_MS;
     if (ms === 0) apply();
     else timer.current = window.setTimeout(apply, ms);
-  }, [exiting, game.ending, game.current]);
+  }, [exiting, game]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -92,8 +97,26 @@ export function ReignsGame() {
   };
   const onPointerCancel = () => { setDragging(false); setDx(0); };
 
-  const restart = () => { setGame(newGame()); setDx(0); setExiting(null); setAftermathShown(false); };
+  const resetCard = () => { setDx(0); setDragging(false); setExiting(null); setAftermathShown(false); setOpenStat(null); };
+  const start = (role: RoleId) => { setGame(newGame(role)); setBackToSelect(false); resetCard(); };
+  /** “再来一局”：回到选角页。 */
+  const restart = () => { setGame(null); setBackToSelect(true); resetCard(); };
+  /** 同一角色再来一次。 */
+  const replay = () => { if (game) start(game.role); };
 
+  if (!game) {
+    return (
+      <section className="reigns-root" aria-label="交易滑牌">
+        <header className="reigns-header">
+          <h1 className="reigns-title">交易滑牌</h1>
+          <p className="reigns-turn"><span className="reigns-sample">示例内容</span></p>
+        </header>
+        <RoleSelect onSelect={start} focusHeading={backToSelect} />
+      </section>
+    );
+  }
+
+  const roleDef = ROLES[game.role];
   const card = game.current;
   const leaning: Side | null = exiting ?? (Math.abs(dx) > HINT_MIN_PX ? (dx < 0 ? 'left' : 'right') : null);
   const affected: readonly StatKey[] = leaning && card ? previewEffects(game, leaning) : [];
@@ -114,30 +137,48 @@ export function ReignsGame() {
   return (
     <section className="reigns-root" aria-label="交易滑牌">
       <header className="reigns-header">
-        <h1 className="reigns-title">交易滑牌</h1>
+        <h1 className="reigns-title">交易滑牌 <span className="reigns-role-chip">{roleDef.emoji} {roleDef.name}</span></h1>
         <p className="reigns-turn">{game.ending ? `共 ${game.turn} 回合` : `第 ${game.turn + 1} 回合`} <span className="reigns-sample">示例内容</span></p>
       </header>
 
-      {!game.ending && <ul className="reigns-stats" aria-label="当前数值">
-        {STAT_KEYS.map((key) => {
-          const value = game.stats[key];
-          const low = value <= 20 || value >= 80;
-          return (
-            <li key={key} className="reigns-stat">
-              <span className="reigns-stat-name">{STAT_LABELS[key]}</span>
-              <span className="reigns-dot-slot" aria-hidden="true">
-                {affected.includes(key) && <span className="reigns-dot" />}
-              </span>
-              <div className="reigns-bar" role="meter" aria-label={STAT_LABELS[key]} aria-valuemin={0} aria-valuemax={100} aria-valuenow={value}>
-                <div className={`reigns-bar-fill${low ? ' reigns-bar-danger' : ''}`} style={{ width: `${value}%` }} />
-              </div>
-            </li>
-          );
-        })}
-      </ul>}
+      {!game.ending && (
+        <>
+          <ul className="reigns-stats" aria-label="当前数值">
+            {STAT_KEYS.map((key) => {
+              const value = game.stats[key];
+              const def = roleDef.stats[key];
+              const low = value <= 20 || value >= 80;
+              const open = openStat === key;
+              return (
+                <li key={key} className="reigns-stat">
+                  <button
+                    type="button"
+                    className="reigns-stat-name"
+                    title={def.meaning}
+                    aria-expanded={open}
+                    aria-controls="reigns-stat-meaning"
+                    onClick={() => setOpenStat(open ? null : key)}
+                  >
+                    {def.label}
+                  </button>
+                  <span className="reigns-dot-slot" aria-hidden="true">
+                    {affected.includes(key) && <span className="reigns-dot" />}
+                  </span>
+                  <div className="reigns-bar" role="meter" aria-label={def.label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={value}>
+                    <div className={`reigns-bar-fill${low ? ' reigns-bar-danger' : ''}`} style={{ width: `${value}%` }} />
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+          <p id="reigns-stat-meaning" className="reigns-stat-meaning" hidden={openStat === null}>
+            {openStat && <><strong>{roleDef.stats[openStat].label}</strong>：{roleDef.stats[openStat].meaning}</>}
+          </p>
+        </>
+      )}
 
       {game.ending ? (
-        <EndingScreen state={game} onRestart={restart} />
+        <EndingScreen state={game} onRestart={restart} onReplay={replay} />
       ) : card && (
         <>
           <div className="reigns-stage">

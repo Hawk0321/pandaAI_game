@@ -1,8 +1,9 @@
-import { ENDINGS, findEnding } from './endings';
+import { ENDINGS, GENERIC_ENDINGS, ROLE_SPECIAL_ENDINGS, findEnding, getEndings } from './endings';
 import { STAT_KEYS, STYLE_TAGS } from './types';
-import type { Card, ChoiceLog, Effects, GameState, PersonaId, Side, StatKey, Stats, StyleTag, StyleTally } from './types';
+import type { Card, ChoiceLog, Effects, GameState, PersonaId, RoleId, Side, StatKey, Stats, StyleTag, StyleTally } from './types';
 
-export { ENDINGS };
+/** 结局表从 endings.ts 原样转出：ENDINGS[role][stat][low|high]、getEndings(role) 等。 */
+export { ENDINGS, GENERIC_ENDINGS, ROLE_SPECIAL_ENDINGS, getEndings };
 
 export const INITIAL_STAT = 50;
 export const STAT_MIN = 0;
@@ -30,6 +31,11 @@ function shuffle<T>(items: readonly T[], rand: () => number): T[] {
     out[j] = tmp;
   }
   return out;
+}
+
+/** 只保留该角色能抽到的卡：roles 省略（共享）或包含该角色。 */
+function cardsForRole(cards: readonly Card[], role: RoleId): readonly Card[] {
+  return cards.filter((card) => card.roles === undefined || card.roles.includes(role));
 }
 
 function clamp(value: number): number {
@@ -84,9 +90,10 @@ function drawNext(
   return { card: byId.get(firstId) as Card, deck: rest };
 }
 
-export function createGame(cards: readonly Card[], seed?: number): GameState {
+export function createGame(allCards: readonly Card[], seed?: number, role: RoleId = 'stock'): GameState {
+  const cards = cardsForRole(allCards, role);
   if (cards.length === 0) {
-    throw new Error('createGame: cards 不能为空');
+    throw new Error(`createGame: 角色 ${role} 没有可用的卡牌`);
   }
   const rand = mulberry32(seed ?? Math.floor(Math.random() * 4294967296));
   const ids = shuffle(
@@ -95,6 +102,7 @@ export function createGame(cards: readonly Card[], seed?: number): GameState {
   );
   const { card, deck } = drawNext(ids, cards, null, 0);
   return {
+    role,
     stats: { capital: INITIAL_STAT, risk: INITIAL_STAT, confidence: INITIAL_STAT, reputation: INITIAL_STAT },
     turn: 0,
     current: card,
@@ -106,8 +114,12 @@ export function createGame(cards: readonly Card[], seed?: number): GameState {
   };
 }
 
-export function choose(state: GameState, side: Side, cards: readonly Card[]): GameState {
+export function choose(state: GameState, side: Side, allCards: readonly Card[]): GameState {
   if (state.ending !== null || state.current === null) return state;
+  const cards = cardsForRole(allCards, state.role);
+  if (cards.length === 0) {
+    throw new Error(`choose: 角色 ${state.role} 没有可用的卡牌`);
+  }
 
   const choice = state.current[side];
   const stats = applyEffects(state.stats, choice.effects);
@@ -116,9 +128,9 @@ export function choose(state: GameState, side: Side, cards: readonly Card[]): Ga
   const log = [...state.log, { cardId: state.current.id, side }];
   const lastAftermath = choice.aftermath ?? null;
 
-  const ending = findEnding({ stats, turn, log, tally }, cards);
+  const ending = findEnding({ role: state.role, stats, turn, log, tally }, cards);
   if (ending !== null) {
-    return { stats, turn, current: null, deck: state.deck, ending, tally, log, lastAftermath };
+    return { role: state.role, stats, turn, current: null, deck: state.deck, ending, tally, log, lastAftermath };
   }
 
   const { card, deck } = drawNext(
@@ -127,7 +139,7 @@ export function choose(state: GameState, side: Side, cards: readonly Card[]): Ga
     state.current.id,
     reshuffleSeed({ ...state, stats, turn }, cards.length),
   );
-  return { stats, turn, current: card, deck, ending: null, tally, log, lastAftermath };
+  return { role: state.role, stats, turn, current: card, deck, ending: null, tally, log, lastAftermath };
 }
 
 export function previewEffects(state: GameState, side: Side): readonly StatKey[] {

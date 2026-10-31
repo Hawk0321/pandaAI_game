@@ -9,7 +9,13 @@
 
 .reigns-stats { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
 .reigns-stat { display: grid; grid-template-rows: auto 10px auto; justify-items: center; gap: 4px; min-width: 0; }
-.reigns-stat-name { font-size: 13px; color: var(--text-secondary, #b9b8b1); }
+.reigns-stat-name { min-height: 32px; max-width: 100%; padding: 4px 6px; font-size: 13px; font-weight: 500; line-height: 1.25; color: var(--text-secondary, #b9b8b1); background: transparent; border: 0; border-bottom: 1px dotted var(--rg-muted); border-radius: 6px; cursor: help; overflow-wrap: anywhere; }
+.reigns-stat-name:hover:not(:disabled) { background: var(--ink-3, #1d2336); color: var(--rg-text); }
+.reigns-stat-name[aria-expanded='true'] { color: var(--rg-gold); border-bottom-color: var(--rg-gold); }
+.reigns-stat-name:focus-visible { outline: 2px solid var(--gold-soft, #f7d98f); outline-offset: 2px; }
+.reigns-stat-meaning { margin: -6px 0 0; padding: 8px 12px; font-size: 13px; line-height: 1.5; color: var(--rg-text); background: var(--rg-ink); border: 1px solid var(--rg-line); border-radius: 10px; }
+.reigns-stat-meaning[hidden] { display: none; }
+.reigns-role-chip { display: inline-block; margin-left: 4px; padding: 1px 8px; font-size: 12px; font-weight: 600; vertical-align: middle; color: var(--rg-gold); border: 1px solid var(--rg-line); border-radius: 999px; }
 .reigns-dot-slot { height: 10px; display: flex; align-items: center; }
 .reigns-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--rg-gold); box-shadow: 0 0 6px var(--rg-gold); }
 .reigns-bar { width: 100%; height: 8px; border-radius: 999px; background: var(--ink-3, #1d2336); border: 1px solid var(--rg-line); overflow: hidden; }
@@ -48,6 +54,34 @@
   background: linear-gradient(180deg, var(--gold-soft, #f7d98f), var(--rg-gold) 58%, #e5ae45); border: 1px solid #f7d98f66; border-radius: 10px; }
 
 /* ---- 卡面“奇遇”小标签、“后来……”一行 ---- */
+/* ---- 选角页 ---- */
+.reigns-select { display: flex; flex-direction: column; gap: 14px; }
+.reigns-select-head { text-align: center; }
+.reigns-select-title { margin: 0 0 4px; font-size: 22px; }
+.reigns-select-title:focus { outline: none; }
+.reigns-select-title:focus-visible { outline: 2px solid var(--gold-soft, #f7d98f); outline-offset: 4px; border-radius: 4px; }
+.reigns-select-sub { margin: 0; font-size: 13px; color: var(--rg-muted); }
+.reigns-roles { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.reigns-role { display: flex; flex-direction: column; align-items: stretch; gap: 10px; width: 100%; padding: 14px; text-align: left; font-weight: 400; color: var(--rg-text);
+  background: linear-gradient(180deg, var(--ink-2, #161b2a), var(--ink-1, #10141f)); border: 1px solid var(--line-strong, #3a4260); border-radius: 16px; }
+.reigns-role:hover:not(:disabled) { background: linear-gradient(180deg, var(--ink-3, #1d2336), var(--ink-2, #161b2a)); border-color: var(--rg-gold); }
+.reigns-role:focus-visible { outline: 2px solid var(--gold-soft, #f7d98f); outline-offset: 3px; }
+.reigns-role-top { display: flex; align-items: center; gap: 12px; }
+.reigns-role-emoji { flex: 0 0 auto; font-size: 36px; line-height: 1; }
+.reigns-role-id { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.reigns-role-name { font-size: 18px; font-weight: 700; color: var(--rg-gold); }
+.reigns-role-tagline { font-size: 13px; line-height: 1.45; color: var(--text-secondary, #b9b8b1); overflow-wrap: anywhere; }
+.reigns-role-desc { display: flex; flex-direction: column; gap: 8px; }
+.reigns-role-intro { font-size: 13px; line-height: 1.55; color: var(--rg-text); overflow-wrap: anywhere; }
+.reigns-role-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.reigns-role-stat { display: flex; flex-direction: column; gap: 1px; min-width: 0; padding: 6px 8px; background: #00000033; border-radius: 8px; }
+.reigns-role-stat-label { font-size: 12px; font-weight: 700; color: var(--rg-text); }
+.reigns-role-stat-meaning { font-size: 11px; line-height: 1.4; color: var(--rg-muted); overflow-wrap: anywhere; }
+.reigns-role-go { align-self: flex-end; font-size: 13px; font-weight: 700; color: var(--rg-gold); }
+.reigns-role-soon, .reigns-role-soon:hover:not(:disabled) { cursor: not-allowed; filter: grayscale(1); opacity: .55; background: var(--ink-1, #10141f); border: 1px dashed var(--rg-line); }
+.reigns-role-soon .reigns-role-emoji { font-size: 28px; }
+.reigns-role-soon .reigns-role-name { font-size: 15px; color: var(--rg-muted); }
+
 .reigns-adv-tag { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); padding: 2px 10px; font-size: 12px; font-weight: 700; letter-spacing: .1em;
   color: var(--rg-gold); border: 1px solid var(--rg-gold); border-radius: 999px; pointer-events: none; }
 .reigns-aftermath { margin: 0; min-height: 3em; padding: 0 4px; text-align: center; font-size: 14px; line-height: 1.5; color: var(--text-secondary, #b9b8b1); opacity: 0; transition: opacity .6s ease; }
@@ -80,9 +114,33 @@
 .reigns-sides { width: 100%; margin-top: 4px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: left; }
 .reigns-side { padding: 10px; border-radius: 10px; background: #00000033; font-size: 13px; line-height: 1.55; color: var(--text-secondary, #b9b8b1); }
 .reigns-side p { margin: 0; }
+/* 动态插画：persona-card.css 的选择器全部带 persona- 前缀，不影响 reigns 之外的页面；这里只给它一个有高度的容器。 */
+.reigns-persona-art { width: min(100%, 280px); aspect-ratio: 1; margin: 4px auto 0; overflow: hidden; border: 1px solid var(--rg-persona); border-radius: 14px; background: var(--ink-2, #161b2a); }
+.reigns-motion-toggle { min-height: 40px; padding: 6px 14px; font-size: 12px; font-weight: 600; color: var(--rg-text); background: transparent; border: 1px solid var(--rg-persona); border-radius: 999px; }
+.reigns-motion-toggle:hover:not(:disabled) { background: var(--ink-3, #1d2336); }
+.reigns-motion-toggle:focus-visible { outline: 2px solid var(--gold-soft, #f7d98f); outline-offset: 3px; }
+.reigns-motion-toggle:disabled { opacity: .7; cursor: default; }
+
+/* ---- 结局图鉴 ---- */
+.reigns-codex { padding: 4px 14px; border: 1px solid var(--rg-line); border-radius: 14px; background: var(--rg-ink); }
+.reigns-codex-summary { min-height: 44px; display: flex; align-items: center; font-size: 14px; font-weight: 600; color: var(--rg-text); cursor: pointer; }
+.reigns-codex-summary:focus-visible { outline: 2px solid var(--gold-soft, #f7d98f); outline-offset: 3px; border-radius: 6px; }
+.reigns-codex-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.reigns-codex-item { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 10px; font-size: 14px; color: var(--rg-muted); border: 1px solid var(--rg-line); border-radius: 10px; }
+.reigns-codex-reached { color: var(--rg-text); border-color: var(--rg-gold); background: #f2c26118; }
+.reigns-codex-title { display: flex; align-items: center; gap: 6px; min-width: 0; overflow-wrap: anywhere; }
+.reigns-codex-tag { padding: 0 6px; font-size: 11px; color: var(--rg-gold); border: 1px solid var(--rg-gold); border-radius: 999px; white-space: nowrap; }
+.reigns-codex-now { font-size: 12px; font-weight: 700; color: var(--rg-gold); white-space: nowrap; }
+.reigns-codex-lock { font-size: 12px; white-space: nowrap; }
+.reigns-codex-note { margin: 8px 0 10px; font-size: 12px; color: var(--rg-muted); }
+
 .reigns-side-title { margin: 0 0 4px; font-size: 12px; color: var(--rg-persona); }
 
 .reigns-restart-wide { width: 100%; }
+.reigns-again { display: flex; flex-direction: column; gap: 10px; }
+.reigns-again-same { width: 100%; min-height: 46px; padding: 10px 16px; font-size: 14px; font-weight: 600; color: var(--rg-text); background: transparent; border: 1px solid var(--line-strong, #3a4260); border-radius: 10px; }
+.reigns-again-same:hover:not(:disabled) { background: var(--ink-3, #1d2336); border-color: var(--gold-deep, #c99a3d); }
+.reigns-again-same:focus-visible { outline: 2px solid var(--gold-soft, #f7d98f); outline-offset: 3px; }
 .reigns-restart:hover { filter: brightness(1.06); }
 
 .reigns-refs-title { margin: 4px 0 0; font-size: 16px; }
@@ -107,5 +165,6 @@
   .reigns-card { animation: none; transition: none !important; }
   .reigns-bar-fill { transition: none; }
   .reigns-aftermath { transition: none; }
+  .reigns-role, .reigns-motion-toggle, .reigns-again-same { transition: none; }
 }
-@media (max-width: 360px) { .reigns-sides { grid-template-columns: 1fr; } }
+@media (max-width: 360px) { .reigns-sides { grid-template-columns: 1fr; } .reigns-role-stats { grid-template-columns: 1fr; } }

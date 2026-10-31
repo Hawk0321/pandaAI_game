@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ADVENTURES } from './adventures';
-import { ALL_CARDS } from './allCards';
+import { ALL_CARDS, cardsForRole } from './allCards';
 import { STAT_KEYS, STYLE_TAGS } from './types';
 import type { Card, StyleTag } from './types';
 
@@ -81,7 +81,7 @@ describe('奇遇卡内容', () => {
     }
   });
 
-  it('effects 每项 5–18，每个选项改 1–3 个数值', () => {
+  it('effects 每项 5–15，每个选项改 1–3 个数值', () => {
     for (const card of ADVENTURES) {
       for (const choice of [card.left, card.right]) {
         const entries = Object.entries(choice.effects);
@@ -90,7 +90,7 @@ describe('奇遇卡内容', () => {
         for (const [key, value] of entries) {
           expect(STAT_KEYS).toContain(key);
           expect(Math.abs(value as number), `${card.id} ${key}`).toBeGreaterThanOrEqual(5);
-          expect(Math.abs(value as number), `${card.id} ${key}`).toBeLessThanOrEqual(18);
+          expect(Math.abs(value as number), `${card.id} ${key}`).toBeLessThanOrEqual(15);
         }
       }
     }
@@ -148,8 +148,34 @@ describe('信息隔离', () => {
   });
 });
 
+describe('奇遇卡的角色限定', () => {
+  it('roles 只能是 stock + fund 的组合或省略（Web3 玩家看不到 A 股 / 期货的卡）', () => {
+    for (const card of ADVENTURES) {
+      if (card.roles === undefined) continue;
+      expect([...card.roles].sort(), card.id).toEqual(['fund', 'stock']);
+    }
+  });
+
+  it('含 A 股 / 期货 / 盘中 / 收盘 等场景词的卡一定标了 roles', () => {
+    for (const card of ADVENTURES) {
+      const face = faceTexts(card).join('') + card.speaker;
+      if (/A 股|期货|盘中|收盘|盯盘|营业部|多单|做空/.test(face)) {
+        expect(card.roles, card.id).toBeDefined();
+      }
+    }
+  });
+
+  it('三个角色都能遇到奇遇卡，Web3 玩家只遇到中性措辞的那部分', () => {
+    for (const role of ['fund', 'crypto', 'stock'] as const) {
+      expect(cardsForRole(ADVENTURES, role).length, role).toBeGreaterThan(0);
+    }
+    expect(cardsForRole(ADVENTURES, 'crypto').length).toBeLessThan(ADVENTURES.length);
+    expect(cardsForRole(ADVENTURES, 'stock')).toHaveLength(ADVENTURES.length);
+  });
+});
+
 describe('ALL_CARDS', () => {
-  it('id 全库唯一，且包含全部奇遇卡', () => {
+  it('id 全库唯一，且包含全部奇遇卡和角色专属卡', () => {
     const ids = ALL_CARDS.map((c) => c.id);
     expect(new Set(ids).size).toBe(ids.length);
     for (const adv of ADVENTURES) expect(ids).toContain(adv.id);

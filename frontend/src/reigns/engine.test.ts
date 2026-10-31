@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { CARDS } from './cards';
-import { ENDINGS, choose, createGame, inferPersona, previewEffects } from './engine';
+import { ENDINGS, choose, createGame, getEndings, inferPersona, previewEffects } from './engine';
+import { ROLE_IDS } from './roles';
 import { MAX_TURNS, STAT_KEYS, STYLE_TAGS } from './types';
-import type { Card, GameState, Side, StatKey, StyleTag, StyleTally } from './types';
+import type { Card, GameState, RoleId, Side, StatKey, StyleTag, StyleTally } from './types';
 
 function deepFreeze<T>(value: T): T {
   if (value !== null && typeof value === 'object' && !Object.isFrozen(value)) {
@@ -36,7 +37,9 @@ describe('createGame', () => {
     expect(state.turn).toBe(0);
     expect(state.ending).toBeNull();
     expect(state.current).not.toBeNull();
-    expect(state.deck.length).toBe(CARDS.length - 1);
+    // 默认角色是 stock；牌堆只含该角色可用的卡（roles 省略或包含 stock）。
+    const available = CARDS.filter((c) => !c.roles || c.roles.includes('stock'));
+    expect(state.deck.length).toBe(available.length - 1);
     expect(state.deck).not.toContain(state.current?.id);
   });
 
@@ -112,7 +115,7 @@ describe('choose', () => {
     });
     const next = choose(start, 'left', cards);
     expect(next.stats.reputation).toBe(100);
-    expect(next.ending).toEqual(ENDINGS.reputation.high);
+    expect(next.ending).toEqual(ENDINGS.stock.reputation.high);
     expect(next.current).toBeNull();
   });
 
@@ -191,13 +194,16 @@ describe('choose', () => {
     }
   });
 
-  it('共 8 个结局，标题和描述非空', () => {
-    const all = STAT_KEYS.flatMap((key) => [ENDINGS[key].low, ENDINGS[key].high]);
-    expect(all).toHaveLength(8);
-    expect(new Set(all.map((e) => e.title)).size).toBe(8);
-    for (const ending of all) {
-      expect(ending.title.length).toBeGreaterThan(0);
-      expect(ending.description.length).toBeGreaterThan(0);
+  it('每个角色共 8 个普通结局，标题和描述非空', () => {
+    for (const role of ROLE_IDS) {
+      const all = STAT_KEYS.flatMap((key) => [ENDINGS[role][key].low, ENDINGS[role][key].high]);
+      expect(all).toHaveLength(8);
+      expect(new Set(all.map((e) => e.title)).size).toBe(8);
+      for (const ending of all) {
+        expect(ending.title.length).toBeGreaterThan(0);
+        expect(ending.description.length).toBeGreaterThan(0);
+      }
+      expect(getEndings(role).length).toBeGreaterThanOrEqual(8 + 2 + 5);
     }
   });
 
@@ -240,6 +246,84 @@ describe('choose', () => {
     let state = createGame(solo, 1);
     state = choose(state, 'left', solo);
     expect(state.current?.id).toBe('solo');
+  });
+});
+
+describe('角色', () => {
+  const shared = makeCard('shared', { risk: 1 }, { risk: -1 });
+  const fundOnly: Card = { ...makeCard('fund-only', { risk: 1 }, { risk: -1 }), roles: ['fund'] };
+  const cryptoOnly: Card = { ...makeCard('crypto-only', { risk: 1 }, { risk: -1 }), roles: ['crypto'] };
+  const multi: Card = { ...makeCard('multi', { risk: 1 }, { risk: -1 }), roles: ['fund', 'stock'] };
+  const pool = [shared, fundOnly, cryptoOnly, multi];
+  const allowed: Record<RoleId, string[]> = {
+    fund: ['shared', 'fund-only', 'multi'],
+    crypto: ['shared', 'crypto-only'],
+    stock: ['shared', 'multi'],
+  };
+
+  it('createGame 默认角色是 stock，并把 role 存进 state', () => {
+    expect(createGame(pool, 1).role).toBe('stock');
+    for (const role of ROLE_IDS) expect(createGame(pool, 1, role).role).toBe(role);
+  });
+
+  it('抽牌只用 roles 省略或包含该角色的卡（含牌堆抽完重洗之后）', () => {
+    for (const role of ROLE_IDS) {
+      let state = createGame(pool, 3, role);
+      const seen = new Set<string>();
+      for (let i = 0; i < 30; i += 1) {
+        expect(state.current).not.toBeNull();
+        expect(allowed[role]).toContain(state.current?.id);
+        seen.add(state.current?.id as string);
+        state = choose(state, i % 2 === 0 ? 'left' : 'right', pool);
+        expect(state.ending).toBeNull();
+        expect(state.role).toBe(role);
+      }
+      expect(seen).toEqual(new Set(allowed[role]));
+    }
+  });
+
+  it('初始牌堆只含该角色可用的卡', () => {
+    const state = createGame(pool, 2, 'crypto');
+    const ids = [state.current?.id, ...state.deck];
+    expect(new Set(ids)).toEqual(new Set(allowed.crypto));
+  });
+
+  it('过滤后牌库为空时 createGame 抛错', () => {
+    expect(() => createGame([fundOnly], 1, 'crypto')).toThrow();
+    expect(() => createGame([fundOnly], 1)).toThrow();
+  });
+
+  it('choose 按 state.role 取结局：同样的触底，三个角色标题不同', () => {
+    const titles = ROLE_IDS.map((role) => {
+      const drop = makeCard('drop', {}, { capital: -60 });
+      const start = withState(createGame([drop], 1, role), { current: drop });
+      const ended = choose(start, 'right', [drop]);
+      expect(ended.ending).toEqual(ENDINGS[role].capital.low);
+      expect(ended.role).toBe(role);
+      return ended.ending?.title;
+    });
+    expect(titles).toEqual(['清盘通知', '空钱包', '爆仓离场']);
+  });
+
+  it('各角色走满 MAX_TURNS 必有结局（role 在结局中保留）', () => {
+    const calm = ['a', 'b', 'c'].map((id) => makeCard(id, { risk: 1 }, { risk: -1 }));
+    for (const role of ROLE_IDS) {
+      let state = createGame(calm, 4, role);
+      for (let i = 0; i < MAX_TURNS; i += 1) state = choose(state, i % 2 === 0 ? 'left' : 'right', calm);
+      expect(state.turn).toBe(MAX_TURNS);
+      expect(state.ending).not.toBeNull();
+      expect(state.ending?.role === role || state.ending?.role === 'all').toBe(true);
+    }
+  });
+
+  it('不修改传入的完整牌库（深冻结后调用不抛错）', () => {
+    const frozen = deepFreeze(pool.map((card) => structuredClone(card)));
+    let state = deepFreeze(createGame(frozen, 9, 'fund'));
+    for (let i = 0; i < 10; i += 1) {
+      expect(() => {
+        state = deepFreeze(choose(state, i % 2 === 0 ? 'left' : 'right', frozen));
+      }).not.toThrow();
+    }
   });
 });
 

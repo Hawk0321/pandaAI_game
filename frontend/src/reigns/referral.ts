@@ -11,8 +11,9 @@
 import { CATALOG, type CatalogId } from '../recommend/catalog';
 import { PERSONA_STRATEGY } from '../recommend/recommend';
 import type { RecResource } from '../shared/protocol';
+import { ROLES } from './roles';
 import { STAT_KEYS, STAT_LABELS } from './types';
-import type { Ending, PersonaId, StatKey, Stats, StyleTag, StyleTally } from './types';
+import type { Ending, PersonaId, RoleId, StatKey, Stats, StyleTag, StyleTally } from './types';
 
 export type ReferralType = 'strategy' | 'tool' | 'product';
 
@@ -111,9 +112,35 @@ function headlineStat(ending: Ending, stats: Stats): StatKey {
   return STAT_KEYS.reduce((best, key) => (Math.abs(stats[key] - 50) > Math.abs(stats[best] - 50) ? key : best), STAT_KEYS[0]);
 }
 
-function endingFact(ending: Ending, stats: Stats): string {
+/** 各角色的口吻：每张卡末尾补一句，只换说法，不改推荐的资源，也不含买卖建议。 */
+const ROLE_VOICE: Readonly<Record<RoleId, Readonly<Record<ReferralType, string>>>> = {
+  fund: {
+    strategy: '放到持有人的视角里，这是一份可以向他们交代的依据。',
+    tool: '对持有人来说，事前写好的底线比事后解释更有说服力。',
+    product: '想法先放进回测里过一遍，也是给持有人的一份投研底稿。',
+  },
+  crypto: {
+    strategy: '放到链上的节奏里，先有规则再看行情，心里更稳。',
+    tool: '链上 24 小时不打烊，事前设好的规则不会疲劳。',
+    product: '群里再热闹，也可以先把想法放进回测里过一遍。',
+  },
+  stock: {
+    strategy: '放到自己盯盘的日子里，有规则就少一点临场情绪。',
+    tool: '一个人扛盈亏，规则能在情绪上头时帮你把关。',
+    product: '把自己的想法放进回测里，看看复盘时站不站得住。',
+  },
+};
+
+/** 优先用显式传入的角色，其次取结局自带的角色（'all' 表示跨角色共用，不带口吻）。 */
+function resolveRole(ending: Ending, role?: RoleId): RoleId | null {
+  if (role) return role;
+  return ending.role === 'all' ? null : ending.role;
+}
+
+function endingFact(ending: Ending, stats: Stats, role: RoleId | null): string {
   const key = headlineStat(ending, stats);
-  return `这局以“${ending.title}”收尾，${STAT_LABELS[key]}停在 ${stats[key]}`;
+  const label = role ? ROLES[role].stats[key].label : STAT_LABELS[key];
+  return `这局以“${ending.title}”收尾，${label}停在 ${stats[key]}`;
 }
 
 function ctaFor(resource: RecResource): string {
@@ -137,26 +164,31 @@ function tallyTotalFact(tally: StyleTally): string {
   return total > 0 ? `这局里你留下了 ${total} 次带风格倾向的选择` : '这一局你已经走完';
 }
 
-export function buildReferrals(personaId: PersonaId, ending: Ending, stats: Stats, tally: StyleTally): Referral[] {
+/**
+ * @param role 可选；省略时取 ending.role（'all' 则不带角色口吻）。
+ */
+export function buildReferrals(personaId: PersonaId, ending: Ending, stats: Stats, tally: StyleTally, role?: RoleId): Referral[] {
+  const who = resolveRole(ending, role);
+  const voice = (type: ReferralType): string => (who ? ROLE_VOICE[who][type] : '');
   // 1. 策略卡
   const strategy = PERSONA_STRATEGY[personaId];
   const fallback = FALLBACK_STRATEGY[personaId];
   const strategyRes: RecResource = CATALOG[strategy?.res ?? fallback?.res ?? 'qbti'];
   const strategyTitle = strategy?.title ?? fallback?.title ?? '先找到适合你的策略方向';
-  const first = make('strategy', strategyTitle, `${tagFact(personaId, tally)}。${STRATEGY_TAIL[personaId]}`, strategyRes);
+  const first = make('strategy', strategyTitle, `${tagFact(personaId, tally)}。${STRATEGY_TAIL[personaId]}${voice('strategy')}`, strategyRes);
 
   // 2. 工具卡：主选与策略卡重复时换备选，保证三张卡指向三个不同的资源
   const used = new Set<string>([strategyRes.url]);
   const toolKey = [toolKeyFor(ending), ...TOOL_ALTERNATES].find((k) => !used.has(CATALOG[TOOL_PLANS[k].res].url)) ?? 'tradeReview';
   const plan = TOOL_PLANS[toolKey];
-  const second = make('tool', plan.title, `${endingFact(ending, stats)}。${plan.tail}`, CATALOG[plan.res]);
+  const second = make('tool', plan.title, `${endingFact(ending, stats, who)}。${plan.tail}${voice('tool')}`, CATALOG[plan.res]);
 
   // 3. 产品卡
   const useFactor = FACTOR_PERSONAS.includes(personaId);
   const productRes = useFactor ? CATALOG.factorCenter : CATALOG.qube;
   const productReason = useFactor
-    ? `${tagFact(personaId, tally)}。量化因子中心能搜索、对比和诊断因子，免费版有 20 个因子的因子池，可以把这股研究劲头用在真实数据上。`
-    : `${tallyTotalFact(tally)}。Qube 用自然语言就能把一个想法写成策略并回测，快速试用不用登录。`;
+    ? `${tagFact(personaId, tally)}。量化因子中心能搜索、对比和诊断因子，免费版有 20 个因子的因子池，可以把这股研究劲头用在真实数据上。${voice('product')}`
+    : `${tallyTotalFact(tally)}。Qube 用自然语言就能把一个想法写成策略并回测，快速试用不用登录。${voice('product')}`;
   const third = make('product', useFactor ? '把研究劲头用在因子上' : '把想法交给 Qube 回测', productReason, productRes);
 
   return [first, second, third];

@@ -16,6 +16,14 @@ export const STAT_LABELS: Readonly<Record<StatKey, string>> = {
   reputation: '口碑',
 };
 
+/**
+ * 角色：每个角色有自己的四条属性名称（见 roles.ts），事件库部分共享。
+ * 引擎里的四个槽位 StatKey 对所有角色语义一致（钱 / 安全垫 / 定力 / 外界认可），
+ * 所以共享事件卡的 effects 对每个角色都有意义。STAT_LABELS 只是默认（炒股达人）叫法，
+ * 界面显示请用 ROLES[role].stats[key].label。
+ */
+export type RoleId = 'fund' | 'crypto' | 'stock';
+
 export type Side = 'left' | 'right';
 
 /** 对数值的影响，只写有变化的项，单位为点数（可正可负）。 */
@@ -71,6 +79,11 @@ export interface Card {
   readonly right: Choice;
   /** 有值表示这是奇遇卡。 */
   readonly adventure?: AdventureSource;
+  /**
+   * 这张卡能在哪些角色里出现。省略 = 三个角色共享。
+   * 共享卡的正文要用中性说法（“你”“持仓”“消息”），不要出现只属于某个角色的词。
+   */
+  readonly roles?: readonly RoleId[];
   /** 标注为示例内容。 */
   readonly is_sample: true;
 }
@@ -80,8 +93,13 @@ export type Stats = Readonly<Record<StatKey, number>>;
 export type EndingKind = 'low' | 'high';
 
 export interface Ending {
-  /** 唯一 id：普通结局用 "low-capital" 这种写法，特殊结局用 "sp-" 开头。 */
+  /**
+   * 唯一 id：普通结局写 "<role>-low-capital" / "<role>-high-risk" 这种，
+   * 特殊结局以 "sp-" 开头，如 "sp-fund-redemption" 或跨角色共用的 "sp-inertia"。
+   */
   readonly id: string;
+  /** 这个结局属于哪个角色；跨角色共用的写 'all'。 */
+  readonly role: RoleId | 'all';
   /** 普通结局对应触底/爆满的那条数值；特殊结局可为 null。 */
   readonly stat: StatKey | null;
   readonly kind: EndingKind | 'survive' | 'special';
@@ -97,6 +115,8 @@ export interface ChoiceLog {
 }
 
 export interface GameState {
+  /** 当前扮演的角色。 */
+  readonly role: RoleId;
   readonly stats: Stats;
   /** 已经做过的决定数（回合数）。 */
   readonly turn: number;
@@ -117,8 +137,9 @@ export interface GameState {
 /**
  * 引擎对外接口（engine.ts 必须导出这四个函数，全部为纯函数，不修改入参）。
  *
- * - createGame(cards, seed?)：洗牌（seed 相同则顺序相同）、发第一张牌。
- * - choose(state, side, cards)：应用所选选项的 effects，数值夹在 0–100，
+ * - createGame(cards, seed?, role = 'stock')：只取 roles 省略或包含该角色的卡，
+ *   洗牌（seed 相同则顺序相同）、发第一张牌。cards 传完整牌库即可。
+ * - choose(state, side, cards)：cards 同样传完整牌库，引擎按 state.role 过滤（重洗时也一样）。应用所选选项的 effects，数值夹在 0–100，
  *   判断结局，没结束就抽下一张；牌抽完则重新洗牌继续。返回新状态。
  *   state.ending 非空时原样返回。抽完 MAX_TURNS 回合且没有触底或爆满，
  *   则进入"存活结局"（按 tally 决定标题和描述）。
@@ -126,7 +147,7 @@ export interface GameState {
  * - inferPersona(tally)：风格标签累计 → 人物卡 id（取得最多的那个标签对应的卡）。
  */
 export interface Engine {
-  createGame(cards: readonly Card[], seed?: number): GameState;
+  createGame(cards: readonly Card[], seed?: number, role?: RoleId): GameState;
   choose(state: GameState, side: Side, cards: readonly Card[]): GameState;
   previewEffects(state: GameState, side: Side): readonly StatKey[];
   inferPersona(tally: StyleTally): PersonaId;
