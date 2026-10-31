@@ -71,12 +71,6 @@ export function PersonaReveal({ tally }: PersonaRevealProps) {
       ) : (
         <p className="reigns-persona-emoji" aria-hidden="true">{persona.emoji}</p>
       )}
-      {artwork && (
-        <button type="button" className="reigns-motion-toggle" aria-pressed={motionEnabled} disabled={reducedMotion} onClick={() => setMotionRequested((v) => !v)}>
-          {toggleLabel}
-        </button>
-      )}
-
       <h3 id="reigns-persona-title" className="reigns-persona-name">
         {artwork && <span aria-hidden="true">{persona.emoji} </span>}{persona.name}
       </h3>
@@ -85,16 +79,24 @@ export function PersonaReveal({ tally }: PersonaRevealProps) {
         {persona.traits.map((t) => <li key={t} className="reigns-trait">{t}</li>)}
       </ul>
       <p className="reigns-why"><strong>为什么是你：</strong>{whyLine(personaId, tally)}</p>
-      <div className="reigns-sides">
-        <div className="reigns-side">
-          <h4 className="reigns-side-title">你的长处</h4>
-          <p>{persona.strength}</p>
+      <details className="reigns-sides">
+        <summary className="reigns-sides-summary">看看长处和需要留意的地方</summary>
+        <div className="reigns-sides-body">
+          <div className="reigns-side">
+            <h4 className="reigns-side-title">你的长处</h4>
+            <p>{persona.strength}</p>
+          </div>
+          <div className="reigns-side">
+            <h4 className="reigns-side-title">需要留意</h4>
+            <p>{persona.blind_spot}</p>
+          </div>
         </div>
-        <div className="reigns-side">
-          <h4 className="reigns-side-title">需要留意</h4>
-          <p>{persona.blind_spot}</p>
-        </div>
-      </div>
+      </details>
+      {artwork && (
+        <button type="button" className="reigns-motion-toggle" aria-pressed={motionEnabled} disabled={reducedMotion} onClick={() => setMotionRequested((v) => !v)}>
+          {toggleLabel}
+        </button>
+      )}
     </section>
   );
 }
