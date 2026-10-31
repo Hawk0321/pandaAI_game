@@ -72,7 +72,7 @@
 .persona-preview-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; color: #c4b58d; font-size: 11px; margin-bottom: 13px; }
 .persona-close-preview { background: transparent; border: 1px solid #5f7959; padding: 6px 11px; min-height: 36px; font-size: 11px; color: #e0e8d3; }
 .persona-close-preview:hover:not(:disabled) { background: #355134; }
-.persona-preview-content > img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 9px; border: 1px solid #657452; }
+.persona-preview-content > img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 9px; border: 1px solid #657452; }
 .persona-preview-content > h2 { color: #f1edda; margin: 17px 3px 6px; font-size: 27px; }
 .persona-preview-content > p { color: #b4c5aa; margin: 0 3px 5px; font-size: 12px; }
 @keyframes persona-deal { from { opacity: 0; transform: translateY(25px) rotate(-3deg) scale(.95); } to { opacity: 1; transform: translateY(0) rotate(0) scale(1); } }

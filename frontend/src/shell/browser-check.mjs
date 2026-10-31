@@ -23,6 +23,7 @@ const exceptions = [];
 const fixtureFailures = [];
 const screenshots = [];
 const checks = [];
+const artworkNetwork = new Map();
 let browser;
 let page;
 let child;
@@ -83,6 +84,30 @@ class CDP {
     this.listeners.set(method, listeners);
   }
   close() { this.socket.close(); }
+}
+
+function observeArtworkNetwork(client) {
+  client.on('Network.requestWillBeSent', event => {
+    const url = new URL(event.request.url);
+    if (event.type !== 'Image' || !url.pathname.includes('/persona-')) return;
+    artworkNetwork.set(event.requestId, { url: url.origin + url.pathname, startedAt: event.timestamp, dataEvents: [] });
+  });
+  client.on('Network.responseReceived', event => {
+    const record = artworkNetwork.get(event.requestId);
+    if (record) Object.assign(record, { responseAt: event.timestamp, status: event.response.status, protocol: event.response.protocol, mimeType: event.response.mimeType, fromDiskCache: event.response.fromDiskCache });
+  });
+  client.on('Network.dataReceived', event => {
+    const record = artworkNetwork.get(event.requestId);
+    if (record) record.dataEvents.push({ at: event.timestamp, encodedBytes: event.encodedDataLength, decodedBytes: event.dataLength });
+  });
+  client.on('Network.loadingFinished', event => {
+    const record = artworkNetwork.get(event.requestId);
+    if (record) Object.assign(record, { finishedAt: event.timestamp, encodedBytes: event.encodedDataLength });
+  });
+  client.on('Network.loadingFailed', event => {
+    const record = artworkNetwork.get(event.requestId);
+    if (record) Object.assign(record, { failedAt: event.timestamp, errorText: event.errorText, canceled: event.canceled, blockedReason: event.blockedReason });
+  });
 }
 
 async function evaluate(expression) {
@@ -601,6 +626,7 @@ try {
   const target = targets.find(item => item.type === 'page');
   assert.ok(target, 'isolated page target exists');
   page = await CDP.connect(target.webSocketDebuggerUrl);
+  observeArtworkNetwork(page);
   page.on('Network.requestWillBeSent', event => requests.push(event.request.url));
   page.on('Runtime.exceptionThrown', event => exceptions.push(event.exceptionDetails.exception?.description || event.exceptionDetails.text));
   await page.send('Page.enable');
@@ -616,7 +642,17 @@ try {
   console.log(JSON.stringify({ ok: true, url: baseUrl.href, checks, screenshots, limitation: 'Desktop browser mobile emulation; domestic mobile-network verification still requires a real device.' }, null, 2));
 } catch (cause) {
   try { if (page) await screenshot('pandaai-shell-failure.png'); } catch {}
-  console.error(JSON.stringify({ ok: false, message: cause.message, stack: cause.stack, exceptions, fixtureFailures, screenshots, browserStderr: stderr }, null, 2));
+  try { if (page) await screenshotViewport('pandaai-shell-failure-viewport.png'); } catch {}
+  const imageRequests = [...artworkNetwork.values()].map(record => ({ ...record,
+    responseAfterMs: record.responseAt ? Math.round((record.responseAt - record.startedAt) * 1000) : null,
+    finishedAfterMs: record.finishedAt ? Math.round((record.finishedAt - record.startedAt) * 1000) : null,
+    receivedEncodedBytes: record.dataEvents.reduce((sum, event) => sum + event.encodedBytes, 0),
+  }));
+  const networkArtifact = path.join(artifactDir, 'persona-network-failure.json');
+  await fs.writeFile(networkArtifact, JSON.stringify(imageRequests, null, 2));
+  console.error(JSON.stringify({ ok: false, message: cause.message, stack: cause.stack, exceptions, fixtureFailures, screenshots, networkArtifact,
+    artworkNetwork: imageRequests.map(({ url, status, protocol, responseAfterMs, finishedAfterMs, encodedBytes, receivedEncodedBytes, errorText, dataEvents }) => ({ url, status, protocol, responseAfterMs, finishedAfterMs, encodedBytes, receivedEncodedBytes, errorText, dataChunks: dataEvents.length })),
+    browserStderr: stderr }, null, 2));
   process.exitCode = 1;
 } finally {
   if (browser) { try { await browser.send('Browser.close'); } catch {} }

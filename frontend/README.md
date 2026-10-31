@@ -37,7 +37,7 @@ npm run preview
 
 画像页新增八种动物人格插画、揭卡/翻面、图鉴预览和人物卡图片下载。角色名称、tagline、能力数值及卡背概览均读取 D 的 Profile；图鉴只是插画预览，不修改本局画像、不新增稀有度或人物等级。未知人物名保留原值并使用明确标记的通用插画。保存 PNG 只接收 `Profile.persona` 和插画，不包含会话 ID、原始事件、证据列表或私密行为记录；原 Profile JSON 导出继续保留。
 
-素材位于 `src/shell/assets/persona-{bull,owl,shark,turtle,crab,dolphin,fox,sloth}.webp`，每张 1024×1024、约 225–304 KB，共约 2.1 MB。8 张原创插画由 OpenAI 内置 image_gen 生成，统一使用深翡翠绿、古铜光和手绘桌游风格；仅做尺寸与 WebP 编码优化，没有引入外部角色 IP、付费图库或新运行依赖。图片文字由页面/Canvas 绘制，避免生成图片中的错字；减少动态偏好会关闭开卡和翻面过渡。
+素材位于 `src/shell/assets/persona-{bull,owl,shark,turtle,crab,dolphin,fox,sloth}.webp`，每张 1024×1024、约 225–304 KB，共约 2.1 MB。图鉴另用 200×200 的 `-thumb.webp` 缩略图（8 张共约 100 KB），按需懒加载；大图仅用于本局卡和打开后的图鉴，避免缩略图并发下载完整插画。8 张原创插画由 OpenAI 内置 image_gen 生成，统一使用深翡翠绿、古铜光和手绘桌游风格；仅做尺寸与 WebP 编码优化，没有引入外部角色 IP、付费图库或新运行依赖。图片文字由页面/Canvas 绘制，避免生成图片中的错字；减少动态偏好会关闭开卡和翻面过渡。
 
 <details>
 <summary>生成提示词与素材记录</summary>
@@ -103,11 +103,11 @@ npm run test:browser
 
 ### 静态部署
 
-当前公开演示：[寻找你的交易人格](https://pandaai-trading-persona-arkimo.chirpy-oasis-3049.chatgpt.site)。Sites v1 已于 2026-10-30 发布，允许免登录访问。这是旧版 C 示例部署，仍使用单关示例/占位模块；本次集成后的十关与真实 B/D 尚未发布，不能用旧站代表当前 main。
+当前公开演示：[寻找你的交易人格](https://pandaai-trading-persona-arkimo.chirpy-oasis-3049.chatgpt.site)。Sites v2 已于 2026-10-31 发布，允许免登录访问，包含已合并的十关题库、真实 B/D 模块及插画人物卡。本次前端代码基于 `ARKimo-mo/persona-cards` 分支；当前题库仍是 4 主关 + 6 补关，每局不会全部打完。
 
 部署只需要 `npm ci && npm run build` 生成的 `dist/`；将目录内容放到静态托管根目录即可。Vite 使用相对资源路径，不需要服务端路由或 Panda Data 凭证。
 
-本次使用 Sites 托管：在隔离部署目录复制已验证的 `dist/`，以 `.openai/hosting.json` 指定静态目录 `dist`；站点 ID 为 `appgprj_6ae4b63d03548191a387f8126f4810f1`。通过 Sites 源码工作流同步、打包，保存版本并部署。该托管目录及短期凭证不提交到团队仓库；后续更新复用同一站点 ID，重新构建、检查后再发布。本机打包采用 Node 24 LTS：系统 Node 25 在托管打包准备脚本发生原生崩溃，Node 24 已确认该步骤成功。站点按用户要求设为公开访问，不要求评委登录。
+本次使用 Sites 托管：在隔离部署目录复制已验证的前端 `dist/` 到新的 `out/` 目录，以 `.openai/hosting.json` 指定静态目录 `out`，保留旧版 `dist/`；站点 ID 为 `appgprj_6ae4b63d03548191a387f8126f4810f1`。通过 Sites 源码工作流同步、打包，保存版本并部署。打包工具会将声明的静态目录规范化，不将旧构建混入新站。该托管目录及短期凭证不提交到团队仓库；后续更新复用同一站点 ID，重新构建、检查后再发布。本机打包采用 Node 24 LTS：系统 Node 25 在托管打包准备脚本发生原生崩溃，Node 24 已确认该步骤成功。站点按用户要求设为公开访问，不要求评委登录。
 
 验收记录（2026-10-30）：线上匿名 Chrome 验证通过，执行 `PANDAAI_QA_FIXTURES=0` 的完整示例流程、375px/桌面布局、刷新、延迟揭晓和 JSON 导出；JS、CSS、关卡 JSON 与本机构建产物一致。HTML 保留原始页面并由托管平台额外注入 Cloudflare 检查脚本。
 
@@ -115,7 +115,7 @@ npm run test:browser
 
 来源：React、React DOM、Vite、官方 React 插件、TypeScript；开发测试使用 Vitest 和本机 Chrome/Edge 的 CDP；真实关卡来自 Panda Data，测试夹具来自本仓库模拟样例；新增 C 模块代码由 OpenAI Codex 协助生成。人格插画由内置 image_gen 生成，提示词见上节。未复制外部游戏代码。原有 `PandaAI_Skill_Card_Demo.html` 保留，仅供视觉参考。
 
-集成状态与剩余交付事项见 [集成验收与缺口](../docs/integration-status.md)。旧站 2026-10-30 的手机验收仅适用于旧版，发布新版后需重新验证。
+集成状态与剩余交付事项见 [集成验收与缺口](../docs/integration-status.md)（该文档的“尚未发布”记录早于本次 v2 发布）。旧站 2026-10-30 的国内手机实测仅适用于旧版，本次不将该结果当作 v2 的实机验收。
 
 ## K 线 Skill 卡牌 Demo
 

@@ -21,14 +21,14 @@ function PersonaGallery({ currentName }: { currentName: string }) {
     <div className="persona-gallery-heading"><h2 id="persona-gallery-title">交易人格图鉴</h2><p>看看别的角色，预览不会改变本局画像。</p></div>
     <div className="persona-gallery-strip" aria-label="八种交易人格插画">
       {PERSONA_ARTWORKS.map(artwork => <button type="button" className="persona-gallery-item" key={artwork.id} onClick={() => setSelected(artwork)} aria-label={`预览${artwork.name}插画`}>
-        <span className="persona-gallery-image"><img src={artwork.image} alt="" loading="lazy" decoding="async" /></span>
+        <span className="persona-gallery-image"><img src={artwork.thumbnail} alt="" width="200" height="200" loading="lazy" decoding="async" /></span>
         <span>{artwork.name}</span><small>{currentName === artwork.name ? '本局角色' : `图鉴 ${artwork.number}`}</small>
       </button>)}
     </div>
     <dialog className="persona-gallery-dialog" ref={dialog} aria-labelledby={titleId} onClose={() => setSelected(null)} onClick={event => { if (event.target === event.currentTarget) setSelected(null); }}>
       {selected && <div className="persona-preview-content" style={{ '--persona-accent': selected.accent } as CSSProperties}>
         <div className="persona-preview-top"><span>图鉴 {selected.number} · 插画预览</span><button type="button" className="persona-close-preview" onClick={() => setSelected(null)}>关闭</button></div>
-        <img src={selected.image} alt={`${selected.name}角色插画`} />
+        <img src={selected.image} alt={`${selected.name}角色插画`} width="1024" height="1024" decoding="async" />
         <h2 id={titleId}>{selected.name}</h2><p>这是角色图鉴预览，不是你的本局画像。</p>
       </div>}
     </dialog>
@@ -72,7 +72,7 @@ export function PersonaCard({ profile }: { profile: Profile }) {
             <article className="persona-card-face persona-card-front" aria-hidden={flipped}>
               <div className="persona-card-topline"><span>PANDAAI</span><span>{matched ? `图鉴 ${artwork.number}` : '通用插画'}</span></div>
               <button type="button" className="persona-art-turn" onClick={() => turnCard(true)} tabIndex={flipped ? -1 : 0} aria-label={`翻到${profile.persona.name}人物卡背面`}>
-                <img className="persona-card-art" src={artwork.image} alt={matched ? `${profile.persona.name}角色插画` : '通用交易角色插画'} decoding="async" />
+                <img className="persona-card-art" src={artwork.image} alt={matched ? `${profile.persona.name}角色插画` : '通用交易角色插画'} width="1024" height="1024" decoding="async" />
                 <span className="persona-art-turn-hint">点击插画翻面 ↗</span>
               </button>
               <div className="persona-card-title"><p>本局交易人格</p><h2 id="persona-name">{profile.persona.name}</h2><p className="persona-card-tagline">{profile.persona.tagline}</p></div>
