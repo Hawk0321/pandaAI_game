@@ -1,0 +1,38 @@
+/* 对局动画：线索翻牌、K 线逐根揭晓、决定时刻竖线。只改观感，不改事件和成交逻辑。 */
+
+/* ---- 线索卡翻面 ---- */
+.play-clues > .clue-card { perspective: 900px; position: relative; }
+.play-clues > .clue-card > .clue-inner { display: block; flex: 1 1 auto; width: 100%; position: relative; font-size: 13px; line-height: normal; color: inherit; transform-style: preserve-3d; transition: transform .55s cubic-bezier(.2, .7, .2, 1); }
+.clue-face { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; width: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+.clue-front { position: absolute; inset: 0; }
+.clue-back { position: relative; min-height: 100%; transform: rotateY(180deg); }
+.clue-face strong { font-size: 13px; font-weight: 550; }
+.clue-face > span { font-size: 11px; line-height: 1.8; color: #a9bda1; }
+.clue-card.is-open > .clue-inner { transform: rotateY(180deg); }
+.clue-card.is-open .clue-back > span { color: #d9e6d4; }
+/* 研究点不够：卡片置灰，正面直接说明原因 */
+.play-clues > .clue-card.is-locked { filter: grayscale(1); opacity: .45; cursor: not-allowed; border-style: dashed; }
+.play-clues > .clue-card.is-locked .clue-front > span { color: #c9b9a9; }
+.play-clues > .clue-card:disabled.is-open { opacity: 1; filter: none; cursor: default; }
+
+/* ---- K 线逐根揭晓 ---- */
+.play-chart { position: relative; }
+.play-level .market-chart g.candle-up, .play-level .market-chart g.candle-down { transform-box: fill-box; transform-origin: 50% 100%; transition: opacity .15s ease-out, transform .2s ease-out; }
+.play-level .market-chart g.candle-pending { opacity: 0; transform: scaleY(.3) translateY(4px); transition: none; }
+.reveal-progress { margin: -14px 0 18px; font-size: 11px; color: #abc3a2; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+.reveal-progress::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #f1d99c; margin-right: 7px; vertical-align: 1px; animation: reveal-blink .6s ease-in-out infinite alternate; }
+@keyframes reveal-blink { from { opacity: .35; } to { opacity: 1; } }
+
+/* ---- 决定时刻的竖线：提交之后从上到下画出来，右侧区域淡入 ---- */
+.play-level:not([data-phase=research]) .chart-decision { transform-box: fill-box; transform-origin: 50% 0; animation: decision-draw .45s ease-out both; }
+.play-level:not([data-phase=research]) .chart-decision-label, .play-level:not([data-phase=research]) .chart-future-zone { animation: decision-fade .6s ease-out both; }
+@keyframes decision-draw { from { transform: scaleY(0); opacity: 0; } to { transform: scaleY(1); opacity: 1; } }
+@keyframes decision-fade { from { opacity: 0; } }
+
+/* ---- 持有阶段：揭晓没放完时操作按钮先按住 ---- */
+.play-level[data-revealing] .action-row > button:disabled { opacity: .5; }
+
+@media (prefers-reduced-motion: reduce) {
+  .play-clues > .clue-card > .clue-inner, .play-level .market-chart g.candle-up, .play-level .market-chart g.candle-down { transition: none; }
+  .play-level .chart-decision, .play-level .chart-decision-label, .play-level .chart-future-zone, .reveal-progress::before { animation: none; }
+}
