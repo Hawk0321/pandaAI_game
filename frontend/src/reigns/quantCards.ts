@@ -18,6 +18,7 @@ const FUND_QUANT_CARDS: readonly Card[] = [
     left: { label: '让他试试', effects: { reputation: 6, capital: -6 }, tags: ['research'], aftermath: '后来渠道听说你在用因子初筛，路演多了个卖点。' },
     right: { label: '老办法选股', effects: { capital: 6, reputation: -6 }, tags: ['stubborn'], aftermath: '后来同行用因子筛出的组合，回撤比你小一些。' },
     roles: ['fund'],
+    pandaai: true,
     is_sample: true,
   },
   {
@@ -27,6 +28,7 @@ const FUND_QUANT_CARDS: readonly Card[] = [
     left: { label: '只当草稿', effects: { confidence: 7, capital: -6 }, tags: ['adaptive'], aftermath: '后来初稿省了不少时间，结论还是你自己核的。' },
     right: { label: '直接照搬', effects: { capital: 6, confidence: -7 }, tags: ['impulsive'], aftermath: '后来投委会追问一个数据出处，你答不上来。' },
     roles: ['fund'],
+    pandaai: true,
     is_sample: true,
   },
   {
@@ -36,6 +38,7 @@ const FUND_QUANT_CARDS: readonly Card[] = [
     left: { label: '一起报名', effects: { reputation: 8, confidence: -6 }, tags: ['trend'], aftermath: '后来你们的因子没进前排，但复盘写得很扎实。' },
     right: { label: '专心管产品', effects: { confidence: 6, reputation: -8 }, tags: ['passive'], aftermath: '后来比赛结果出来，同事拿到一个入围名额。' },
     roles: ['fund'],
+    pandaai: true,
     is_sample: true,
   },
   {
@@ -94,6 +97,7 @@ const CRYPTO_QUANT_CARDS: readonly Card[] = [
     left: { label: '报名参赛', effects: { reputation: 8, confidence: -6 }, tags: ['adaptive'], aftermath: '后来你的 AI 排在中间，但你学会了先写规则。' },
     right: { label: '只围观', effects: { confidence: 6, reputation: -8 }, tags: ['passive'], aftermath: '后来你把前几名的思路截图，存进了收藏夹。' },
     roles: ['crypto'],
+    pandaai: true,
     is_sample: true,
   },
   {
@@ -103,6 +107,7 @@ const CRYPTO_QUANT_CARDS: readonly Card[] = [
     left: { label: '导入复盘', effects: { risk: 9, confidence: -7 }, tags: ['research'], aftermath: '后来报告标出一长串追涨，你看了半天没说话。' },
     right: { label: '不想看', effects: { confidence: 7, risk: -9 }, tags: ['stubborn'], aftermath: '后来同样的追涨，你又犯了两次。' },
     roles: ['crypto'],
+    pandaai: true,
     is_sample: true,
   },
   {
@@ -112,6 +117,7 @@ const CRYPTO_QUANT_CARDS: readonly Card[] = [
     left: { label: '拿来练手', effects: { reputation: 6, capital: -6 }, tags: ['trend'], aftermath: '后来你习惯先写清买卖条件，群里开始有人问你。' },
     right: { label: '凭感觉就行', effects: { capital: 6, reputation: -6 }, tags: ['contrarian'], aftermath: '后来群里讨论回测时，你插不上话。' },
     roles: ['crypto'],
+    pandaai: true,
     is_sample: true,
   },
   {
@@ -134,6 +140,7 @@ const STOCK_QUANT_CARDS: readonly Card[] = [
     left: { label: '先回测看看', effects: { risk: 8, capital: -6 }, tags: ['research'], aftermath: '后来回测发现震荡市里来回打脸，你调低了仓位。' },
     right: { label: '照着金叉买', effects: { capital: 6, risk: -8 }, tags: ['trend'], aftermath: '后来震荡市来回打脸，手续费吃掉不少。' },
     roles: ['stock'],
+    pandaai: true,
     is_sample: true,
   },
   {
@@ -143,6 +150,7 @@ const STOCK_QUANT_CARDS: readonly Card[] = [
     left: { label: '严格止损', effects: { risk: 9, confidence: -6 }, tags: ['cautious'], aftermath: '后来被止损洗出去几次，但大亏一次都没有。' },
     right: { label: '止损太早', effects: { confidence: 6, risk: -9 }, tags: ['stubborn'], aftermath: '后来你把止损线越挪越远，模板也不灵了。' },
     roles: ['stock'],
+    pandaai: true,
     is_sample: true,
   },
   {
@@ -152,6 +160,7 @@ const STOCK_QUANT_CARDS: readonly Card[] = [
     left: { label: '先查未来函数', effects: { reputation: 7, capital: -6 }, tags: ['research'], aftermath: '后来发现它用收盘价当天下单，实盘做不到。' },
     right: { label: '一起上实盘', effects: { capital: 6, reputation: -7 }, tags: ['impulsive'], aftermath: '后来实盘第一周，收益和回测对不上号。' },
     roles: ['stock'],
+    pandaai: true,
     is_sample: true,
   },
   {
@@ -161,6 +170,7 @@ const STOCK_QUANT_CARDS: readonly Card[] = [
     left: { label: '报名模拟赛', effects: { reputation: 7, confidence: -6 }, tags: ['adaptive'], aftermath: '后来模拟盘亏了几次，你才知道杠杆有多快。' },
     right: { label: '股票够忙了', effects: { confidence: 6, reputation: -7 }, tags: ['passive'], aftermath: '后来群里聊期货时，你只能听着。' },
     roles: ['stock'],
+    pandaai: true,
     is_sample: true,
   },
   {
