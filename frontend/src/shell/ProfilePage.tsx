@@ -1,4 +1,5 @@
 import type { Dimension, GameEvent, Profile } from '../shared/protocol';
+import { PersonaCard } from './PersonaCard';
 import { RecommendationPanel } from '../recommend/RecommendationPanel';
 import { SkillCards } from '../skills/SkillCards';
 import type { CompletedLevel } from '../skills/model';
@@ -69,13 +70,13 @@ export function ProfilePage({ profile, events, completed, nextLevelId, onSupplem
   }
 
   return <div className="profile-page page-enter">
-    <section className="page-heading"><p className="eyebrow">第 {profile.round} 次画像 · {profile.round === 2 ? '补充观察之后' : '从选择里认识自己'}</p><h1>属于你的交易观察。</h1><p>能力与偏好分别看。结论背后的证据，比一个标签更重要。</p></section>
+    <section className="page-heading"><p className="eyebrow">第 {profile.round} 次画像 · {profile.round === 2 ? '补充观察之后' : '从选择里认识自己'}</p><h1>你的交易人格，亮牌。</h1><p>翻开人物卡，再看看选择留下的证据。</p></section>
 
     {fixedExample ? <p className="notice sample-notice">固定示例画像：内容与仓库示例一致，不能视为你本次操作的计算结论。证据里的事件编号属于样例。</p>
       : profile.is_sample && <p className="notice sample-notice">本画像含示例数据。请结合本局行为证据解读，模拟行情不能证明真实交易表现。</p>}
     {storageWarning && <p role="status" className="notice">{storageWarning}</p>}
 
-    <section className="persona-card" aria-labelledby="persona-name"><div className="persona-emoji" aria-hidden="true">{profile.persona.emoji}</div><div><p className="eyebrow">{profile.persona.is_fun_label ? '你的趣味人物卡' : '人物卡'}</p><h2 id="persona-name">{profile.persona.name}</h2><p className="persona-tagline">{profile.persona.tagline}</p></div><div className="persona-summary"><p>{profile.summary.split('。')[0]}。</p><details><summary>展开完整画像解读</summary><p>{profile.summary}</p></details></div><dl className="persona-stats"><div><dt>完成关卡</dt><dd>{completed.length}<small>关</small></dd></div><div><dt>行为证据</dt><dd>{profile.dimensions.reduce((n, d) => n + d.evidence.length, 0)}<small>条</small></dd></div><div><dt>仍待观察</dt><dd>{profile.needs_more.length}<small>项</small></dd></div></dl></section>
+    <PersonaCard profile={profile} />
 
     {!fixedExample && <RecommendationPanel profile={profile} />}
     {!fixedExample && <SkillCards key={`${profile.session_id}-${profile.round}`} profile={profile} events={events} completed={completed} />}
