@@ -40,7 +40,17 @@
 ### HydroGene
 - 许可: CC0
 - 来源: https://opengameart.org/users/hydrogene
-- 使用曲目: **8-bit Mechanical Complex** (基金经理游戏中 BGM)
+- 使用曲目: **8-bit Truth** (结局页 BGM)
+
+### Never Sleep
+- 许可: CC-BY 3.0 / CC-BY 4.0 / CC0 (作者三选一，本项目选择 CC0)
+- 来源: https://opengameart.org/content/eyeless-retrowave
+- 使用曲目: **Eyeless (Retrowave)** (基金经理游戏中 BGM)
+
+### bertsz
+- 许可: CC0
+- 来源: https://opengameart.org/content/heavy-heist
+- 使用曲目: **Heavy Heist** (基金经理紧张层 BGM)
 
 ---
 
@@ -56,24 +66,27 @@
 
 ## 文件清单
 
-### 音效（`public/audio/sfx/`）
-- `sfx-card-grab.{ogg,mp3}` — 拿起卡牌
-- `sfx-card-left.{ogg,mp3}` — 左滑确认
-- `sfx-card-right.{ogg,mp3}` — 右滑确认
-- `sfx-card-enter.{ogg,mp3}` — 新卡牌进入
-- `sfx-stat-danger.{ogg,mp3}` — 属性进入危险区警告
-- `sfx-final-low.{ogg,mp3}` — 触底的最终撞击（失败）
-- `sfx-final-high.{ogg,mp3}` — 爆满的最终撞击（过头）
-- `sfx-btn-click.{ogg,mp3}` — 按钮点击
+### 音效（`public/audio/sfx/`，OGG + MP3 回退）
+- `sfx-card-grab` 拿起卡牌 · `sfx-card-left` / `sfx-card-right` 左右滑确认 · `sfx-card-enter` 新卡进入
+- `sfx-stat-danger` 属性进入危险区 · `sfx-final-low` / `sfx-final-high` 触底 / 爆满的最终撞击
+- `sfx-btn-click` 按钮 · `sfx-role-confirm` 选角确认 · `sfx-restart` 再来一局
+- `sfx-secret-unlock` 隐藏结局 · `sfx-persona-flip` 人格卡翻出
 
-### BGM（`public/audio/`）
-- `bgm-select.ogg` — 选角页
-- `bgm-play-fund-safe.ogg` — 基金经理游戏中
-- `bgm-play-crypto-safe.ogg` — Web3 玩家游戏中
-- `bgm-play-crypto-tense.ogg` — Web3 玩家紧张层
-- `bgm-play-stock-safe.ogg` — 炒股达人游戏中
-- `bgm-play-stock-tense.ogg` — 炒股达人紧张层
+### BGM（`public/audio/`，OGG Opus）
+| 文件 | 曲目 | 作者 | 许可 |
+|---|---|---|---|
+| `bgm-select` | Flowerbed Fields | Zane Little Music | CC0 |
+| `bgm-play-fund-safe` | Eyeless (Retrowave) | Never Sleep | CC0（作者三选一：CC-BY 3.0 / 4.0 / CC0，本项目选 CC0） |
+| `bgm-play-fund-tense` | Heavy Heist | bertsz | CC0 |
+| `bgm-play-crypto-safe` | Midnight Drive | congusbongus | CC0 |
+| `bgm-play-crypto-tense` | Tense Future Loop | gmason | CC0 |
+| `bgm-play-stock-safe` | Summer Park (8bit tune) | Scribe | CC0 |
+| `bgm-play-stock-tense` | Lasso Lady | congusbongus | CC0 |
+| `bgm-ending-idle` | 8-bit Truth | HydroGene | CC0 |
+
+许可于 2026-10-31 逐首读取 OpenGameArt 来源页的 license 字段核实。处理：统一响度（BGM 约 -16 LUFS，结局页 -18 LUFS）、
+转码为 Opus、个别曲目压缩以满足单曲 ≤ 1.5MB；未改动旋律。
 
 ---
 
-*最后更新: 2024-10-31*
+*最后更新: 2026-10-31*

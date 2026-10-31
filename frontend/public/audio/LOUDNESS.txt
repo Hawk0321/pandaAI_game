@@ -2,8 +2,8 @@
 bgm-ending-idle	-17.9	-4.9
 bgm-play-crypto-safe	-15.9	-0.2
 bgm-play-crypto-tense	-15.9	-3.1
-bgm-play-fund-safe	-15.9	-4.0
-bgm-play-fund-tense	-15.9	-3.1
+bgm-play-fund-safe	-15.6	-2.1
+bgm-play-fund-tense	-16.2	-2.2
 bgm-play-stock-safe	-15.8	-2.6
 bgm-play-stock-tense	-16.0	-0.5
 bgm-select	-16.0	-2.0
