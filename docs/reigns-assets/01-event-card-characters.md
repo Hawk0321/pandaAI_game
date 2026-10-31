@@ -1,7 +1,7 @@
 # 事件卡人物：归并方案与立绘清单
 
 > 规划文档，不含游戏代码，不含图片。尺寸、色板、描边、命名一律以 [00-style-bible.md](./00-style-bible.md) 为准，本文不修改它。
-> 所有人物为原创虚构，不模仿现有游戏、品牌或真人。数据来源：`frontend/src/reigns/` 下 `cards.ts`、`adventures.ts`、`roleCards.ts`（共 81 张卡、56 种 speaker）。
+> 所有人物为原创虚构，不模仿现有游戏、品牌或真人。数据来源：`frontend/src/reigns/` 下 `cards.ts`、`adventures.ts`、`roleCards.ts`（当前共 81 张卡、56 种 speaker）。
 > 全部为示例内容（is_sample），AI 生成部分需按 AGENTS.md 第 5 节在 PR 描述里披露。
 
 ## 0. 怎么用这份文档
@@ -9,7 +9,7 @@
 给 AI 助手和美术同学：
 
 - 先看第 1 节，知道哪个 speaker 对应哪个人物原型（下称“原型”）。
-- 要出图：去第 2.3 节找原型 id，整段复制“提示词”和“负面提示词”。每条提示词都是完整可用的（已含公共前缀），默认是 neutral 版；换表情时只替换提示词末尾 `expression:` 后面的短语，短语表见第 3.2 节。
+- 要出图：去第 2.3 节找原型 id，整段使用“提示词”；“负面提示词”用于人工筛选和局部重绘时的补充约束。每条提示词都是完整可用的（已含公共前缀），默认是 neutral 版；换表情时只替换提示词末尾 `Expression:` 后面的短语，短语表见第 3.2 节。
 - 不要改色板、尺寸、描边、命名。要改，先改风格圣经。
 - 先做第 4 节 P0 清单里的图，其余按优先级补。
 
@@ -86,11 +86,11 @@
 
 不是真正的 NPC，是玩家的自我对话，共 15 张卡（`stop-loss`、`daily-review`、`losing-streak`、`big-win` 等），占卡池很大比重。
 
-**做法**：**思考气泡风格**。画一个半透明思考气泡（边缘模糊，泡泡边是淡色像素描边）里的玩家半身剪影或背影，三个角色各一个。穿各自典型服装但淡化细节，突出"自我反思"意味。色板用相应角色主题色加墨蓝底。
+**做法**：**思考气泡风格**。画一个不透明像素思考气泡（硬边阶梯轮廓、淡色像素描边，不用模糊或半透明）里的玩家半身剪影或背影，三个角色各一个。穿各自典型服装但淡化细节，突出"自我反思"意味。色板用相应角色主题色加墨蓝底。
 
 **理由**：
 
-1. 这 15 张卡都是"自己"说话，内心独白而不是外来刺激，需和其他 NPC 视觉上明显区分。
+1. 这些卡都是"自己"说话，内心独白而不是外来刺激，需和其他 NPC 视觉上明显区分。
 2. 剪影而不是完整立绘，让玩家容易投射自己，也避免三个角色共用同一张脸。
 3. 气泡风格让卡面更轻盈，符合"自言自语"的场景感。
 
@@ -132,7 +132,7 @@
 | id | 中文名 | 所属 | 出现角色 | 外观 | 标志道具 | 主色（hex） | 性格 | 典型卡牌 |
 |---|---|---|---|---|---|---|---|---|
 | npc-crypto-anon-dev | 匿名开发者 | crypto | Web3 | 25–35 岁，连帽衫把大半张脸遮住，只露下巴 | 笔记本电脑（贴满贴纸） | #3a4260 暗蓝灰 | 神秘，不可信 | crypto-rug-pull |
-| npc-crypto-kol | 推特大 V | crypto | Web3 | 30–40 岁，夸张发型（染色），墨镜 | 手机（屏幕显示推特 logo） | #7a5a1f 深金棕色 | 自信张扬 | crypto-kol-call |
+| npc-crypto-kol | 推特大 V | crypto | Web3 | 30–40 岁，夸张发型（染色），墨镜 | 手机（屏幕显示抽象社交信息流，无品牌标识） | #7a5a1f 深金棕色 | 自信张扬 | crypto-kol-call |
 | npc-crypto-onchain-analyst | 链上分析员 | crypto | Web3 | 25–35 岁，休闲衬衫，眼镜，屏幕反光打脸 | 双屏显示器（虚拟） | #2a9a77 深绿 | 冷静专业 | crypto-smart-money, crypto-bridge-hack |
 | npc-crypto-chain-feed | 链上公告板 | crypto | Web3 | **像素吉祥物**：青色立方体，表面浮动区块纹理，无五官 | 区块浮动特效 | #7ee7f2 青色 | 机械中性 | crypto-dex-liquidity, crypto-governance, crypto-narrative |
 
@@ -150,29 +150,29 @@
 |---|---|---|---|---|---|
 | self-fund / self-crypto / self-stock | neutral, worried, happy | mirror | neutral, worried | happy | — |
 | npc-friend | neutral, happy, worried | pusher | neutral, happy | worried | — |
-| npc-colleague | neutral, worried, sly | guardian | neutral | worried | sly |
-| npc-chatmate | neutral, happy | pusher | neutral | happy | — |
-| npc-family | neutral, worried | guardian | neutral | worried | — |
-| npc-support | neutral | neutral | neutral | — | — |
+| npc-colleague | neutral, worried, sly | guardian | neutral | worried, sly | — |
+| npc-chatmate | neutral, happy, worried | pusher | neutral, happy | worried | — |
+| npc-family | neutral, worried, happy | guardian | neutral, worried | happy | — |
+| npc-support | neutral, happy | neutral | neutral | happy | — |
 | npc-media | neutral, happy | pusher | neutral | happy | — |
-| npc-host | neutral | neutral | neutral | — | — |
+| npc-host | neutral, happy | neutral | neutral | happy | — |
 | npc-newbie | neutral, worried | neutral | neutral | worried | — |
-| npc-researcher | neutral, worried | guardian | neutral | — | worried |
+| npc-researcher | neutral, worried | guardian | neutral, worried | — | — |
 | npc-mentor | neutral, worried | guardian | neutral | worried | — |
 | npc-stranger | neutral, sly | pusher | neutral, sly | — | — |
 | npc-market-ticker | neutral | neutral | neutral | — | — |
-| npc-client-manager | neutral, happy, sly | pusher | neutral | happy | sly |
-| npc-fund-cio | neutral, angry | guardian | neutral | angry | — |
-| npc-fund-sales-director | neutral, happy, angry | pusher | neutral | happy | angry |
+| npc-client-manager | neutral, happy, sly | pusher | neutral, happy | sly | — |
+| npc-fund-cio | neutral, angry | guardian | neutral, angry | — | — |
+| npc-fund-sales-director | neutral, happy, angry | pusher | neutral, happy | angry | — |
 | npc-fund-boss | neutral, angry | guardian | neutral | — | angry |
 | npc-fund-compliance | neutral, angry | guardian | neutral | — | angry |
 | npc-crypto-anon-dev | neutral, sly | pusher | neutral, sly | — | — |
-| npc-crypto-kol | neutral, happy, sly | pusher | neutral | happy | sly |
-| npc-crypto-onchain-analyst | neutral, worried | guardian | neutral | — | worried |
+| npc-crypto-kol | neutral, happy, sly | pusher | neutral | sly | happy |
+| npc-crypto-onchain-analyst | neutral, worried | guardian | neutral | worried | — |
 | npc-crypto-chain-feed | neutral | neutral | neutral | — | — |
-| npc-stock-auntie | neutral, happy, worried | pusher | neutral | happy | worried |
+| npc-stock-auntie | neutral, happy, worried | pusher | neutral, worried | happy | — |
 | npc-stock-screen-watcher | neutral, worried | guardian | neutral, worried | — | — |
-| npc-stock-veteran | neutral, happy, sly | guardian | neutral | happy | sly |
+| npc-stock-veteran | neutral, happy | guardian | neutral, happy | — | — |
 
 说明：
 
@@ -188,7 +188,7 @@
 **公共模板**（已写入所有提示词，不必手工拼接）：
 
 ```
-Pixel art chibi bust portrait, 64x64px, trading card game character, [CHARACTER_DESCRIPTION], limited color palette (32 colors max), 1px dark outline (#0a0d15), no anti-aliasing, single flat background color, top-left lighting, no gradients, no text, no watermarks, clean pixel art style. Expression: [EXPRESSION_PHRASE].
+Pixel art chibi bust portrait, trading card game character, [CHARACTER_DESCRIPTION], limited color palette (16 colors max), 1px dark outline (#0a0d15), crisp square pixels, no anti-aliasing, single flat background color, top-left lighting, no gradients, no transparency effects, no text, no logos, no watermarks, clean pixel art style. Expression: [EXPRESSION_PHRASE].
 ```
 
 #### 2.3.1 "自己"三个版本
@@ -196,34 +196,34 @@ Pixel art chibi bust portrait, 64x64px, trading card game character, [CHARACTER_
 **self-fund（基金经理）**
 
 ```
-Pixel art chibi bust portrait, 64x64px, silhouette of a fund manager inside a translucent thought bubble, wearing dark suit with tie and ID badge (blue-purple theme), office window night scene background, limited color palette (32 colors max), 1px dark outline (#0a0d15), no anti-aliasing, single flat background color (#1d2336), top-left lighting, no gradients, no text, no watermarks. Expression: neutral reflection.
+Pixel art chibi bust portrait, silhouette of a fund manager inside an opaque pixel-art thought bubble with a crisp stepped pale outline, wearing dark suit with tie and ID badge (blue-purple theme), one simple office-window silhouette, limited color palette (16 colors max), 1px dark outline (#0a0d15), no anti-aliasing, single flat background color (#1d2336), top-left lighting, no gradients, no transparency effects, no text, no logos, no watermarks. Expression: neutral reflection.
 ```
 
 负面提示词：
 ```
-realistic photo, 3D render, smooth gradients, anti-aliasing, more than 32 colors, text overlays, logos, watermarks, visible face details, multiple characters, complex background
+realistic photo, 3D render, smooth gradients, anti-aliasing, more than 16 colors, text overlays, logos, watermarks, visible face details, multiple characters, complex background
 ```
 
 **self-crypto（Web3 玩家）**
 
 ```
-Pixel art chibi bust portrait, 64x64px, silhouette of a crypto trader inside a translucent thought bubble, wearing hoodie and headphones (cyan glow theme), dark purple night screen glow background, limited color palette (32 colors max), 1px dark outline (#0a0d15), no anti-aliasing, single flat background color (#36408a), top-left lighting, no gradients, no text, no watermarks. Expression: neutral reflection.
+Pixel art chibi bust portrait, silhouette of a crypto trader inside an opaque pixel-art thought bubble with a crisp stepped pale outline, wearing hoodie and headphones (cyan theme), one simple screen silhouette, limited color palette (16 colors max), 1px dark outline (#0a0d15), no anti-aliasing, single flat background color (#36408a), top-left lighting, no gradients, no transparency effects, no text, no logos, no watermarks. Expression: neutral reflection.
 ```
 
 负面提示词：
 ```
-realistic photo, 3D render, smooth gradients, anti-aliasing, more than 32 colors, text overlays, logos, watermarks, visible face details, multiple characters, complex background
+realistic photo, 3D render, smooth gradients, anti-aliasing, more than 16 colors, text overlays, logos, watermarks, visible face details, multiple characters, complex background
 ```
 
 **self-stock（炒股达人）**
 
 ```
-Pixel art chibi bust portrait, 64x64px, silhouette of a stock trader inside a translucent thought bubble, wearing vest and holding thermos (amber-gold theme), warm daylight filtering through curtains background, limited color palette (32 colors max), 1px dark outline (#0a0d15), no anti-aliasing, single flat background color (#c99a3d), top-left lighting, no gradients, no text, no watermarks. Expression: neutral reflection.
+Pixel art chibi bust portrait, silhouette of a stock trader inside an opaque pixel-art thought bubble with a crisp stepped pale outline, wearing vest and holding thermos (amber-gold theme), one simple curtain silhouette, limited color palette (16 colors max), 1px dark outline (#0a0d15), no anti-aliasing, single flat background color (#c99a3d), top-left lighting, no gradients, no transparency effects, no text, no logos, no watermarks. Expression: neutral reflection.
 ```
 
 负面提示词：
 ```
-realistic photo, 3D render, smooth gradients, anti-aliasing, more than 32 colors, text overlays, logos, watermarks, visible face details, multiple characters, complex background
+realistic photo, 3D render, smooth gradients, anti-aliasing, more than 16 colors, text overlays, logos, watermarks, visible face details, multiple characters, complex background
 ```
 
 #### 2.3.2 通用 NPC（13 个）
@@ -231,217 +231,219 @@ realistic photo, 3D render, smooth gradients, anti-aliasing, more than 32 colors
 **npc-friend**
 
 ```
-Pixel art chibi bust portrait, 64x64px, young adult 20-35yo, casual jacket, short hair or ponytail, holding smartphone with notification light, blue-purple color (#8fa0ff), limited color palette, 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no watermarks. Expression: neutral.
+Pixel art chibi bust portrait, young adult 20-35yo, casual jacket, short hair or ponytail, holding smartphone with notification light, blue-purple color (#8fa0ff), limited color palette (16 colors max), 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no logos, no watermarks. Expression: neutral.
 ```
 
-负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 32 colors, text, logos, watermarks`
+负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 16 colors, text, logos, watermarks`
 
 **npc-colleague**
 
 ```
-Pixel art chibi bust portrait, 64x64px, office worker 25-40yo, business shirt, black-framed glasses, holding laptop, neutral gray color (#b9b8b1), limited color palette, 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no watermarks. Expression: neutral.
+Pixel art chibi bust portrait, office worker 25-40yo, business shirt, black-framed glasses, holding laptop, neutral gray color (#b9b8b1), limited color palette (16 colors max), 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no logos, no watermarks. Expression: neutral.
 ```
 
-负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 32 colors, text, logos, watermarks`
+负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 16 colors, text, logos, watermarks`
 
 **npc-chatmate**
 
 ```
-Pixel art chibi bust portrait, 64x64px, young person 20-40yo, hoodie or t-shirt, virtual avatar frame, emoji speech bubble decoration, cyan color (#7ee7f2), limited color palette, 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no watermarks. Expression: neutral.
+Pixel art chibi bust portrait, young person 20-40yo, hoodie or t-shirt, virtual avatar frame, emoji speech bubble decoration, cyan color (#7ee7f2), limited color palette (16 colors max), 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no logos, no watermarks. Expression: neutral.
 ```
 
-负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 32 colors, text, logos, watermarks`
+负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 16 colors, text, logos, watermarks`
 
 **npc-family**
 
 ```
-Pixel art chibi bust portrait, 64x64px, middle-aged or older 45-60yo, warm clothing with scarf or sweater, holding thermos, warm skin color (#eab98f), limited color palette, 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no watermarks. Expression: neutral.
+Pixel art chibi bust portrait, middle-aged or older 45-60yo, warm clothing with scarf or sweater, holding thermos, warm skin color (#eab98f), limited color palette (16 colors max), 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no logos, no watermarks. Expression: neutral.
 ```
 
-负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 32 colors, text, logos, watermarks`
+负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 16 colors, text, logos, watermarks`
 
 **npc-support**
 
 ```
-Pixel art chibi bust portrait, 64x64px, customer service agent 20-30yo, professional attire, wearing headset with ID badge decoration, green color (#3fcf9f), limited color palette, 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no watermarks. Expression: neutral.
+Pixel art chibi bust portrait, customer service agent 20-30yo, professional attire, wearing headset with ID badge decoration, green color (#3fcf9f), limited color palette (16 colors max), 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no logos, no watermarks. Expression: neutral.
 ```
 
-负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 32 colors, text, logos, watermarks`
+负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 16 colors, text, logos, watermarks`
 
 **npc-media**
 
 ```
-Pixel art chibi bust portrait, 64x64px, media professional 30-45yo, suit or sharp business shirt, holding microphone or voice recorder, amber-gold color (#f2c261), limited color palette, 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no watermarks. Expression: neutral.
+Pixel art chibi bust portrait, media professional 30-45yo, suit or sharp business shirt, holding microphone or voice recorder, amber-gold color (#f2c261), limited color palette (16 colors max), 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no logos, no watermarks. Expression: neutral.
 ```
 
-负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 32 colors, text, logos, watermarks`
+负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 16 colors, text, logos, watermarks`
 
 **npc-host**
 
 ```
-Pixel art chibi bust portrait, 64x64px, event organizer 25-35yo, hoodie or creative t-shirt, event badge accessory, deep blue color (#5b6bd0), limited color palette, 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no watermarks. Expression: neutral.
+Pixel art chibi bust portrait, event organizer 25-35yo, hoodie or creative t-shirt, event badge accessory, deep blue color (#5b6bd0), limited color palette (16 colors max), 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no logos, no watermarks. Expression: neutral.
 ```
 
-负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 32 colors, text, logos, watermarks`
+负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 16 colors, text, logos, watermarks`
 
 **npc-newbie**
 
 ```
-Pixel art chibi bust portrait, 64x64px, young intern 20-25yo, nervous look, backpack or document folder, intern badge, ivory light color (#f7d9b8), limited color palette, 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no watermarks. Expression: neutral.
+Pixel art chibi bust portrait, young intern 20-25yo, nervous look, backpack or document folder, intern badge, ivory light color (#f7d9b8), limited color palette (16 colors max), 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no logos, no watermarks. Expression: neutral.
 ```
 
-负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 32 colors, text, logos, watermarks`
+负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 16 colors, text, logos, watermarks`
 
 **npc-researcher**
 
 ```
-Pixel art chibi bust portrait, 64x64px, analyst 28-40yo, loose shirt, messy hair, glasses, holding thick notebook with hand-drawn charts, deep blue-purple color (#36408a), limited color palette, 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no watermarks. Expression: neutral.
+Pixel art chibi bust portrait, analyst 28-40yo, loose shirt, messy hair, glasses, holding thick notebook with hand-drawn charts, deep blue-purple color (#36408a), limited color palette (16 colors max), 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no logos, no watermarks. Expression: neutral.
 ```
 
-负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 32 colors, text, logos, watermarks`
+负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 16 colors, text, logos, watermarks`
 
 **npc-mentor**
 
 ```
-Pixel art chibi bust portrait, 64x64px, senior advisor 40-55yo, calm suit or vest, graying short hair, holding teacup, dark blue-black color (#272d42), limited color palette, 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no watermarks. Expression: neutral.
+Pixel art chibi bust portrait, senior advisor 40-55yo, calm suit or vest, graying short hair, holding teacup, dark blue-black color (#272d42), limited color palette (16 colors max), 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no logos, no watermarks. Expression: neutral.
 ```
 
-负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 32 colors, text, logos, watermarks`
+负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 16 colors, text, logos, watermarks`
 
 **npc-stranger**
 
 ```
-Pixel art chibi bust portrait, 64x64px, suspicious figure 30-45yo, obscured face with hat or mask, dark trench coat, holding envelope (implying bribe), dark red color (#7d2f2f), limited color palette, 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no watermarks. Expression: neutral.
+Pixel art chibi bust portrait, suspicious figure 30-45yo, obscured face with hat or mask, dark trench coat, holding envelope (implying bribe), dark red color (#7d2f2f), limited color palette (16 colors max), 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no logos, no watermarks. Expression: neutral.
 ```
 
-负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 32 colors, text, logos, watermarks`
+负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 16 colors, text, logos, watermarks`
 
 **npc-market-ticker**
 
 ```
-Pixel art mascot, 64x64px, cute golden cube robot with screen displaying simplified candlestick chart, no facial features, amber-gold color (#f2c261), limited color palette, 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no watermarks. Expression: neutral.
+Pixel art mascot, cute golden cube robot with screen displaying simplified candlestick chart, no facial features, amber-gold color (#f2c261), limited color palette (16 colors max), 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no logos, no watermarks. Expression: neutral.
 ```
 
-负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 32 colors, text, logos, watermarks, humanoid face`
+负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 16 colors, text, logos, watermarks, humanoid face`
 
 **npc-client-manager**
 
 ```
-Pixel art chibi bust portrait, 64x64px, account manager 30-40yo, professional suit, exaggerated smile, holding business card folder, deep gold color (#c99a3d), limited color palette, 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no watermarks. Expression: neutral.
+Pixel art chibi bust portrait, account manager 30-40yo, professional suit, exaggerated smile, holding business card folder, deep gold color (#c99a3d), limited color palette (16 colors max), 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no logos, no watermarks. Expression: neutral.
 ```
 
-负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 32 colors, text, logos, watermarks`
+负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 16 colors, text, logos, watermarks`
 
 #### 2.3.3 基金经理专属（4 个）
 
 **npc-fund-cio**
 
 ```
-Pixel art chibi bust portrait, 64x64px, chief investment officer 45-55yo, dark suit, stern expression, balding or short hair, metal-framed glasses, dark blue color (#1d2336), limited color palette, 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no watermarks. Expression: neutral.
+Pixel art chibi bust portrait, chief investment officer 45-55yo, dark suit, stern expression, balding or short hair, metal-framed glasses, dark blue color (#1d2336), limited color palette (16 colors max), 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no logos, no watermarks. Expression: neutral.
 ```
 
-负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 32 colors, text, logos, watermarks`
+负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 16 colors, text, logos, watermarks`
 
 **npc-fund-sales-director**
 
 ```
-Pixel art chibi bust portrait, 64x64px, sales director 35-45yo, bright suit with red tie, holding tablet showing sales data, red color (#c24d45), limited color palette, 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no watermarks. Expression: neutral.
+Pixel art chibi bust portrait, sales director 35-45yo, bright suit with red tie, holding tablet showing sales data, red color (#c24d45), limited color palette (16 colors max), 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no logos, no watermarks. Expression: neutral.
 ```
 
-负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 32 colors, text, logos, watermarks`
+负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 16 colors, text, logos, watermarks`
 
 **npc-fund-boss**
 
 ```
-Pixel art chibi bust portrait, 64x64px, senior manager 50-60yo, conservative suit, slightly hunched shoulders, holding briefcase, very dark blue-black color (#10141f), limited color palette, 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no watermarks. Expression: neutral.
+Pixel art chibi bust portrait, senior manager 50-60yo, conservative suit, slightly hunched shoulders, holding briefcase, very dark blue-black color (#10141f), limited color palette (16 colors max), 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no logos, no watermarks. Expression: neutral.
 ```
 
-负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 32 colors, text, logos, watermarks`
+负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 16 colors, text, logos, watermarks`
 
 **npc-fund-compliance**
 
 ```
-Pixel art chibi bust portrait, 64x64px, compliance officer 30-45yo, black-framed glasses, holding folder, holding small compliance handbook, gray color (#8e8f9a), limited color palette, 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no watermarks. Expression: neutral.
+Pixel art chibi bust portrait, compliance officer 30-45yo, black-framed glasses, holding folder, holding small compliance handbook, gray color (#8e8f9a), limited color palette (16 colors max), 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no logos, no watermarks. Expression: neutral.
 ```
 
-负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 32 colors, text, logos, watermarks`
+负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 16 colors, text, logos, watermarks`
 
 #### 2.3.4 Web3 专属（4 个）
 
 **npc-crypto-anon-dev**
 
 ```
-Pixel art chibi bust portrait, 64x64px, anonymous developer 25-35yo, hoodie covering most of face showing only chin, holding laptop covered with stickers, dark blue-gray color (#3a4260), limited color palette, 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no watermarks. Expression: neutral.
+Pixel art chibi bust portrait, anonymous developer 25-35yo, hoodie covering most of face showing only chin, holding laptop covered with stickers, dark blue-gray color (#3a4260), limited color palette (16 colors max), 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no logos, no watermarks. Expression: neutral.
 ```
 
-负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 32 colors, text, logos, watermarks`
+负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 16 colors, text, logos, watermarks`
 
 **npc-crypto-kol**
 
 ```
-Pixel art chibi bust portrait, 64x64px, crypto influencer 30-40yo, exaggerated dyed hairstyle, sunglasses, holding phone showing Twitter logo, deep gold-brown color (#7a5a1f), limited color palette, 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no watermarks. Expression: neutral.
+Pixel art chibi bust portrait, crypto influencer 30-40yo, exaggerated dyed hairstyle, sunglasses, holding phone showing an abstract social feed made of simple blocks without brand marks, deep gold-brown color (#7a5a1f), limited color palette (16 colors max), 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no logos, no watermarks. Expression: neutral.
 ```
 
-负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 32 colors, text, logos, watermarks`
+负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 16 colors, text, logos, watermarks`
 
 **npc-crypto-onchain-analyst**
 
 ```
-Pixel art chibi bust portrait, 64x64px, blockchain analyst 25-35yo, casual shirt, glasses, screen glow reflecting on face, virtual dual monitor accessory, deep green color (#2a9a77), limited color palette, 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no watermarks. Expression: neutral.
+Pixel art chibi bust portrait, blockchain analyst 25-35yo, casual shirt, glasses, screen glow reflecting on face, virtual dual monitor accessory, deep green color (#2a9a77), limited color palette (16 colors max), 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no logos, no watermarks. Expression: neutral.
 ```
 
-负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 32 colors, text, logos, watermarks`
+负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 16 colors, text, logos, watermarks`
 
 **npc-crypto-chain-feed**
 
 ```
-Pixel art mascot, 64x64px, cute cyan cube with floating blockchain texture on surface, no facial features, cyan color (#7ee7f2), limited color palette, 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no watermarks. Expression: neutral.
+Pixel art mascot, cute cyan cube with floating blockchain texture on surface, no facial features, cyan color (#7ee7f2), limited color palette (16 colors max), 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no logos, no watermarks. Expression: neutral.
 ```
 
-负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 32 colors, text, logos, watermarks, humanoid face`
+负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 16 colors, text, logos, watermarks, humanoid face`
 
 #### 2.3.5 炒股专属（3 个）
 
 **npc-stock-auntie**
 
 ```
-Pixel art chibi bust portrait, 64x64px, middle-aged woman 50-60yo, floral scarf, warm coat, holding reading glasses, warm orange skin color (#c98f65), limited color palette, 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no watermarks. Expression: neutral.
+Pixel art chibi bust portrait, middle-aged woman 50-60yo, floral scarf, warm coat, holding reading glasses, warm orange skin color (#c98f65), limited color palette (16 colors max), 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no logos, no watermarks. Expression: neutral.
 ```
 
-负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 32 colors, text, logos, watermarks`
+负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 16 colors, text, logos, watermarks`
 
 **npc-stock-screen-watcher**
 
 ```
-Pixel art chibi bust portrait, 64x64px, day trader 35-50yo, vest or plaid shirt, holding steaming thermos, brown-gold color (#7a5a1f), limited color palette, 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no watermarks. Expression: neutral.
+Pixel art chibi bust portrait, day trader 35-50yo, vest or plaid shirt, holding steaming thermos, brown-gold color (#7a5a1f), limited color palette (16 colors max), 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no logos, no watermarks. Expression: neutral.
 ```
 
-負面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 32 colors, text, logos, watermarks`
+负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 16 colors, text, logos, watermarks`
 
 **npc-stock-veteran**
 
 ```
-Pixel art chibi bust portrait, 64x64px, elderly trader 55-70yo, simple shirt, balding or white hair, holding folding reading glasses, deep brown color (#5b3a2a), limited color palette, 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no watermarks. Expression: neutral.
+Pixel art chibi bust portrait, elderly trader 55-70yo, simple shirt, balding or white hair, holding folding reading glasses, deep brown color (#5b3a2a), limited color palette (16 colors max), 1px dark outline (#0a0d15), no anti-aliasing, single flat background, top-left lighting, no gradients, no text, no logos, no watermarks. Expression: neutral.
 ```
 
-负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 32 colors, text, logos, watermarks`
+负面提示词：`realistic photo, 3D render, smooth gradients, anti-aliasing, more than 16 colors, text, logos, watermarks`
 
 ## 3. 生图流程与验收清单
 
 ### 3.1 建议的生图流程
 
-1. **基础模板阶段**：先用公共模板（2.3 节里已写入完整提示词）出每个人物的 neutral 版本，固定种子或参考图以保持一致风格。
-2. **表情变体阶段**：对于需要多个表情的人物，保持五官、发型、服装、道具不变，只替换提示词末尾的 `Expression:` 部分（短语表见 3.2 节）。用同一种子或同一参考图保证同一人物的一致性。
-3. **批量生成顺序**：先做 P0（第 4 节清单，27 个 neutral + 关键表情），再做 P1，最后 P2。
-4. **质量检查**：每生成一批，跑一次验收清单（3.3 节），不合格重做。
-5. **透明背景版**：所有通过验收的图，导出一份透明背景 PNG（用于界面叠加），一份单色背景 PNG（用于测试和预览）。
-6. **命名与打包**：按第 6 节命名规则重命名，放入目录。
+1. **API 与密钥**：默认使用 GPT Image API，`model` 设为 `gpt-image-2.5`；密钥只从环境变量或密钥管理工具读取，不写入文档、提示词、代码或提交记录。生成正方形 PNG，保存原始返回图供追溯。
+2. **风格定稿**：先用公共模板生成少量代表人物的 neutral 版，人工选定风格、构图和配色参考图；不要依赖随机种子或把 64×64 当作 API 输出尺寸。
+3. **基础人物**：用完整提示词和已选参考图生成各人物 neutral 版。提示词写清主体、唯一标志道具、主色、硬边像素和无文字；先生成单色背景版，不直接依赖模型产出透明底或精确像素网格。
+4. **表情变体**：以该人物验收通过的 neutral 图为参考进行编辑，只替换提示词末尾的 `Expression:` 部分（短语表见 3.2 节），保持五官、发型、服装、道具和构图不变；参考图不一致时先修基础图，不批量生成变体。
+5. **批量顺序**：按第 4 节先做 P0（27 个 neutral + 15 个关键表情），再做 P1、P2；每张保留提示词、参考图、模型和生成日期记录。
+6. **像素后处理**：逐张筛选后，再量化到全局色板且单张不超过 16 色，规范为 64×64 原图，并用邻近采样放大 5 倍至 320×320；不得用缩放或调色掩盖主体、表情和道具错误。
+7. **验收与导出**：按 3.3 节验收，不合格则重生成或局部重绘。通过后分别导出透明背景 PNG（界面叠加）和单色背景 PNG（测试预览）；透明版本只处理背景，不引入半透明人物或气泡。
+8. **命名与交付**：按第 6 节命名并分批交付，PR 披露实际使用的 AI 工具与模型。
 
 ### 3.2 表情短语对照表
 
 提示词末尾 `Expression:` 后面只替换这一段：
 
-| 表情名 | 英文短语（neutral 默认不写，其他表情替换这段） |
+| 表情名 | 英文短语（替换 `Expression:` 后的整段内容） |
 |---|---|
 | neutral | neutral |
 | happy | cheerful smile, upbeat |
@@ -467,12 +469,12 @@ Pixel art chibi bust portrait, 64x64px, elderly trader 55-70yo, simple shirt, ba
 
 ### 4.1 总量
 
-27 个人物 × 平均表情数 = **91 张图**（粗算，实际按下表）。
+按第 2.2 节的表情列表统计，共 **64 张图**（P0 / P1 / P2 互斥）。
 
 分档：
 - **P0（必须有，游戏能完整玩）**：**40 张**
 - **P1（重要，核心人物情绪丰富度）**：**20 张**
-- **P2（加分，锦上添花）**：**31 张**
+- **P2（加分，锦上添花）**：**4 张候选（当前均归 P1，无独立占位）**
 
 ### 4.2 P0 清单（40 张，验收通过后游戏可完整运行）
 
@@ -482,14 +484,14 @@ Pixel art chibi bust portrait, 64x64px, elderly trader 55-70yo, simple shirt, ba
 | self-crypto | ✓ | | ✓ | | | 2 |
 | self-stock | ✓ | | ✓ | | | 2 |
 | npc-friend | ✓ | ✓ | | | | 2 |
-| npc-colleague | ✓ | | ✓ | | | 2 |
+| npc-colleague | ✓ | | | | | 1 |
 | npc-chatmate | ✓ | ✓ | | | | 2 |
 | npc-family | ✓ | | ✓ | | | 2 |
 | npc-support | ✓ | | | | | 1 |
 | npc-media | ✓ | ✓ | | | | 2 |
 | npc-host | ✓ | | | | | 1 |
 | npc-newbie | ✓ | | | | | 1 |
-| npc-researcher | ✓ | | | | | 1 |
+| npc-researcher | ✓ | | ✓ | | | 2 |
 | npc-mentor | ✓ | | | | | 1 |
 | npc-stranger | ✓ | | | | ✓ | 2 |
 | npc-market-ticker | ✓ | | | | | 1 |
@@ -502,12 +504,10 @@ Pixel art chibi bust portrait, 64x64px, elderly trader 55-70yo, simple shirt, ba
 | npc-crypto-kol | ✓ | | | | | 1 |
 | npc-crypto-onchain-analyst | ✓ | | | | | 1 |
 | npc-crypto-chain-feed | ✓ | | | | | 1 |
-| npc-stock-auntie | ✓ | | | | | 1 |
-| npc-stock-screen-watcher | ✓ | ✓ | | | | 2 |
+| npc-stock-auntie | ✓ | | ✓ | | | 2 |
+| npc-stock-screen-watcher | ✓ | | ✓ | | | 2 |
 | npc-stock-veteran | ✓ | ✓ | | | | 2 |
-| **P0 合计** | 27 | 9 | 4 | 1 | 2 | **43 张** |
-
-**修正**：P0 实际 43 张（比目标多 3 张），但为保证核心体验，接受略微超标。若必须压缩到 40 张，可去掉：`self-*` 三个的 worried（降为 P1），`npc-stock-screen-watcher` 和 `npc-stock-veteran` 的 happy（降为 P1）。
+| **P0 合计** | 27 | 6 | 4 | 1 | 2 | **40 张** |
 
 ### 4.3 P1 清单（20 张，核心人物情绪补充）
 
@@ -518,6 +518,7 @@ Pixel art chibi bust portrait, 64x64px, elderly trader 55-70yo, simple shirt, ba
 | self-stock | happy | 同上 |
 | npc-friend | worried | 朋友的担忧面 |
 | npc-colleague | sly | 同事的狡黠（office politics） |
+| npc-colleague | worried | 同事的谨慎提醒 |
 | npc-chatmate | worried | 群友恐慌 |
 | npc-family | happy | 家人高兴（不常见，故 P1） |
 | npc-support | happy | 客服的职业笑容 |
@@ -531,15 +532,12 @@ Pixel art chibi bust portrait, 64x64px, elderly trader 55-70yo, simple shirt, ba
 | npc-fund-compliance | angry | 合规的严厉 |
 | npc-crypto-kol | sly | KOL 的狡黠 |
 | npc-crypto-onchain-analyst | worried | 链上分析员预警 |
-| npc-stock-auntie | happy | 营业部大妈的热心 |
 | npc-stock-auntie | worried | 营业部大妈的八卦惊讶 |
 | **P1 合计** | | **20 张** |
 
-### 4.4 P2 清单（31 张，锦上添花）
+### 4.4 P2 候选（当前无独立占位）
 
-剩余所有未列入 P0 / P1 的表情组合，包括但不限于：npc-market-ticker 和 npc-crypto-chain-feed 的 happy / worried（吉祥物不需要复杂表情），部分低频人物的 angry / sly 等。
-
-P2 的优先级可在开发后期根据实际游戏体验和剩余预算灵活调整。
+现有 P0 / P1 明细已覆盖第 2.2 节全部 64 个表情组合，无独立 P2 项。原定的四个候选为 `npc-colleague` sly、`npc-client-manager` sly、`npc-fund-sales-director` angry、`npc-crypto-kol` sly，当前均归 P1；后续若降级须同步修改 2.2、4.3 和本节。两个吉祥物只画 neutral，不额外扩展无五官的复杂表情。
 
 ## 5. 事件卡版式与滑动反应
 
@@ -639,7 +637,7 @@ frontend/src/reigns/assets/characters/
 ├── self-fund-happy.png
 ├── self-crypto-neutral.png
 ├── ...
-└── (共 91 张 PNG，按 P0 / P1 / P2 分批放入)
+└── (共 64 张 PNG，按 P0 / P1 / P2 分批放入)
 ```
 
 ### 6.2 命名规则
@@ -688,8 +686,8 @@ frontend/src/reigns/assets/characters/
 
 给人工决定：
 
-1. **AI 生图许可**：本文所有英文提示词用于 AI 生图工具（如 Midjourney、Stable Diffusion、DALL·E），是否允许？若不允许，改为人工参照本文描述手绘。
-2. **版权与披露**：AGENTS.md 第 5 节要求 AI 生成的大段内容在 PR 描述里注明。本文档全部提示词和人物设计由 Claude 生成，生成的图片也是 AI 辅助创作，需在 PR 里标注"人物设计与提示词由 Claude (Opus 5.5) 生成，图片由 [工具名] 生成"。
+1. **生图工具**：默认使用 GPT Image API 的 `gpt-image-2.5`，实际替换工具或模型时须保留原有风格约束并更新生成记录。
+2. **版权与披露**：人物设计、提示词和实际生成的图片按 AI 辅助创作处理；PR 按 AGENTS.md 第 5 节披露实际使用的工具与模型，不预先固定图片尚未使用的模型。
 3. **服装变体**（P2 之后）：通用 NPC 是否要给三个角色各做一套服装变体（如 `npc-friend-fund-neutral.png`），还是三个角色共用同一套立绘？当前设计是共用（节约成本），若要做变体，工作量×3。
 4. **表情动画**：卡牌滑动时表情切换，是否要做 CSS transition 或逐帧动画（如 neutral → happy 的中间帧），还是直接切图？当前设计是直接切图（简单实现）。
 5. **回退图**：若某个人物某个表情的图还没做好，代码回退到 neutral；若 neutral 也没有（不应该发生），回退到 emoji（风格圣经第 6 节提到的 🏦🪙📈）还是占位图？
@@ -697,6 +695,6 @@ frontend/src/reigns/assets/characters/
 
 ---
 
-**文档完成**。人物原型总数 27 个（24 个 NPC + 3 个"自己"版本），P0 张数 43 张（略超 40 张目标，可接受），不确定的归并：两个吉祥物（npc-market-ticker / npc-crypto-chain-feed）是否要做表情（当前设计是 P2 才做，P0 只要 neutral）。
+**文档完成**。人物原型总数 27 个（24 个 NPC + 3 个"自己"版本），共 64 张表情图，其中 P0 40 张、P1 20 张；四个 P2 候选当前归 P1，无独立 P2 占位。两个吉祥物只画 neutral。
 
 

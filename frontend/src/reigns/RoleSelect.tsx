@@ -1,6 +1,8 @@
 // 选角页：游戏入口。三个可玩角色 + 一张“待开发”灰色卡片（不可进入）。
 // 角色数据来自 roles.ts，这里只负责展示；属性名称和含义按角色不同，让玩家一眼看出玩法差异。
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { ROLE_AVATARS } from './characterArt';
+import lockedAvatar from './assets/avatars/avatar-locked.png';
 import { COMING_SOON_ROLE, ROLES, ROLE_IDS } from './roles';
 import { STAT_KEYS } from './types';
 import type { RoleId } from './types';
@@ -14,6 +16,7 @@ export interface RoleSelectProps {
 
 export function RoleSelect({ onSelect, focusHeading = false }: RoleSelectProps) {
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const [failedAvatars, setFailedAvatars] = useState<ReadonlySet<RoleId>>(new Set());
   useEffect(() => { if (focusHeading) headingRef.current?.focus(); }, [focusHeading]);
   // 选角页的音乐。unlock 之前只是登记，第一次手势后才真正出声。悬停/聚焦不放音效，避免划过三张卡时吵。
   useEffect(() => { audio.playBgm('bgm-select'); }, []);
@@ -40,7 +43,19 @@ export function RoleSelect({ onSelect, focusHeading = false }: RoleSelectProps) 
                 onClick={() => { audio.playSfx('sfx-role-confirm'); onSelect(id); }}
               >
                 <span className="reigns-role-top">
-                  <span className="reigns-role-emoji" aria-hidden="true">{role.emoji}</span>
+                  <span className="reigns-role-avatar" aria-hidden="true">
+                    {failedAvatars.has(id) ? (
+                      <span className="reigns-role-emoji">{role.emoji}</span>
+                    ) : (
+                      <img
+                        src={ROLE_AVATARS[id]}
+                        alt=""
+                        width="80"
+                        height="80"
+                        onError={() => setFailedAvatars((previous) => new Set(previous).add(id))}
+                      />
+                    )}
+                  </span>
                   <span className="reigns-role-id">
                     <span className="reigns-role-name" id={nameId}>{role.name}</span>
                     <span className="reigns-role-tagline">{role.tagline}</span>
@@ -72,7 +87,7 @@ export function RoleSelect({ onSelect, focusHeading = false }: RoleSelectProps) 
             onClick={(e) => e.preventDefault()}
           >
             <span className="reigns-role-top">
-              <span className="reigns-role-emoji" aria-hidden="true">{COMING_SOON_ROLE.emoji}</span>
+              <span className="reigns-role-avatar" aria-hidden="true"><img src={lockedAvatar} alt="" width="64" height="64" /></span>
               <span className="reigns-role-id">
                 <span className="reigns-role-name" id="reigns-role-soon-name">{COMING_SOON_ROLE.name}（{COMING_SOON_ROLE.tagline}）</span>
               </span>
