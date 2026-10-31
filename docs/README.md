@@ -14,3 +14,4 @@
 - [参考 Nansen 的标签流程](nansen-labels.md)：Nansen 怎样从交易记录生成标签，以及对画像模块（D）的改进建议
 - [集成验收与交付缺口](integration-status.md)：A/B/C/D 联调结果、测试记录与提交前待办
 - [画像后的推荐技能卡](skill-cards.md)：四张卡的匹配规则、实际练习、QuantSkills 来源及游戏化改动
+- [10-31 下午 PR 冲突说明与分工](merge-plan-1031.md)：画像页三方冲突、合并顺序，以及 A/C/D 各自的 AI 指令
