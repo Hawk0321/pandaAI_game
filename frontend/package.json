@@ -12,7 +12,9 @@
     "test": "vitest run",
     "test:browser": "node src/shell/browser-check.mjs",
     "build": "npm run typecheck && vite build",
-    "preview": "vite preview --host 0.0.0.0"
+    "preview": "vite preview --host 0.0.0.0",
+    "build:reigns": "npm run typecheck && vite build --config vite.reigns.config.ts",
+    "start:reigns": "node ../backend/deploy/serve.mjs"
   },
   "dependencies": {
     "react": "18.3.1",

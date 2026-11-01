@@ -1,5 +1,16 @@
 # 前端
 
+## trading人生（默认主线）
+
+在本目录运行 `npm ci`、`npm run dev`，打开 `/` 即进入 trading人生；原地址 `/src/reigns/demo.html` 继续可用。
+
+- `npm run build`：构建默认首页，输出到 `dist/`，用 `npm run preview` 预览。
+- `npm run build:reigns`：构建独立部署版本，输出到 `dist-reigns/`。
+- `npm run start:reigns`：托管独立部署版本和 AI 复盘接口，默认端口 8090，`/` 与 `/reigns` 都可进入。
+- `npm run typecheck`、`npm test`：检查类型和单元测试。
+
+详细玩法见 [trading人生说明](src/reigns/README.md)，部署与环境变量见 [部署说明](../backend/deploy/README.md)。下方保留早期 K 线观察室的实现说明，默认首页已使用 trading人生。
+
 ## React + TypeScript 应用（C / ARKimo-mo）
 
 环境：Node.js 20.19+ 或 22.12+（Vite 要求），npm。React 18 保持协议中 `JSX.Element` 的类型兼容。
