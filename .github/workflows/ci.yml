@@ -23,6 +23,7 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npx vite build
+      - run: npm run build:reigns
 
   levels:
     name: 关卡数据（离线校验）

@@ -18,7 +18,7 @@
 
 ## 启动
 
-在 `frontend/` 目录启动开发服务器（`package.json` 里的 `dev` 脚本），然后打开 `/src/reigns/demo.html`。电脑上用 ← → 键或拖动，手机上直接滑动。
+在 `frontend/` 目录启动开发服务器（`package.json` 里的 `dev` 脚本），然后打开 `/`（默认主线）。原入口 `/src/reigns/demo.html` 继续可用。电脑上用 ← → 键或拖动，手机上直接滑动。
 
 ```bash
 npx vitest run src/reigns   # 单测
